@@ -1,3 +1,7 @@
+#ifndef T_BOARD
+#error T_BOARD macro is not defined but we need it!
+#endif
+
 /*
  * Cryogenic refrigeration unit. Basically a despawner.
  * Stealing a lot of concepts/code from sleepers due to massive laziness.
@@ -6,10 +10,7 @@
  * ~ Zuhayr
  */
 
-
 //Main cryopod console.
-
-GLOBAL_LIST_EMPTY(frozen_crew)
 
 /obj/machinery/computer/cryopod
 	name = "cryogenic oversight console"
@@ -74,11 +75,10 @@ GLOBAL_LIST_EMPTY(frozen_crew)
 
 	dat += "<hr><b>[storage_name]</b><br>"
 	dat += "<i>Welcome, [user.real_name].</i><br><hr><br>"
-	dat += "<a href='?src=\ref[src];log=1'>View Storage Log</a><br>"
 	if(allow_items)
-		dat += "<a href='?src=\ref[src];view=1'>View Objects</a><br>"
-		dat += "<a href='?src=\ref[src];item=1'>Recover Object</a><br>"
-		dat += "<a href='?src=\ref[src];allitems=1'>Recover All Objects</a><br>"
+		dat += "<a href='byond://?src=[REF(src)];view=1'>View Objects</a><br>"
+		dat += "<a href='byond://?src=[REF(src)];item=1'>Recover Object</a><br>"
+		dat += "<a href='byond://?src=[REF(src)];allitems=1'>Recover All Objects</a><br>"
 
 	var/datum/browser/cryocon_win = new(user, "cryopod_console", "Cryogenic Oversight Console")
 	cryocon_win.set_content(dat)
@@ -91,19 +91,6 @@ GLOBAL_LIST_EMPTY(frozen_crew)
 	var/mob/user = usr
 
 	src.add_fingerprint(user)
-
-	if(href_list["log"])
-		if(!length(GLOB.frozen_crew))
-			to_chat(user, SPAN_WARNING("Nothing has been stored recently."))
-			return
-		var/dat = "<center><b>Recently Stored [storage_type]</b></center><hr>"
-		for(var/person in GLOB.frozen_crew)
-			dat += " - [person]<br>"
-		dat += "<hr>"
-
-		var/datum/browser/cryolog_win = new(user, "cryolog", "Cryogenic Storage Log")
-		cryolog_win.set_content(dat)
-		cryolog_win.open()
 
 	if(href_list["view"])
 		if(!allow_items)
@@ -164,17 +151,17 @@ GLOBAL_LIST_EMPTY(frozen_crew)
 	return
 
 /obj/item/circuitboard/cryopodcontrol
-	name = "Circuit board (Cryogenic Oversight Console)"
+	name = T_BOARD("cryogenic oversight console")
 	build_path = /obj/machinery/computer/cryopod
 	origin_tech = list(TECH_DATA = 3)
 
 /obj/item/circuitboard/robotstoragecontrol
-	name = "Circuit board (Robotic Storage Console)"
+	name = T_BOARD("robotic storage console")
 	build_path = /obj/machinery/computer/cryopod/robot
 	origin_tech = list(TECH_DATA = 3)
 
 /obj/item/circuitboard/living_quarters_cryo
-	name = "Circuit board (Living Quarters Console)"
+	name = T_BOARD("living quarters oversight console")
 	build_path = /obj/machinery/computer/cryopod/living_quarters
 	origin_tech = list(TECH_DATA = 3)
 
@@ -182,7 +169,7 @@ GLOBAL_LIST_EMPTY(frozen_crew)
 /obj/structure/cryofeed
 	name = "cryogenic feed"
 	desc = "A bewildering tangle of machinery and pipes."
-	icon = 'icons/obj/sleeper.dmi'
+	icon = 'icons/obj/machinery/cryopod.dmi'
 	icon_state = "cryo_rear"
 	anchored = TRUE
 	dir = WEST
@@ -190,15 +177,15 @@ GLOBAL_LIST_EMPTY(frozen_crew)
 /obj/structure/cryofeed/pipes
 	name = "cryogenic feed pipes"
 	desc = "A bewildering tangle of pipes."
-	icon = 'icons/obj/sleeper.dmi'
+	icon = 'icons/obj/machinery/cryopod.dmi'
 	icon_state = "cryo_rear_pipes"
 
 //Cryopods themselves.
 /obj/machinery/cryopod
 	name = "cryogenic freezer"
 	desc = "A man-sized pod for entering suspended animation."
-	icon = 'icons/obj/sleeper.dmi'
-	icon_state = "body_scanner"
+	icon = 'icons/obj/machinery/cryopod.dmi'
+	icon_state = "cryo_pod"
 	density = TRUE
 	anchored = TRUE
 	dir = WEST
@@ -212,11 +199,17 @@ GLOBAL_LIST_EMPTY(frozen_crew)
 	var/allow_occupant_types = list(/mob/living/carbon/human)
 	var/disallow_occupant_types = list()
 
-	var/mob/occupant					// Person waiting to be despawned.
-	var/time_till_despawn = 1200		// Two minute safe period before being despawned.
-	var/time_till_force_cryo = 3000		// Five minutes safe period until they're despawned even if active.
-	var/time_entered = 0				// Used to keep track of the safe period.
-	var/obj/item/device/radio/intercom/announce
+	/// Person waiting to be despawned.
+	var/mob/occupant
+	/// Two minute safe period before being despawned.
+	var/time_till_despawn = 1200
+	/// Five minutes safe period until they're despawned even if active.
+	var/time_till_force_cryo = 3000
+	/// Used to keep track of the safe period.
+	var/time_entered = 0
+	var/obj/item/radio/intercom/announce
+	/// If this cryopod/lift should ALWAYS announce that a person is departing the map. Primarily used in ports of call for flavorful custom text.
+	var/force_announce = FALSE
 
 	var/obj/machinery/computer/cryopod/control_computer
 
@@ -226,14 +219,19 @@ GLOBAL_LIST_EMPTY(frozen_crew)
 		/obj/item/implant,
 		/obj/item/card/id,
 		/obj/item/modular_computer,
-		/obj/item/device/radio/headset,
-		/obj/item/device/encryptionkey
+		/obj/item/radio/headset,
+		/obj/item/encryptionkey
 	)
 
 	//For subtypes of the blacklist that are allowed to be kept
 	var/list/items_whitelist = list(
 		/obj/item/card/id/captains_spare
 		)
+
+/obj/machinery/cryopod/feedback_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	if(occupant)
+		. += SPAN_NOTICE("<b>[occupant]</b> [occupant.get_pronoun("is")] inside \the [initial(name)].")
 
 /obj/machinery/cryopod/robot
 	name = "robotic storage unit"
@@ -265,7 +263,6 @@ GLOBAL_LIST_EMPTY(frozen_crew)
 	var/image/I = image(icon, "pod_top")
 	AddOverlays(I)
 
-
 	if(occupant)
 		I = image(icon, "pod_back")
 		AddOverlays(I)
@@ -295,11 +292,6 @@ GLOBAL_LIST_EMPTY(frozen_crew)
 /obj/machinery/cryopod/LateInitialize()
 	. = ..()
 	find_control_computer()
-
-/obj/machinery/cryopod/get_examine_text(mob/user, distance, is_adjacent, infix, suffix)
-	. = ..()
-	if(occupant)
-		. += SPAN_NOTICE("<b>[occupant]</b> [occupant.get_pronoun("is")] inside \the [initial(name)].")
 
 /obj/machinery/cryopod/can_hold_dropped_items()
 	return FALSE
@@ -366,8 +358,8 @@ GLOBAL_LIST_EMPTY(frozen_crew)
 		occupant.drop_from_inventory(W, src)
 	//Prepare items tnat require modification before dropping
 	for(var/obj/item/W in items)
-		if(istype(W, /obj/item/device/mmi))
-			var/obj/item/device/mmi/brain = W
+		if(istype(W, /obj/item/mmi))
+			var/obj/item/mmi/brain = W
 			if(brain.brainmob && brain.brainmob.client && brain.brainmob.key)
 				brain.forceMove(T)
 				items -= brain
@@ -393,11 +385,10 @@ GLOBAL_LIST_EMPTY(frozen_crew)
 			else
 				W.forceMove(T)
 
-	if(isStationLevel(z))
+	if(force_announce || is_station_level(z))
 		GLOB.global_announcer.autosay("[occupant.real_name], [occupant.mind.role_alt_title], [on_store_message] [on_store_location].", "[on_store_name]")
 	visible_message(SPAN_NOTICE("\The [src] hums and hisses as it moves [occupant] to [on_store_location]."))
 	playsound(loc, on_store_sound, 25)
-	GLOB.frozen_crew += occupant
 	if(ishuman(occupant))
 		var/mob/living/carbon/human/H = occupant
 		if(H.ghost_spawner)
@@ -425,14 +416,14 @@ GLOBAL_LIST_EMPTY(frozen_crew)
 		go_in(user, M)
 		return TRUE
 
-/obj/machinery/cryopod/MouseDrop_T(atom/dropping, mob/user)
+/obj/machinery/cryopod/mouse_drop_receive(atom/dropped, mob/user, params)
 	if(!istype(user, /mob/living))
 		return
 
-	if(!check_occupant_allowed(dropping))
+	if(!check_occupant_allowed(dropped))
 		return
 
-	var/mob/living/M = dropping
+	var/mob/living/M = dropped
 	if(istype(M))
 		go_in(user, M)
 
@@ -491,8 +482,8 @@ GLOBAL_LIST_EMPTY(frozen_crew)
 
 	// Book keeping!
 	var/turf/location = get_turf(src)
-	log_admin("[key_name_admin(M)] has entered a [initial(src.name)].",ckey=key_name(M))
-	message_admins(SPAN_NOTICE("[key_name_admin(M)] has entered a [initial(src.name)].(<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[location.x];Y=[location.y];Z=[location.z]'>JMP</a>)"))
+	log_admin("[key_name_admin(M)] has entered a [initial(src.name)].")
+	message_admins(SPAN_NOTICE("[key_name_admin(M)] has entered a [initial(src.name)].(<A href='byond://?_src_=holder;adminplayerobservecoodjump=1;X=[location.x];Y=[location.y];Z=[location.z]'>JMP</a>)"))
 
 	//Despawning occurs when process() is called with an occupant without a client.
 	src.add_fingerprint(user)
@@ -560,14 +551,16 @@ GLOBAL_LIST_EMPTY(frozen_crew)
 		else
 			icon_state = initial(icon_state)
 
-/obj/machinery/cryopod/relaymove(var/mob/user)
+/obj/machinery/cryopod/relaymove(mob/living/user, direction)
+	. = ..()
+
 	go_out()
 
 /obj/machinery/cryopod/proc/save_ipc_tag(var/mob/M)
 	var/choice = alert(M, "Would you like to save your tag data?", "Tag Persistence", "Yes", "No")
 	if(choice == "Yes")
 		var/mob/living/carbon/human/H = M
-		var/obj/item/organ/internal/ipc_tag/tag = H.internal_organs_by_name[BP_IPCTAG]
+		var/obj/item/organ/internal/machine/ipc_tag/tag = H.internal_organs_by_name[BP_IPCTAG]
 		if(tag)
 			M.client.prefs.machine_ownership_status = tag.ownership_info
 			M.client.prefs.machine_serial_number = tag.serial_number

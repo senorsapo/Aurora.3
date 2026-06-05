@@ -1,10 +1,10 @@
-/*
-	Defines a firing mode for a gun.
-
-	A firemode is created from a list of fire mode settings. Each setting modifies the value of the gun var with the same name.
-	If the fire mode value for a setting is null, it will be replaced with the initial value of that gun's variable when the firemode is created.
-	Obviously not compatible with variables that take a null value. If a setting is not present, then the corresponding var will not be modified.
-*/
+/**
+ * Defines a firing mode for a gun.
+ *
+ * A firemode is created from a list of fire mode settings. Each setting modifies the value of the gun var with the same name.
+ * If the fire mode value for a setting is null, it will be replaced with the initial value of that gun's variable when the firemode is created.
+ * Obviously not compatible with variables that take a null value. If a setting is not present, then the corresponding var will not be modified.
+ */
 /datum/firemode
 	var/name = "default"
 	var/list/settings = list()
@@ -39,13 +39,11 @@
 		LAZYCLEARLIST(original_settings)
 		original_settings = null
 
-//Parent gun type. Guns are weapons that can be aimed at mobs and act over a distance
-/obj/item/gun
+/// Parent gun type. Guns are weapons that can be aimed at mobs and act over a distance.
+ABSTRACT_TYPE(/obj/item/gun)
 	name = "gun"
 	desc = "It's a gun. It's pretty terrible, though."
-	desc_info = "This is a gun.  To fire the weapon, ensure your intent is *not* set to 'help', have your gun mode set to 'fire', \
-	then click where you want to fire."
-	icon = 'icons/obj/guns/pistol.dmi'
+	icon = 'icons/obj/guns/faction/zavodskoi_interstellar/pistol.dmi'
 	var/gun_gui_icons = 'icons/obj/guns/gun_gui.dmi'
 	icon_state = "pistol"
 	item_state = "pistol"
@@ -53,7 +51,7 @@
 	obj_flags = OBJ_FLAG_CONDUCTABLE
 	slot_flags = SLOT_BELT|SLOT_HOLSTER
 	matter = list(DEFAULT_WALL_MATERIAL = 2000)
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	throwforce = 5
 	throw_speed = 4
 	throw_range = 5
@@ -61,102 +59,170 @@
 	origin_tech = list(TECH_COMBAT = 1)
 	attack_verb = list("struck", "hit", "bashed")
 	zoomdevicename = "scope"
+	light_system = DIRECTIONAL_LIGHT
 
 /*
  * Suppression vars
  */
 
-	///Does the gun have a suppressor attached, or should it be suppressed? This will modify firing messages to obscure their source, and change the firing sound to use suppressed_sound
+	/// Does the gun have a suppressor attached, or should it be suppressed? This will modify firing messages to obscure their source, and change the firing sound to use suppressed_sound
 	var/suppressed = FALSE
-	///The suppressor item currently attached to the gun
+	/// The suppressor item currently attached to the gun
 	var/obj/item/suppressor/suppressor
-	///Whether the weapon can have a suppressor attached
+	/// Whether the weapon can have a suppressor attached
 	var/can_suppress = FALSE
-	///Whether the weapon can have a suppressor unattached
+	/// Whether the weapon can have a suppressor unattached
 	var/can_unsuppress = TRUE
 
 /*
  * Sound vars
  */
 
-	///Sound of the gun firing
+	/// Sound of the gun firing.
 	var/fire_sound = 'sound/weapons/gunshot/gunshot1.ogg'
-	///Whether to vary the frequency of the firing sound
+	/// Whether to vary the frequency of the firing sound.
 	var/vary_fire_sound = TRUE
-	///The volume of the firing sound
+	/// The volume of the firing sound.
 	var/fire_sound_volume = 50
-	///Sound of the gun firing when empty (dryfiring)
-	var/empty_sound = /singleton/sound_category/out_of_ammo
-	///Determines what a player should hear in audible_message when the gun is fired. e.g gunshot, blast
+	///Sound of the gun firing when empty (dryfiring).
+	var/empty_sound = SFX_OUT_OF_AMMO
+	///Determines what a player should hear in audible_message when the gun is fired. e.g gunshot, blast.
 	var/fire_sound_text = "gunshot"
-	///The firing sound to play when suppressed = TRUE
+	/// The firing sound to play when suppressed = TRUE.
 	var/suppressed_sound = 'sound/weapons/gunshot/gunshot_suppressed.ogg'
-	///The volume of the suppressed sound
+	/// The volume of the suppressed sound.
 	var/suppressed_volume = 60
-	///The sound of the safety being turned on
+	/// The sound of the safety being turned on.
 	var/safetyon_sound = 'sound/weapons/blade_open.ogg'
-	///The sound of the safety being turned off
+	/// The sound of the safety being turned off.
 	var/safetyoff_sound = 'sound/weapons/blade_close.ogg'
 	drop_sound = 'sound/items/drop/gun.ogg'
 	pickup_sound = 'sound/items/pickup/gun.ogg'
 
 	var/burst = 1
 	var/can_autofire = FALSE
-	var/fire_delay = 6 	//delay after shooting before the gun can be used again
-	var/burst_delay = 1	//delay between shots, if firing in bursts
+	/// Delay after shooting before the gun can be used again
+	var/fire_delay = 6
+	/// Delay between shots, if firing in bursts
+	var/burst_delay = 1
 	var/move_delay = 0
 
-	var/recoil = 0		//screen shake
+	/// Screen shake.
+	var/recoil = 0
 	var/muzzle_flash = 3
-	var/accuracy = 0   //accuracy is measured in tiles. +1 accuracy means that everything is effectively one tile closer for the purpose of miss chance, -1 means the opposite. launchers are not supported, at the moment.
-	var/offhand_accuracy = 0 // the higher this number, the more accurate this weapon is when fired from the off-hand
+	/// Accuracy is measured in tiles. +1 accuracy means that everything is effectively one tile closer for the purpose of miss chance, -1 means the opposite. launchers are not supported, at the moment.
+	var/accuracy = 0
+	/// The higher this number, the more accurate this weapon is when fired from the off-hand.
+	var/offhand_accuracy = 0
 	var/scoped_accuracy = null
-	var/list/burst_accuracy = list(0) //allows for different accuracies for each shot in a burst. Applied on top of accuracy
+	/// Allows for different accuracies for each shot in a burst. Applied on top of accuracy.
+	var/list/burst_accuracy = list(0)
 	var/list/dispersion = list(0)
+	/// The weapon's reliability; impacts probability rolls for misfires/failures of different sorts. As of 2025/11, only implemented for science modular weapons.
 	var/reliability = 100
+
+	/// Standard firing pin for most guns.
+	var/obj/item/firing_pin/pin = /obj/item/firing_pin
 
 	var/cyborg_maptext_override
 	var/displays_maptext = FALSE
+	/// If this weapon can have an ammo display attached.
 	var/can_ammo_display = TRUE
+	/// The ammo display attached to this weapon.
 	var/obj/item/ammo_display
 	maptext_x = 22
 	maptext_y = 2
 
-	var/obj/item/device/firing_pin/pin = /obj/item/device/firing_pin //standard firing pin for most guns.
-
+	/// If this weapon can have a bayonet attached.
 	var/can_bayonet = FALSE
+	/// The bayonet attached to this weapon.
 	var/obj/item/material/knife/bayonet/bayonet
 	var/knife_x_offset = 0
 	var/knife_y_offset = 0
 
 	var/next_fire_time = 0
 
-	var/sel_mode = 1 //index of the currently selected mode
+	/// Index of the currently selected mode.
+	var/sel_mode = 1
 	var/list/firemodes = list()
 
-	var/markings = 0 // for marking kills with a knife
+	/// For marking kills with a knife.
+	var/markings = 0
 
-	//wielding information
+	// Wielding information
 	var/fire_delay_wielded
 	var/recoil_wielded
 	var/accuracy_wielded
 	var/wielded = 0
 	var/needspin = TRUE
+	/// Can this weapon be dual-wielded?
 	var/is_wieldable = FALSE
-	var/wield_sound = /singleton/sound_category/generic_wield_sound
+	var/wield_sound = SFX_WIELD
 	var/unwield_sound = null
-	var/one_hand_fa_penalty = 0 // Additional accuracy/dispersion penalty for using full auto one-handed
+	/// Additional accuracy/dispersion penalty for using full auto one-handed
+	var/one_hand_fa_penalty = 0
 
-	//aiming system stuff
-	var/multi_aim = 0 //Used to determine if you can target multiple people.
-	var/tmp/list/mob/living/aim_targets //List of who yer targeting.
-	var/tmp/mob/living/last_moved_mob //Used to fire faster at more than one person.
+	// Aiming system stuff
+	/// Can this gun target multiple people?
+	var/multi_aim = 0
+	/// List of who is being targeted.
+	var/tmp/list/mob/living/aim_targets
+	/// Used to fire faster at more than one person.
+	var/tmp/mob/living/last_moved_mob
 	var/tmp/lock_time = -100
-	var/safety_state = TRUE
+
+	/// Whether or not the gun has a safety.
 	var/has_safety = TRUE
+	/// Whether the gun's safety is currently engaged.
+	var/safety_state = TRUE
 	var/image/safety_overlay
 
-	var/iff_capable = FALSE // if true, applies the user's ID iff_faction to the projectile
+	/// If TRUE, applies the user's ID iff_faction to the projectile. As of 2025/11, code making use of this is not currently implemented.
+	var/iff_capable = FALSE
+
+/obj/item/gun/mechanics_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	if(has_safety)
+		. += "To fire, toggle the safety with CTRL-click (or enable HARM intent), then click where you want to shoot."
+	else
+		. += "To fire, because this weapon has no safety, just click where you want to shoot."
+	if(is_wieldable)
+		. += "This weapon can be wielded with two hands to improve firing stability; use it on yourself while your inactive hand is empty to wield it."
+	. += "Use an object with a sharp edge, like a knife, to carve a notch into this."
+
+/obj/item/gun/assembly_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	if(can_bayonet && !bayonet)
+		. += "This weapon can support the attachment of a bayonet."
+	if(can_ammo_display && !ammo_display)
+		. += "This weapon can support the attachment of an ammo display."
+
+/obj/item/gun/disassembly_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	if(bayonet)
+		. += "The bayonet can be removed from this weapon with a crowbar."
+	if(ammo_display)
+		. += "The ammo display can be removed from this weapon with a wrench."
+	if(pin)
+		. += "The firing pin can be removed from this weapon with a screwdriver. Most firing pins are rather fragile, and this has a chance of breaking it!"
+
+/obj/item/gun/feedback_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	if(distance > 1)
+		return
+	if(markings)
+		. += SPAN_NOTICE("It has [markings] [markings == 1 ? "notch" : "notches"] carved into the stock.")
+	if(needspin)
+		if(pin)
+			. += "\The [pin] is installed in the trigger mechanism."
+			pin.examine_info(user) // Allows people to check the current firemode of their wireless-control firing pin. Returns nothing if there's no wireless-control firing pin.
+		else
+			. += "It doesn't have a firing pin installed, and won't fire."
+	if(firemodes.len > 1)
+		var/datum/firemode/current_mode = firemodes[sel_mode]
+		. += "The fire selector is set to [current_mode.name]."
+	if(has_safety)
+		. += "The safety is [safety() ? "on" : "off"]."
 
 /obj/item/gun/Initialize(mapload)
 	. = ..()
@@ -168,7 +234,7 @@
 
 	if (needspin)
 		if(!pin)
-			pin = /obj/item/device/firing_pin
+			pin = /obj/item/firing_pin
 		pin = new pin(src)
 	else
 		pin = null
@@ -192,7 +258,7 @@
 	underlays.Cut()
 	if(bayonet)
 		var/image/I
-		I = image(icon = 'icons/obj/guns/bayonet.dmi', icon_state = "bayonet")
+		I = image(icon = 'icons/obj/guns/attachments/bayonet.dmi', icon_state = "bayonet")
 		I.pixel_x = knife_x_offset
 		I.pixel_y = knife_y_offset
 		underlays += I
@@ -226,6 +292,11 @@
 	return
 
 /obj/item/gun/proc/toggle_firing_mode(var/mob/user, var/list/message_mobs)
+	var/cancelled = FALSE
+	SEND_SIGNAL(user, COMSIG_GUN_TOGGLE_FIRING_MODE, src, &cancelled)
+	if (cancelled)
+		return
+
 	var/datum/firemode/new_mode = switch_firemodes(user)
 	if(new_mode)
 		playsound(user, safetyoff_sound, 25)
@@ -285,7 +356,7 @@
 	else
 		if(needspin)
 			to_chat(user, SPAN_WARNING("\The [src]'s trigger is locked. This weapon doesn't have a firing pin installed!"))
-			balloon_alert(user, "Trigger locked, firing pin needed!")
+			balloon_alert(user, "trigger locked, firing pin needed!")
 			return FALSE
 		else
 			return TRUE
@@ -302,18 +373,18 @@
 	else
 		Fire(A,user,params) //Otherwise, fire normally.
 
-/obj/item/gun/attack(atom/A, mob/living/user, def_zone)
-	if (A == user && user.zone_sel.selecting == BP_MOUTH && !mouthshoot)
+/obj/item/gun/attack(mob/living/target_mob, mob/living/user, target_zone)
+	if (target_mob == user && user.zone_sel.selecting == BP_MOUTH && !mouthshoot)
 		handle_suicide(user)
 	else if(user.a_intent != I_HURT && user.aiming && user.aiming.active) //if aim mode, don't pistol whip
-		if (user.aiming.aiming_at != A)
-			PreFire(A, user)
+		if (user.aiming.aiming_at != target_mob)
+			PreFire(target_mob, user)
 		else
-			Fire(A, user, pointblank=1)
+			Fire(target_mob, user, pointblank=1)
 	else if(user.a_intent == I_HURT) //point blank shooting
-		Fire(A, user, pointblank=1)
+		Fire(target_mob, user, pointblank=1)
 	else if(bayonet)
-		bayonet.attack(A, user, def_zone)
+		bayonet.attack(target_mob, user, target_zone)
 	else
 		return ..() //Pistolwhippin'
 
@@ -323,6 +394,14 @@
 	var/shoot_time = max(fire_time, appropriate_delay)
 	return shoot_time
 
+/**
+ * Attempts to fire the weapon. This does several things, namely:
+ * * Adds fingerprints to the weapon.
+ * * Checks for the safety's engagement.
+ * * Runs reliability checks, and executes any custom-coded failure events.
+ * * Fire time checks to avoid spam, as well as handling shoot delay.
+ * * Makes the user face their target (duh).
+ */
 /obj/item/gun/proc/fire_checks(atom/target, mob/living/user, clickparams, pointblank=0, reflex=0)
 	if(!user || !target)
 		return FALSE
@@ -333,7 +412,9 @@
 		if(user.a_intent == I_HURT)
 			toggle_safety(user)
 		else
+			var/safety_cooldown = 5 // Half a second
 			handle_click_empty(user)
+			user.setClickCooldown(safety_cooldown)
 			return FALSE
 
 	if(!special_check(user))
@@ -357,7 +438,7 @@
 
 	return TRUE
 
-/obj/item/gun/proc/Fire(atom/target, mob/living/user, clickparams, pointblank=0, reflex=0, accuracy_decrease=0, is_offhand=0)
+/obj/item/gun/proc/Fire(atom/target, mob/living/user, clickparams, pointblank = 0, reflex = 0, var/accuracy_decrease = 0, is_offhand = 0)
 	if(!fire_checks(target,user,clickparams,pointblank,reflex))
 		return FALSE
 
@@ -366,6 +447,10 @@
 		if(istype(SG) && SG.w_class <= w_class)
 			var/decreased_accuracy = SG.w_class - SG.offhand_accuracy
 			addtimer(CALLBACK(SG, PROC_REF(Fire), target, user, clickparams, pointblank, reflex, decreased_accuracy, TRUE), 1)
+
+	/// The amount of extra degrees of firing arc the gun will have from the effects of a signal raised on the user.
+	var/dispersion_increase = 0
+	SEND_SIGNAL(user, COMSIG_BEFORE_GUN_FIRE, &accuracy_decrease, &dispersion_increase)
 
 	//actually attempt to shoot
 	var/turf/targloc = get_turf(target) //cache this in case target gets deleted during shooting, e.g. if it was a securitron that got destroyed.
@@ -376,7 +461,7 @@
 			break
 
 		var/acc = burst_accuracy[min(i, burst_accuracy.len)] - accuracy_decrease
-		var/disp = dispersion[min(i, dispersion.len)]
+		var/disp = dispersion[min(i, dispersion.len)] + dispersion_increase
 		process_accuracy(projectile, user, target, acc, disp)
 
 		if(pointblank)
@@ -401,9 +486,11 @@
 
 	// Custom formula here because otherwise you can fire bursts within the burst.
 	var/shoot_time = burst > 1 ? burst_delay + 1 : fire_delay
+	if (burst > 1 && burst_delay == 0) //Prevents guns with no burst delay (laser shotguns) from firing as fast as you can click.
+		shoot_time = fire_delay
 	user.setClickCooldown(shoot_time)
 
-// Similar to the above proc, but does not require a user, which is ideal for things like turrets.
+/// Similar to the Fire() proc, but does not require a user, which is ideal for things like turrets.
 /obj/item/gun/proc/Fire_userless(atom/target)
 	if(!target)
 		return FALSE
@@ -422,24 +509,28 @@
 			break
 
 		if(isprojectile(projectile))
-			var/obj/item/projectile/P = projectile
+			var/obj/projectile/P = projectile
 
 			var/acc = burst_accuracy[min(i, burst_accuracy.len)]
 			var/disp = dispersion[min(i, dispersion.len)]
 
 			P.accuracy = accuracy + acc
-			P.dispersion = disp
+			P.spread += disp
 
-			P.shot_from = src.name
 			P.suppressed =  suppressed
 
-			P.launch_projectile(target)
+			if(!P.preparePixelProjectile(target, get_turf(src)))
+				return FALSE
+			P.fired_from = src
+			P.fire()
 
 			handle_post_fire() // should be safe to not include arguments here, as there are failsafes in effect (?)
 
+			var/prev_light = light_range
 			if (muzzle_flash)
-				set_light(muzzle_flash)
-				addtimer(CALLBACK(src, TYPE_PROC_REF(/atom, set_light), 0), 2, TIMER_UNIQUE | TIMER_OVERRIDE)
+				set_light_range(muzzle_flash)
+				set_light_on(TRUE)
+				addtimer(CALLBACK(src, PROC_REF(reset_light_range), prev_light), 0.5 SECONDS)
 			update_icon()
 
 		if(i < burst)
@@ -452,6 +543,12 @@
 	next_fire_time = world.time + shoot_time
 
 	accuracy = initial(accuracy)	//Reset the gun's accuracy
+
+/// called by a timer to remove the light range from muzzle flash
+/obj/item/gun/proc/reset_light_range(lightrange)
+	set_light_range(lightrange)
+	if(lightrange <= 0)
+		set_light_on(FALSE)
 
 //obtains the next projectile to fire
 /obj/item/gun/proc/consume_next_projectile()
@@ -466,9 +563,11 @@
 	return (target in check_trajectory(target, user))
 
 //called if there was no projectile to shoot
-/obj/item/gun/proc/handle_click_empty()
+/obj/item/gun/proc/handle_click_empty(mob/user)
 	balloon_alert_to_viewers("*click*")
 	playsound(loc, empty_sound, 30, TRUE)
+	if(user)
+		SEND_SIGNAL(user, COMSIG_EMPTIED_MAGAZINE, src)
 
 //called after successfully firing
 /obj/item/gun/proc/handle_post_fire(mob/user, atom/target, var/pointblank = FALSE, var/reflex = FALSE, var/playemote = TRUE)
@@ -489,8 +588,11 @@
 				)
 
 		if(muzzle_flash)
-			set_light(muzzle_flash)
-			addtimer(CALLBACK(src, TYPE_PROC_REF(/atom, set_light), 0), 2)
+			var/prev_light = light_range
+			if (muzzle_flash)
+				set_light_range(muzzle_flash)
+				set_light_on(TRUE)
+				addtimer(CALLBACK(src, PROC_REF(reset_light_range), prev_light), 0.5 SECONDS)
 
 	if(recoil)
 		shake_camera(user, recoil + 1, recoil)
@@ -510,7 +612,7 @@
 		playsound(loc, fire_sound, fire_sound_volume, vary_fire_sound, falloff_distance  = 0.5)
 
 /obj/item/gun/proc/process_point_blank(obj/projectile, mob/user, atom/target)
-	var/obj/item/projectile/P = projectile
+	var/obj/projectile/P = projectile
 	if(!istype(P))
 		return //default behaviour only applies to true projectiles
 
@@ -533,13 +635,13 @@
 	P.point_blank = TRUE
 
 /obj/item/gun/proc/process_accuracy(obj/projectile, mob/user, atom/target, acc_mod, dispersion)
-	var/obj/item/projectile/P = projectile
+	var/obj/projectile/P = projectile
 	if(!istype(P))
 		return //default behaviour only applies to true projectiles
 
 	//Accuracy modifiers
 	P.accuracy = accuracy + acc_mod
-	P.dispersion = dispersion
+	P.spread += dispersion
 
 	//Increasing accuracy across the board, ever so slightly
 	P.accuracy += 1
@@ -556,11 +658,17 @@
 		F = firemodes[sel_mode]
 	if(one_hand_fa_penalty > 2 && !wielded && F?.name == "full auto") // todo: make firemode names defines
 		P.accuracy -= one_hand_fa_penalty * 0.5
-		P.dispersion -= one_hand_fa_penalty * 0.5
+		P.spread -= one_hand_fa_penalty * 0.5 //Adds 6 degrees of spread on all rifles. Not very significant.
+	if(one_hand_fa_penalty > 2 && !wielded && F?.name == "short burst")
+		P.accuracy -= one_hand_fa_penalty * 0.5
+		P.spread -= one_hand_fa_penalty * 0.5
+	if(one_hand_fa_penalty > 2 && !wielded && F?.name == "3 round burst")
+		P.accuracy -= one_hand_fa_penalty * 0.5
+		P.spread -= one_hand_fa_penalty * 0.5
 
 //does the actual launching of the projectile
 /obj/item/gun/proc/process_projectile(obj/projectile, mob/user, atom/target, target_zone, params)
-	var/obj/item/projectile/P = projectile
+	var/obj/projectile/P = projectile
 	if(!istype(P))
 		return FALSE //default behaviour only applies to true projectiles
 
@@ -573,7 +681,13 @@
 		else if(mob.shock_stage > 70)
 			added_spread = 15
 
-	return !P.launch_from_gun(target, target_zone, user, params, null, added_spread, src)
+	if(!P.preparePixelProjectile(target, src, params, added_spread))
+		return FALSE
+	P.firer = user
+	P.fired_from = src
+	P.def_zone = target_zone
+
+	return !P.fire()
 
 //Suicide handling.
 /obj/item/gun/var/mouthshoot = FALSE //To stop people from suiciding twice... >.>
@@ -588,7 +702,7 @@
 		M.visible_message(SPAN_GOOD("\The [user] takes \the [src] out of their mouth."))
 		mouthshoot = FALSE
 		return
-	var/obj/item/projectile/in_chamber = consume_next_projectile()
+	var/obj/projectile/in_chamber = consume_next_projectile()
 	if(istype(in_chamber))
 		user.visible_message(SPAN_DANGER("\The [user] pulls the trigger."))
 		if (!pin && needspin) // Checks the pin of the gun.
@@ -653,24 +767,6 @@
 	suppressor = null
 	update_icon()
 
-/obj/item/gun/get_examine_text(mob/user, distance, is_adjacent, infix, suffix)
-	. = ..()
-	if(distance > 1)
-		return
-	if(markings)
-		. += SPAN_NOTICE("It has [markings] [markings == 1 ? "notch" : "notches"] carved into the stock.")
-	if(needspin)
-		if(pin)
-			. += "\The [pin] is installed in the trigger mechanism."
-			pin.examine_info(user) // Allows people to check the current firemode of their wireless-control firing pin. Returns nothing if there's no wireless-control firing pin.
-		else
-			. += "It doesn't have a firing pin installed, and won't fire."
-	if(firemodes.len > 1)
-		var/datum/firemode/current_mode = firemodes[sel_mode]
-		. += "The fire selector is set to [current_mode.name]."
-	if(has_safety)
-		. += "The safety is [safety() ? "on" : "off"]."
-
 /obj/item/gun/proc/switch_firemodes()
 	if(!firemodes.len)
 		return null
@@ -687,6 +783,7 @@
 	return new_mode
 
 /obj/item/gun/attack_self(mob/user)
+	. = ..()
 	if(is_wieldable)
 		toggle_wield(usr)
 		update_held_icon()
@@ -699,7 +796,7 @@
 	safety_state = !safety_state
 	update_icon()
 	if(user)
-		balloon_alert(user, "Safety [safety_state ? "on" : "off"].")
+		balloon_alert(user, "safety [safety_state ? "on" : "off"].")
 		if(!safety_state)
 			playsound(src, safetyon_sound, 30, 1)
 		else
@@ -707,15 +804,17 @@
 
 /obj/item/gun/verb/toggle_safety_verb()
 	set src in usr
-	set category = "Object"
+	set category = "Object.Held"
+	set desc = "Shortcut is Ctrl-click."
 	set name = "Toggle Gun Safety"
 	if(has_safety && usr == loc)
 		toggle_safety(usr)
 
 /obj/item/gun/CtrlClick(var/mob/user)
-	if(has_safety && user == loc)
+	if(has_safety && !use_check(user, USE_FORCE_SRC_IN_USER))
 		toggle_safety(user)
 		return TRUE
+
 	. = ..()
 
 /obj/item/gun/proc/safety()
@@ -831,6 +930,9 @@
 		var/mob/living/living_user = user
 		living_user.stop_aiming(src)
 
+	// so that mobs don't rest with the gun already wielded to bypass the firing delay updates
+	UnregisterSignal(user, COMSIG_MOB_RESTED)
+
 	queue_icon_update()
 	//Unwields the item when dropped, deletes the offhand
 	update_maptext()
@@ -845,12 +947,14 @@
 	..()
 	queue_icon_update()
 	addtimer(CALLBACK(src, PROC_REF(update_maptext)), 1)
+	// so that mobs don't rest with the gun already wielded to bypass the firing delay updates
+	RegisterSignal(user, COMSIG_MOB_RESTED, PROC_REF(update_firing_delays))
 	if(is_wieldable)
 		unwield()
 
 ///////////OFFHAND///////////////
 /obj/item/offhand
-	w_class = ITEMSIZE_HUGE
+	w_class = WEIGHT_CLASS_HUGE
 	icon = 'icons/obj/weapons.dmi'
 	icon_state = "offhand"
 	item_state = "nothing"
@@ -900,12 +1004,18 @@
 		QDEL_NULL(suppressor)
 	return ..()
 
-
+/**
+ * This proc is only called when a weapon has already hit a failure chance, based on prob(100-reliability) during the fire_checks proc.
+ * Based on the weapon's relability value, this proc checks if the severity of the failure exceeds the default (1). It then executes
+ * either small_*, medium_*, or critical_fail procs. These are empty returns by default, and must be coded for each weapon/component.
+ *
+ * As of 2025/11, reliability failures are only implemented for Science's modular weaponry system.
+ */
 /obj/item/gun/proc/handle_reliability_fail(var/mob/user)
 	var/severity = 1
-	if(prob(100-reliability))
+	if(prob(80-reliability)) //Medium severity failures only possible under 80% reliability.
 		severity = 2
-		if(prob(100-reliability))
+		if(prob(65-reliability)) //Critical failures only possible under 65% reliability.
 			severity = 3
 	switch(severity)
 		if(1)
@@ -924,18 +1034,18 @@
 /obj/item/gun/proc/critical_fail(var/mob/user)
 	return
 
-/obj/item/gun/attackby(obj/item/attacking_item, mob/user)
+/obj/item/gun/attackby(obj/item/attacking_item, mob/user, params)
 	if(istype(attacking_item, /obj/item/material/knife/bayonet))
 		if(!can_bayonet)
-			balloon_alert(user, "\the [attacking_item.name] doesn't fit")
+			balloon_alert(user, "doesn't fit!")
 			return ..()
 
 		if(bayonet)
-			balloon_alert(user, "\the [src] already has a bayonet")
+			balloon_alert(user, "already has a bayonet!")
 			return TRUE
 
 		if(user.l_hand != attacking_item && user.r_hand != attacking_item)
-			balloon_alert(user, "not in hand")
+			balloon_alert(user, "not in hand!")
 			return
 
 		user.drop_from_inventory(attacking_item,src)
@@ -950,19 +1060,19 @@
 
 	if(istype(attacking_item, /obj/item/ammo_display))
 		if(!can_ammo_display)
-			balloon_alert(user, "\the [attacking_item.name] doesn't fit")
+			balloon_alert(user, "doesn't fit!")
 			return TRUE
 
 		if(ammo_display)
-			balloon_alert(user, "\the [src] already has an ammo display")
+			balloon_alert(user, "already has an ammo display!")
 			return TRUE
 
 		if(user.l_hand != attacking_item && user.r_hand != attacking_item)
-			balloon_alert(user, "not in hand")
+			balloon_alert(user, "not in hand!")
 			return
 
 		if(displays_maptext)
-			balloon_alert(user, "\the [src] is already displaying its ammo count")
+			balloon_alert(user, "already displaying its ammo count!")
 			return TRUE
 
 		user.drop_from_inventory(attacking_item, src)
@@ -972,7 +1082,7 @@
 		w_class += attacking_item.w_class
 		return TRUE
 
-	if(attacking_item.iscrowbar() && bayonet)
+	if(attacking_item.tool_behaviour == TOOL_CROWBAR && bayonet)
 		to_chat(user, SPAN_NOTICE("You detach \the [bayonet] from \the [src]."))
 		bayonet.forceMove(get_turf(src))
 		user.put_in_hands(bayonet)
@@ -981,7 +1091,7 @@
 		update_icon()
 		return TRUE
 
-	if(attacking_item.iswrench() && ammo_display)
+	if(attacking_item.tool_behaviour == TOOL_WRENCH && ammo_display)
 		to_chat(user, SPAN_NOTICE("You wrench the ammo display loose from \the [src]."))
 		ammo_display.forceMove(get_turf(src))
 		user.put_in_hands(ammo_display)
@@ -991,7 +1101,7 @@
 		maptext = ""
 		return TRUE
 
-	if(pin && attacking_item.isscrewdriver())
+	if(pin && attacking_item.tool_behaviour == TOOL_SCREWDRIVER)
 		visible_message(SPAN_WARNING("\The [user] begins to try and pry out \the [src]'s firing pin!"))
 		if(attacking_item.use_tool(src, user, 45, volume = 50))
 			if(pin.durable || prob(50))

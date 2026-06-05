@@ -10,7 +10,7 @@
 	silent = TRUE
 	cold_protection = FEET
 	min_cold_protection_temperature = SHOE_MIN_COLD_PROTECTION_TEMPERATURE
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	drop_sound = 'sound/items/drop/cloth.ogg'
 	pickup_sound = 'sound/items/pickup/cloth.ogg'
 	icon_auto_adapt = TRUE
@@ -27,3 +27,15 @@
 	desc = "Slippers made to look like baby carp, but on your feet! Squeeeeeee!!"
 	item_state = "carpslippers"
 	icon_state = "carpslippers"
+
+/obj/item/clothing/shoes/slippers/recolourable_slippers
+	desc = "A pair of simple slippers, in a variety of colours."
+	name = "slippers"
+	icon_state = "colourslippers"
+	item_state = "colourslippers"
+
+/obj/item/clothing/shoes/slippers/scc_slippers
+	desc = "A pair of simple slippers, branded with the unmistakable logo of the Stellar Corporate Conglomerate. A small logo on the inside indicates it is a pair of Nyx-brand slippers, produced by Idris Incorporated for Stellar Corporate Conglomerate vessels."
+	name = "\improper SCC Slippers"
+	icon_state = "sccslippers"
+	item_state = "sccslippers"

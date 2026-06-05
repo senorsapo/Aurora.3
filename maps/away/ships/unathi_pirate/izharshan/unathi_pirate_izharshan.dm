@@ -4,9 +4,10 @@
 	description = "A shuttle belonging to the Unahi pirates of Izharshan's Raiders."
 
 	prefix = "ships/unathi_pirate/izharshan/"
-	suffixes = list("unathi_pirate_izharshan.dmm")
+	suffix = "unathi_pirate_izharshan.dmm"
 
 	spawn_weight = 1
+	template_flags = TEMPLATE_FLAG_RUIN_STARTS_DISALLOWED // Disabled for debloating. Feel free to enable again if reworked or relevant.
 	ship_cost = 1
 	shuttles_to_initialise = list(/datum/shuttle/autodock/overmap/unathi_pirate_izharshan)
 	sectors = list(SECTOR_NRRAHRAHUL, SECTOR_BADLANDS, SECTOR_GAKAL, SECTOR_UUEOAESA)
@@ -64,7 +65,7 @@
 		/obj/item/reagent_containers/food/drinks/cans/threetowns = 10,
 		/obj/item/reagent_containers/food/drinks/bottle/sarezhiwine = 10)
 	req_access = list(210)
-	restock_items = 1
+	restock_items = TRUE
 
 //shuttle time :)
 

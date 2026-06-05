@@ -6,7 +6,7 @@
 	icon_state = "shade"
 	icon_living = "shade"
 	icon_dead = "shade_dead"
-	maxHealth = 50
+	maxhealth = 50
 	health = 50
 	universal_speak = 1
 	speak_emote = list("hisses")
@@ -17,7 +17,7 @@
 	response_harm   = "punches"
 	melee_damage_lower = 5
 	melee_damage_upper = 15
-	attacktext = "drained the life from"
+	attacktext = "drains the life from"
 	minbodytemp = 0
 	maxbodytemp = 4000
 	min_oxy = 0
@@ -32,6 +32,7 @@
 	var/obj/item/residue = /obj/item/ectoplasm
 
 	psi_pingable = FALSE
+	sample_data = null
 
 /mob/living/simple_animal/shade/cultify()
 	return
@@ -51,8 +52,8 @@
 	return FALSE
 
 /mob/living/simple_animal/shade/attackby(obj/item/attacking_item, mob/user)  //Marker -Agouri
-	if(istype(attacking_item, /obj/item/device/soulstone))
-		var/obj/item/device/soulstone/S = attacking_item
+	if(istype(attacking_item, /obj/item/soulstone))
+		var/obj/item/soulstone/S = attacking_item
 		S.transfer_soul("SHADE", src, user)
 		return
 	return ..()
@@ -74,7 +75,7 @@
 	icon_state = "blank"
 	icon_living = "blank"
 	icon_dead = "blank"
-	maxHealth = 100
+	maxhealth = 100
 	health = 100
 	universal_speak = 1
 	universal_understand = 1
@@ -103,7 +104,7 @@
 	var/datum/weakref/original_body
 	var/datum/weakref/possessed_body
 
-/mob/living/simple_animal/shade/bluespace/apply_damage(damage = 0, damagetype = DAMAGE_BRUTE, def_zone, blocked, used_weapon, damage_flags = 0, armor_pen, silent = FALSE)
+/mob/living/simple_animal/shade/bluespace/apply_damage(damage = 0, damagetype = DAMAGE_BRUTE, def_zone, used_weapon, damage_flags = 0, armor_pen, silent = FALSE)
 	return 0
 
 /mob/living/simple_animal/shade/bluespace/adjustBruteLoss()
@@ -148,7 +149,7 @@
 				to_chat(src, SPAN_DANGER("You feel yourself begin to fade away!"))
 	..()
 
-/mob/living/simple_animal/shade/bluespace/Life()
+/mob/living/simple_animal/shade/bluespace/Life(seconds_per_tick, times_fired)
 	if(possessive && possessed_body)
 		update_possession()
 	..()
@@ -204,7 +205,7 @@
 			heard_dying_message = 0
 			to_chat(src, SPAN_NOTICE("The soothing echoes of life reinvigorate you."))
 
-/mob/living/simple_animal/shade/bluespace/say(var/message, var/datum/language/speaking = null, var/verb="says", var/alt_name="", var/ghost_hearing = GHOSTS_ALL_HEAR, var/whisper = FALSE)
+/mob/living/simple_animal/shade/bluespace/say(var/message, var/datum/language/speaking = null, var/verb="says", var/alt_name="", var/ghost_hearing = GHOSTS_ALL_HEAR, var/whisper = FALSE, var/skip_edit = FALSE)
 	if(!possessive)
 		var/list/words_in_memory = dd_text2List(last_message_heard, " ")
 		var/list/words_in_message = dd_text2List(message, " ")

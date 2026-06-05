@@ -84,8 +84,9 @@
 			owner.set_default_language(LANGUAGE_LIIDRA)
 			removed_langs = TRUE
 
-		owner.set_see_invisible(SEE_INVISIBLE_NOLIGHTING)
+		owner.lighting_alpha = LIGHTING_PLANE_ALPHA_SOMEWHAT_INVISIBLE
 		owner.add_client_color(/datum/client_color/vaurca)
+		owner.update_sight()
 
 		if(prob(10))
 			if(owner.can_feel_pain())
@@ -158,10 +159,10 @@
 			SPAN_DANGER("You feel the cold of the knife cutting and cutting, but it is too late. There is nothing left of you but the Lii'dra's will, now. A final cut - and then you are granted the only escape that still remains to you."))
 			to_chat(target, SPAN_GOOD("Your function is fulfilled. We have no further need of you. Releasing control."))
 			target.death(FALSE) //too late, there is no brain left to save
-	if(GLOB.all_languages[LANGUAGE_VAURCA] in target.languages && stage >= 3 && !isvaurca(target))
+	if((GLOB.all_languages[LANGUAGE_VAURCA] in target.languages) && stage >= 3 && !isvaurca(target))
 		target.remove_language(LANGUAGE_VAURCA)
 		to_chat(target, SPAN_WARNING("Your mind suddenly grows dark as the unity of the Hive is torn from you."))
-	if(GLOB.all_languages[LANGUAGE_LIIDRA] in target.languages && stage >= 3)
+	if((GLOB.all_languages[LANGUAGE_LIIDRA] in target.languages) && stage >= 3)
 		target.remove_language(LANGUAGE_LIIDRA)
 	removed_langs = 0
 	remove_verb(owner, /mob/living/carbon/human/proc/kois_cough)

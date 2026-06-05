@@ -1,5 +1,5 @@
 /mob/living/carbon/brain/emote(var/act,var/m_type=1,var/message = null)
-	if(!(container && istype(container, /obj/item/device/mmi)))//No MMI, no emotes
+	if(!(container && istype(container, /obj/item/mmi)))//No MMI, no emotes
 		return
 
 	if (findtext(act, "-", 1, null))
@@ -66,6 +66,6 @@
 			to_chat(src, SPAN_NOTICE("Unusable emote '[act]'. Say *help for a list."))
 
 	if (message)
-		log_emote("[name]/[key] : [message]",ckey=key_name(key))
+		log_emote("[name]/[key] : [message]")
 
 		send_emote(message, m_type)

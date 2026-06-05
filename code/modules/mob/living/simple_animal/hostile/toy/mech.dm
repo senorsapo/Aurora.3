@@ -9,12 +9,12 @@
 	universal_speak = FALSE
 
 	health = 10
-	maxHealth = 10
+	maxhealth = 10
 	melee_damage_lower = 1
 	melee_damage_upper = 2
 	organ_names = list("chest", "lower body", "left arm", "right arm", "left leg", "right leg", "head")
 	attack_emote = "raises its fist at"
-	attacktext = "smashed"
+	attacktext = "smashes"
 	attack_sound = 'sound/weapons/woodenhit.ogg'
 	speed = 2
 	mob_size = MOB_MINISCULE
@@ -60,7 +60,7 @@
 			if(1)
 				rival.forceMove(loc)
 				visible_message("<b>[src]</b> lifts \the [rival] over its head and slams them down into the ground behind them!")
-				rival.throw_at(get_step(src, GLOB.reverse_dir[dir]), 1, 3, src, TRUE)
+				rival.throw_at(get_step(src, REVERSE_DIR(dir)), 1, 3, src, TRUE)
 				playsound(loc, 'sound/effects/bang.ogg', 50, 1)
 				rival.apply_damage(2, DAMAGE_BRUTE)
 			if(2)

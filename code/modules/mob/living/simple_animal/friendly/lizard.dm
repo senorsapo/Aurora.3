@@ -6,7 +6,7 @@
 	icon_dead = "lizard_dead"
 	speak_emote = list("hisses")
 	health = 5
-	maxHealth = 5
+	maxhealth = 5
 	attacktext = "bitten"
 	melee_damage_lower = 1
 	melee_damage_upper = 2
@@ -30,7 +30,7 @@
 	. = ..()
 	nutrition = rand(max_nutrition*0.25, max_nutrition*0.75)
 
-/mob/living/simple_animal/lizard/Life()
+/mob/living/simple_animal/lizard/Life(seconds_per_tick, times_fired)
 	if (!..())
 		if ((world.time - timeofdeath) > decompose_time)
 			dust()

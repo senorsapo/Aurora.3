@@ -1,5 +1,5 @@
 ///Generic damage proc (slimes and monkeys).
-/atom/proc/attack_generic(mob/user as mob)
+/atom/proc/attack_generic(mob/user, damage, attack_message, environment_smash, armor_penetration, attack_flags, damage_type)
 	return 0
 
 ///Generic click on for pai
@@ -39,7 +39,7 @@
 /mob/proc/attack_empty_hand(var/bp_hand)
 	return
 
-/mob/living/carbon/human/RangedAttack(var/atom/A)
+/mob/living/carbon/human/RangedAttack(atom/A)
 	var/obj/item/clothing/gloves/GV = gloves
 	var/obj/item/clothing/glasses/GS = glasses
 

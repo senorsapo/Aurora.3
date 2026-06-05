@@ -12,7 +12,7 @@
 	possible_transfer_amounts = list(5,10,15,25,30,60)
 	volume = 60
 	accuracy = 0.1
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	atom_flags = ATOM_FLAG_OPEN_CONTAINER
 	fragile = 2
 	unacidable = 1 //glass doesn't dissolve in acid
@@ -20,12 +20,8 @@
 	pickup_sound = 'sound/items/pickup/bottle.ogg'
 	var/label_text = ""
 
-/obj/item/reagent_containers/glass/Initialize()
-	. = ..()
-	AddComponent(/datum/component/base_name, name)
-
-/obj/item/reagent_containers/glass/get_examine_text(mob/user, distance, is_adjacent, infix, suffix)
-	. = ..()
+/obj/item/reagent_containers/glass/feedback_hints(mob/user, distance, is_adjacent)
+	. += ..()
 	if(distance > 2)
 		return
 	if(LAZYLEN(reagents.reagent_volumes))
@@ -45,6 +41,10 @@
 		. += SPAN_NOTICE("It is empty.")
 	if(!is_open_container())
 		. += SPAN_NOTICE("An airtight lid seals it completely.")
+
+/obj/item/reagent_containers/glass/Initialize()
+	. = ..()
+	AddComponent(/datum/component/base_name, name)
 
 /obj/item/reagent_containers/glass/get_additional_forensics_swab_info()
 	var/list/additional_evidence = ..()
@@ -77,7 +77,7 @@
 	if(istype(attacking_item,/obj/item/storage/part_replacer))
 		if(!reagents || !reagents.total_volume)
 			return ..()
-	if(attacking_item.ispen() || istype(attacking_item, /obj/item/device/flashlight/pen))
+	if(attacking_item.tool_behaviour == TOOL_PEN || istype(attacking_item, /obj/item/flashlight/pen))
 		var/tmp_label = sanitizeSafe( tgui_input_text(user, "Enter a label for [name]", "Label", label_text, MAX_NAME_LEN), MAX_NAME_LEN )
 		if(length(tmp_label) > 15)
 			to_chat(user, SPAN_NOTICE("The label can be at most 15 characters long."))
@@ -107,7 +107,8 @@
 	matter = list(MATERIAL_GLASS = 500)
 	drop_sound = 'sound/items/drop/drinkglass.ogg'
 	pickup_sound = 'sound/items/pickup/drinkglass.ogg'
-	fragile = 1
+	fragile = TRUE
+	storage_slot_sort_by_name = TRUE
 
 /obj/item/reagent_containers/glass/beaker/Initialize()
 	. = ..()
@@ -201,6 +202,21 @@
 	amount_per_transfer_from_this = 5
 	reagents_to_add = list(/singleton/reagent/antibodies = 60)
 
+/obj/item/reagent_containers/glass/beaker/vial/dexalin_plus
+	name = "dexalin plus vial"
+	desc = "A small vial of Dexalin Plus, a potent medication that aids in the re-oxygenating of blood cells."
+	reagents_to_add = list(/singleton/reagent/dexalin/plus = 15)
+
+/obj/item/reagent_containers/glass/beaker/vial/peridaxon
+	name = "peridaxon vial"
+	desc = "A small vial of Peridaxon, an advanced organ regenerative compound."
+	reagents_to_add = list(/singleton/reagent/peridaxon = 15)
+
+/obj/item/reagent_containers/glass/beaker/vial/arithrazine
+	name = "arithrazine vial"
+	desc = "A small vial of Arithrazine, a potent anti-radiation medication."
+	reagents_to_add = list(/singleton/reagent/arithrazine = 15)
+
 /obj/item/reagent_containers/glass/beaker/medcup
 	name = "medicine cup"
 	desc = "A glass medicine cup. Like a shot glass for medicine."
@@ -248,7 +264,7 @@
 	center_of_mass = list("x" = 16,"y" = 10)
 	accuracy = 1
 	matter = list(MATERIAL_PLASTIC = 200)
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	amount_per_transfer_from_this = 120
 	possible_transfer_amounts = list(5,10,15,25,30,50,60,100,120,250,300)
 	volume = 300
@@ -266,7 +282,7 @@
 		user.put_in_hands(new /obj/item/bucket_sensor)
 		qdel(src)
 		return
-	else if(attacking_item.iswirecutter())
+	else if(attacking_item.tool_behaviour == TOOL_WIRECUTTER)
 		to_chat(user, SPAN_NOTICE("You cut a big hole in \the [src] with \the [attacking_item]."))
 		user.put_in_hands(new helmet_type)
 		qdel(src)

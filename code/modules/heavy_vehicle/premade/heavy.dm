@@ -1,10 +1,10 @@
 /mob/living/heavy_vehicle/premade/heavy
 	name = "Heavy exosuit"
 	desc = "A heavily armored combat exosuit."
-	icon_state = "durand"
+	icon_state = "heavy"
 
 	e_head = /obj/item/mech_component/sensors/heavy
-	e_body = /obj/item/mech_component/chassis/heavy
+	e_body = /obj/item/mech_component/chassis/heavy/cell
 	e_arms = /obj/item/mech_component/manipulators/heavy
 	e_legs = /obj/item/mech_component/propulsion/heavy
 	e_color = COLOR_TITANIUM
@@ -20,7 +20,7 @@
 	desc = "Designed to function where any other piece of equipment would have long fallen apart, the Hephaestus Superheavy Lifter series can take a beating and excel at delivering it."
 	melee_damage = 50
 	action_delay = 15
-	max_damage = 200
+	max_damage = 300
 	power_use = 3500
 	punch_sound = 'sound/mecha/mech_punch_slow.ogg'
 
@@ -33,6 +33,7 @@
 	max_damage = 200
 	power_use = 2500
 	trample_damage = 45
+	damaged_delay = 5
 
 /obj/item/mech_component/sensors/heavy
 	name = "heavy sensors"
@@ -59,7 +60,14 @@
 	has_hardpoints = list(HARDPOINT_BACK)
 	power_use = 500
 
+	cell_type = /obj/item/cell/mecha/nuclear
+
 /obj/item/mech_component/chassis/heavy/prebuild()
 	. = ..()
 	mech_armor = new /obj/item/robot_parts/robot_component/armor/mech/combat(src)
 
+/obj/item/mech_component/chassis/heavy/cell
+	cell_type = /obj/item/cell/mecha
+
+/obj/item/mech_component/chassis/heavy/nuclear
+	cell_type = /obj/item/cell/mecha/nuclear

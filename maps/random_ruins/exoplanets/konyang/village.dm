@@ -9,7 +9,7 @@
 	sectors = list(SECTOR_HANEUNIM)
 
 	prefix = "konyang/"
-	suffixes = list("village.dmm")
+	suffix = "village.dmm"
 
 	ban_ruins = list(/datum/map_template/ruin/exoplanet/konyang_abandoned_village)
 
@@ -19,7 +19,6 @@
 	name = "Konyang Village"
 	icon_state = "bluenew"
 	requires_power = FALSE
-	dynamic_lighting = TRUE
 	no_light_control = FALSE
 	base_turf = /turf/simulated/mineral
 	area_flags = AREA_FLAG_HIDE_FROM_HOLOMAP | AREA_FLAG_INDESTRUCTIBLE_TURFS

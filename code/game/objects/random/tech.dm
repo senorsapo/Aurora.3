@@ -1,7 +1,6 @@
 /obj/random/tool
 	name = "random tool"
 	desc = "This is a random tool"
-	icon = 'icons/obj/random.dmi'
 	icon_state = "tool"
 	spawnlist = list(
 		/obj/item/screwdriver,
@@ -10,30 +9,31 @@
 		/obj/item/crowbar,
 		/obj/item/wrench,
 		/obj/item/hammer,
-		/obj/item/device/flashlight
+		/obj/item/flashlight
 	)
 
 /obj/random/technology_scanner
 	name = "random scanner"
 	desc = "This is a random technology scanner."
-	icon = 'icons/obj/device.dmi'
-	icon_state = "atmos"
+	icon = 'icons/obj/item/scanner.dmi'
+	icon_state = "airanalyzer"
 	problist = list(
-		/obj/item/device/t_scanner = 5,
-		/obj/item/device/radio = 2,
-		/obj/item/device/analyzer = 5
+		/obj/item/t_scanner = 5,
+		/obj/item/radio = 2,
+		/obj/item/analyzer = 5
 	)
 
 /obj/random/powercell
 	name = "random powercell"
 	desc = "This is a random powercell."
-	icon = 'icons/obj/random.dmi'
 	icon_state = "cell"
 	problist = list(
-		/obj/item/cell/crap = 10,
 		/obj/item/cell = 40,
 		/obj/item/cell/high = 40,
+		/obj/item/cell/crap = 10,
+		/obj/item/cell/mecha = 10,
 		/obj/item/cell/super = 9,
+		/obj/item/cell/mecha/nuclear = 5,
 		/obj/item/cell/hyper = 1
 	)
 
@@ -43,17 +43,16 @@
 	icon = 'icons/obj/assemblies/new_assemblies.dmi'
 	icon_state = "signaller"
 	problist = list(
-		/obj/item/device/assembly/igniter = 2,
-		/obj/item/device/assembly/prox_sensor = 2,
-		/obj/item/device/assembly/signaler = 2,
-		/obj/item/device/multitool = 1,
-		/obj/item/device/transfer_valve = 0.5
+		/obj/item/assembly/igniter = 2,
+		/obj/item/assembly/prox_sensor = 2,
+		/obj/item/assembly/signaler = 2,
+		/obj/item/multitool = 1,
+		/obj/item/transfer_valve = 0.5
 	)
 
 /obj/random/toolbox
 	name = "random toolbox"
 	desc = "This is a random toolbox."
-	icon = 'icons/obj/random.dmi'
 	icon_state = "toolbox"
 	spawnlist = list(
 		/obj/item/storage/toolbox/mechanical = 3,
@@ -64,7 +63,6 @@
 /obj/random/tech_supply
 	name = "random tech supply"
 	desc = "This is a random piece of technology supplies."
-	icon = 'icons/obj/random.dmi'
 	icon_state = "tech_supply"
 	problist = list(
 		/obj/random/powercell = 3,
@@ -80,16 +78,20 @@
 		/obj/item/tape_roll = 2
 	)
 
+/// Spawns a random AI lawboard with 'evil' law sets
 /obj/random/bad_ai
 	name = "random evil AI module"
 	desc = "Contains a random evil AI module."
 	icon = 'icons/obj/module.dmi'
 	icon_state = "std_mod"
 	spawnlist = list(
-		/obj/item/aiModule/antimov = 1,
+		/obj/item/aiModule/antimov = 0.5,
 		/obj/item/aiModule/asimov = 1,
 		/obj/item/aiModule/purge = 1,
-		/obj/item/aiModule/quarantine = 1,
+		/obj/item/aiModule/robocop = 0.5,
+		/obj/item/aiModule/tyrant = 0.5,
+		/obj/item/aiModule/paladin = 0.5,
+		/obj/item/aiModule/hadiist = 0.2,
 		/obj/item/aiModule/freeform = 1,
 		/obj/item/aiModule/oneHuman = 0.5,
 		/obj/item/aiModule/oxygen = 1
@@ -253,4 +255,81 @@
 		/obj/item/rig/retro/equipped = 0.8,
 		/obj/item/rig/ert/security = 0.3,
 		/obj/item/rig/unathi = 0.4
+	)
+
+/obj/random/canister
+	name = "random canister"
+	icon_state = "canister"
+	spawn_nothing_percentage = 20
+	problist = list(
+		/obj/random/canister/empty = 0.6,
+		/obj/random/canister/filled = 0.4,
+	)
+
+/// Used on the Horizon, or anywhere else you don't want people to find extremely rare/valuable gases like Phoron or Helium-3.
+/obj/random/canister/restricted
+	name = "random canister (restricted)"
+	icon_state = "canister"
+	spawn_nothing_percentage = 20
+	problist = list(
+		/obj/random/canister/empty = 0.6,
+		/obj/random/canister/filled/restricted = 0.4,
+	)
+
+/obj/random/canister/empty
+	name = "random empty canister"
+	// In descending order of probability
+	problist = list(
+		// common:
+		/obj/machinery/portable_atmospherics/canister/empty/air = 2,
+		/obj/machinery/portable_atmospherics/canister/empty/carbon_dioxide = 2,
+		/obj/machinery/portable_atmospherics/canister/empty/oxygen = 2,
+		/obj/machinery/portable_atmospherics/canister/empty = 1,
+		/obj/machinery/portable_atmospherics/canister/empty/nitrogen = 1.5,
+		/obj/machinery/portable_atmospherics/canister/empty/hydrogen = 1.25,
+		/obj/machinery/portable_atmospherics/canister/empty/sleeping_agent = 1,
+		/obj/machinery/portable_atmospherics/canister/empty/helium = 0.5,
+		/obj/machinery/portable_atmospherics/canister/empty/chlorine = 0.1,
+		/obj/machinery/portable_atmospherics/canister/empty/nitrogen_dioxide = 0.1,
+		/obj/machinery/portable_atmospherics/canister/empty/heliumfuel = 0.05,
+		/obj/machinery/portable_atmospherics/canister/empty/phoron = 0.1,
+	)
+
+/obj/random/canister/filled
+	name = "random filled canister"
+	// In descending order of probability
+	problist = list(
+		/obj/machinery/portable_atmospherics/canister/air = 2,
+		/obj/machinery/portable_atmospherics/canister/carbon_dioxide = 2,
+		/obj/machinery/portable_atmospherics/canister/oxygen = 2,
+		/obj/machinery/portable_atmospherics/canister/nitrogen = 1.5,
+		/obj/machinery/portable_atmospherics/canister/hydrogen = 1.25,
+		/obj/machinery/portable_atmospherics/canister/sleeping_agent = 1,
+		/obj/machinery/portable_atmospherics/canister/nitrogen/prechilled = 0.75,
+		/obj/machinery/portable_atmospherics/canister/helium = 0.5,
+		/obj/machinery/portable_atmospherics/canister/chlorine = 0.1,
+		/obj/machinery/portable_atmospherics/canister/nitrogen_dioxide = 0.1,
+		/obj/machinery/portable_atmospherics/canister/heliumfuel = 0.05,
+		/obj/machinery/portable_atmospherics/canister/phoron_scarce = 0.1,
+		/obj/machinery/portable_atmospherics/canister/phoron = 0.01,
+	)
+
+/// Used on the Horizon, or anywhere else you don't want people to find extremely rare/valuable gases like Phoron or Helium-3.
+/obj/random/canister/filled/restricted
+	name = "random filled canister (restricted)"
+	// In descending order of probability
+	problist = list(
+		/obj/machinery/portable_atmospherics/canister/air = 2,
+		/obj/machinery/portable_atmospherics/canister/carbon_dioxide = 2,
+		/obj/machinery/portable_atmospherics/canister/oxygen = 2,
+		/obj/machinery/portable_atmospherics/canister/nitrogen = 1.5,
+		/obj/machinery/portable_atmospherics/canister/hydrogen = 1.25,
+		/obj/machinery/portable_atmospherics/canister/sleeping_agent = 1,
+		/obj/machinery/portable_atmospherics/canister/nitrogen/prechilled = 0.75,
+		/obj/machinery/portable_atmospherics/canister/helium = 0.5,
+		/obj/machinery/portable_atmospherics/canister/chlorine = 0.1,
+		/obj/machinery/portable_atmospherics/canister/nitrogen_dioxide = 0.1,
+		/obj/machinery/portable_atmospherics/canister/heliumfuel = 0.05,
+		/obj/machinery/portable_atmospherics/canister/phoron_scarce = 0.1,
+		/obj/machinery/portable_atmospherics/canister/phoron = 0.01,
 	)

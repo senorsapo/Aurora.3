@@ -12,7 +12,7 @@
 	outputs = list("dir" = IC_PINTYPE_DIR)
 	activators = list("calculate dir" = IC_PINTYPE_PULSE_IN, "on calculated" = IC_PINTYPE_PULSE_OUT,"not calculated" = IC_PINTYPE_PULSE_OUT)
 	spawn_flags = IC_SPAWN_RESEARCH
-	power_draw_per_use = 40
+	power_draw_per_use = 400
 
 /obj/item/integrated_circuit/smart/basic_pathfinder/do_work()
 	var/datum/integrated_io/I = inputs[1]
@@ -50,15 +50,15 @@
 	)
 	activators = list("calculate dir" = IC_PINTYPE_PULSE_IN, "on calculated" = IC_PINTYPE_PULSE_OUT,"not calculated" = IC_PINTYPE_PULSE_OUT)
 	spawn_flags = IC_SPAWN_RESEARCH
-	power_draw_per_use = 40
+	power_draw_per_use = 400
 
 /obj/item/integrated_circuit/smart/coord_basic_pathfinder/do_work()
 	if(!assembly)
 		activate_pin(3)
 		return
 	var/turf/T = get_turf(assembly)
-	var/target_x = Clamp(get_pin_data(IC_INPUT, 1), 0, world.maxx)
-	var/target_y = Clamp(get_pin_data(IC_INPUT, 2), 0, world.maxy)
+	var/target_x = clamp(get_pin_data(IC_INPUT, 1), 0, world.maxx)
+	var/target_y = clamp(get_pin_data(IC_INPUT, 2), 0, world.maxy)
 	var/turf/A = locate(target_x, target_y, T.z)
 	set_pin_data(IC_OUTPUT, 1, null)
 	if(!A||A==T)

@@ -3,7 +3,7 @@
 	desc = "Holds loose sheets of paper and is a bureaucrat's best friend."
 	icon = 'icons/obj/bureaucracy.dmi'
 	icon_state = "folder"
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	drop_sound = 'sound/items/drop/paper.ogg'
 	pickup_sound = 'sound/items/pickup/paper.ogg'
 
@@ -44,24 +44,24 @@
 		user.drop_from_inventory(attacking_item, src)
 		to_chat(user, SPAN_NOTICE("You put the [attacking_item] into \the [src]."))
 		update_icon()
-	else if(attacking_item.ispen())
+	else if(attacking_item.tool_behaviour == TOOL_PEN)
 		var/n_name = sanitizeSafe( tgui_input_text(user, "What would you like to label the folder?", "Folder Labelling", max_length = MAX_NAME_LEN), MAX_NAME_LEN )
 		if(Adjacent(user) && user.stat == 0)
-			name = "folder[(n_name ? text("- '[n_name]'") : null)]"
+			name = "folder[(n_name ? "- '[n_name]'" : null)]"
 	return
 
 /obj/item/folder/attack_self(mob/user as mob)
-	var/dat = "<title>[name]</title>"
+	var/dat = ""
 
 	for(var/obj/item/paper/P in src)
-		dat += "[can_write ? "<A href='?src=\ref[src];write=\ref[P]'>Write</A> " : ""]<A href='?src=\ref[src];remove=\ref[P]'>Remove</A> <A href='?src=\ref[src];rename=\ref[P]'>Rename</A> - <A href='?src=\ref[src];read=\ref[P]'>[P.name]</A><BR>"
+		dat += "[can_write ? "<A href='byond://?src=[REF(src)];write=[REF(P)]'>Write</A> " : ""]<A href='byond://?src=[REF(src)];remove=[REF(P)]'>Remove</A> <A href='byond://?src=[REF(src)];rename=[REF(P)]'>Rename</A> - <A href='byond://?src=[REF(src)];read=[REF(P)]'>[P.name]</A><BR>"
 	for(var/obj/item/photo/Ph in src)
-		dat += "<A href='?src=\ref[src];remove=\ref[Ph]'>Remove</A> <A href='?src=\ref[src];rename=\ref[Ph]'>Rename</A> - <A href='?src=\ref[src];look=\ref[Ph]'>[Ph.name]</A><BR>"
+		dat += "<A href='byond://?src=[REF(src)];remove=[REF(Ph)]'>Remove</A> <A href='byond://?src=[REF(src)];rename=[REF(Ph)]'>Rename</A> - <A href='byond://?src=[REF(src)];look=[REF(Ph)]'>[Ph.name]</A><BR>"
 	for(var/obj/item/paper_bundle/Pb in src)
-		dat += "<A href='?src=\ref[src];remove=\ref[Pb]'>Remove</A> <A href='?src=\ref[src];rename=\ref[Pb]'>Rename</A> - <A href='?src=\ref[src];browse=\ref[Pb]'>[Pb.name]</A><BR>"
+		dat += "<A href='byond://?src=[REF(src)];remove=[REF(Pb)]'>Remove</A> <A href='byond://?src=[REF(src)];rename=[REF(Pb)]'>Rename</A> - <A href='byond://?src=[REF(src)];browse=[REF(Pb)]'>[Pb.name]</A><BR>"
 	for(var/obj/item/sample/Pf in src)
-		dat += "<A href='?src=\ref[src];remove=\ref[Pf]'>Remove</A> - [Pf.name]<BR>"
-	user << browse(dat, "window=folder")
+		dat += "<A href='byond://?src=[REF(src)];remove=[REF(Pf)]'>Remove</A> - [Pf.name]<BR>"
+	user << browse(HTML_SKELETON_TITLE(name, dat), "window=folder")
 	onclose(user, "folder")
 	add_fingerprint(usr)
 	return
@@ -76,17 +76,15 @@
 		if(href_list["remove"])
 			var/obj/item/P = locate(href_list["remove"])
 			if(P && (P.loc == src) && istype(P))
-				P.forceMove(usr.loc)
-				usr.put_in_hands(P)
-				handle_post_remove()
+				handle_remove(P, astype(usr, /mob))
 		else if(href_list["write"])
 			var/obj/item/paper/paper = locate(href_list["write"])
 			if(!istype(paper) || paper.loc != src)
 				return
 			var/obj/item/pen = usr.get_inactive_hand()
-			if(!pen || !pen.ispen())
+			if(!pen || pen.tool_behaviour != TOOL_PEN)
 				pen = usr.get_active_hand()
-			if(pen?.ispen())
+			if(pen?.tool_behaviour == TOOL_PEN)
 				paper.attackby(pen, usr)
 		else if(href_list["read"])
 			var/obj/item/paper/P = locate(href_list["read"])
@@ -127,6 +125,10 @@
 		return TRUE
 	return FALSE
 
+/obj/item/folder/proc/handle_remove(obj/item/P, mob/user)
+	user?.put_in_hands(P)
+	handle_post_remove()
+
 /obj/item/folder/proc/handle_post_remove()
 	return
 
@@ -149,9 +151,21 @@
 		return TRUE
 	return FALSE
 
+/obj/item/folder/embedded/handle_remove(obj/item/paper/P, mob/user)
+	. = ..()
+	if(istype(P, /obj/item/paper/notepad))
+		P.ripped = TRUE
+		playsound(src.loc, 'sound/items/poster_ripped.ogg', 25, 1)
+		P.update_icon()
+
 /obj/item/folder/embedded/handle_post_remove()
 	if(!length(contents))
 		qdel(src)
+
+/obj/item/folder/embedded/Destroy()
+	for(var/x in src)
+		qdel(x)
+	. = ..()
 
 /obj/item/folder/envelope
 	name = "envelope"
@@ -191,9 +205,19 @@
 	else
 		..()
 
+/obj/item/folder/envelope/empty
+	sealed = FALSE
+
+/obj/item/folder/envelope/empty/zat
+	name = "instructions envelope"
+	desc = "\
+		A small envelope with some warning words written in bold text on the front. \
+		It is all dusty and crumpled, like someone forgot about it a while ago.\
+	"
+
 /obj/item/folder/envelope/zat
 	name = "leviathan zero-point artillery instructions"
-	desc = "A small envelope with \"SCC CONFIDENTIAL\" written in bold text on the front."
+	desc = "A small envelope with 'SCC CONFIDENTIAL' written in bold text on the front."
 
 /obj/item/folder/envelope/zat/Initialize()
 	. = ..()

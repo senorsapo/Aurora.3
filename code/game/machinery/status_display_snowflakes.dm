@@ -4,7 +4,8 @@
 	header_text_color = COLOR_DISPLAY_YELLOW
 
 /obj/machinery/status_display/supply_display/update()
-	if(!..() && mode == STATUS_DISPLAY_CUSTOM)
+	if(mode == STATUS_DISPLAY_CUSTOM)
+		remove_display()
 		var/message1 = "CARGO"
 		var/message2 = ""
 
@@ -20,12 +21,13 @@
 				message2 = "ETA"
 		else
 			if(shuttle.at_station())
-				message2 = "Docked"
+				message2 = "Elevator Arrived"
 			else
-				message1 = ""
+				message2 = "Elevator Stowed"
 		set_messages(message1, message2)
-		return 1
-	return 0
+		arrange_displayed_texts(message1, message2)
+		return TRUE
+	..()
 
 /obj/machinery/status_display/supply_display/receive_signal(datum/signal/signal)
 	if(signal.data["command"] == "supply")

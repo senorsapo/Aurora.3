@@ -3,8 +3,7 @@
 	filedesc = "Map Program"
 	extended_desc = "This program may be used to see the decks or levels of the vessel, station, or ship."
 	program_icon_state = "map"
-	program_key_icon_state = "lightblue_key"
-	color = LIGHT_COLOR_BLUE
+	program_key_icon_state = "black_key"
 	size = 4
 	requires_ntnet = TRUE
 	available_on_ntnet = TRUE
@@ -12,6 +11,8 @@
 
 	/// If zero/null, show the z-level of the user, otherwise show `z_override` z-level.
 	var/z_override = 0
+	/// If FALSE, do not display the Show/Hide Legend button
+	var/legend_enabled = TRUE
 
 /datum/computer_file/program/map/ui_data(mob/user)
 	var/list/data = list()
@@ -22,15 +23,18 @@
 		data["_PC"] = headerdata
 		. = data
 
+	var/list/zlevels_affected = SSmapping.levels_by_trait(ZTRAIT_STATION)
+
 	var/z_level = z_override ? z_override : user.z
-	if(z_level in SSatlas.current_map.station_levels)
+	if(z_level in zlevels_affected)
 		data["map_image"] = SSholomap.minimaps_area_colored_base64[z_level]
 
 	data["user_x"] = user.x
 	data["user_y"] = user.y
 	data["user_z"] = user.z
-	data["station_levels"] = SSatlas.current_map.station_levels
+	data["station_levels"] = zlevels_affected
 	data["z_override"] = z_override
+	data["legend_enabled"] = legend_enabled
 
 	data["dept_colors_map"] = list(
 		list("d"="Command", "c"=HOLOMAP_AREACOLOR_COMMAND),
@@ -44,6 +48,16 @@
 		list("d"="Dock", "c"=HOLOMAP_AREACOLOR_DOCK),
 		list("d"="Hangar", "c"=HOLOMAP_AREACOLOR_HANGAR),
 	)
+
+	data["pois"] = list()
+	for(var/obj/effect/landmark/minimap_poi/poi as anything in SSholomap.pois)
+		data["pois"] += list(list(
+			"name" = poi.name,
+			"desc" = poi.desc,
+			"x" = poi.x,
+			"y" = poi.y,
+			"z" = poi.z,
+		))
 
 	return data
 

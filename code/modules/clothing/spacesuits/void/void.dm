@@ -6,13 +6,13 @@
 
 	heat_protection = HEAD
 	armor = list(
-		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_MINOR,
-		laser = ARMOR_LASER_SMALL,
-		energy = ARMOR_ENERGY_MINOR,
-		bomb = ARMOR_BOMB_PADDED,
-		bio = ARMOR_BIO_SHIELDED,
-		rad = ARMOR_RAD_MINOR
+		MELEE = ARMOR_MELEE_RESISTANT,
+		BULLET = ARMOR_BALLISTIC_MINOR,
+		LASER = ARMOR_LASER_SMALL,
+		ENERGY = ARMOR_ENERGY_MINOR,
+		BOMB = ARMOR_BOMB_PADDED,
+		BIO = ARMOR_BIO_SHIELDED,
+		RAD = ARMOR_RAD_MINOR
 	)
 	max_heat_protection_temperature = SPACE_SUIT_MAX_HEAT_PROTECTION_TEMPERATURE
 	max_pressure_protection = VOIDSUIT_MAX_PRESSURE
@@ -22,7 +22,7 @@
 	icon = 'icons/obj/clothing/hats.dmi'
 
 	//Species-specific stuff.
-	species_restricted = list(BODYTYPE_HUMAN, BODYTYPE_IPC_BISHOP, BODYTYPE_IPC_ZENGHU)
+	species_restricted = list(BODYTYPE_HUMAN)
 	sprite_sheets_refit = list(
 		BODYTYPE_UNATHI = 'icons/mob/species/unathi/helmet.dmi',
 		BODYTYPE_TAJARA = 'icons/mob/species/tajaran/helmet.dmi',
@@ -43,24 +43,24 @@
 	icon_state = "void"
 	item_state = "void"
 	desc = "A high-tech dark red space suit. Used for AI satellite maintenance."
-	slowdown = 1
+	slowdown = 0.5
 	armor = list(
-		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_MINOR,
-		laser = ARMOR_LASER_SMALL,
-		energy = ARMOR_ENERGY_MINOR,
-		bomb = ARMOR_BOMB_PADDED,
-		bio = ARMOR_BIO_SHIELDED,
-		rad = ARMOR_RAD_MINOR
+		MELEE = ARMOR_MELEE_RESISTANT,
+		BULLET = ARMOR_BALLISTIC_MINOR,
+		LASER = ARMOR_LASER_SMALL,
+		ENERGY = ARMOR_ENERGY_MINOR,
+		BOMB = ARMOR_BOMB_PADDED,
+		BIO = ARMOR_BIO_SHIELDED,
+		RAD = ARMOR_RAD_MINOR
 	)
-	allowed = list(/obj/item/device/flashlight,/obj/item/tank,/obj/item/device/suit_cooling_unit)
+	allowed = list(/obj/item/flashlight,/obj/item/tank,/obj/item/suit_cooling_unit)
 	heat_protection = UPPER_TORSO|LOWER_TORSO|LEGS|FEET|ARMS|HANDS
 	max_heat_protection_temperature = SPACE_SUIT_MAX_HEAT_PROTECTION_TEMPERATURE
 	siemens_coefficient = 0.5
 	contained_sprite = FALSE
 	icon = 'icons/obj/clothing/suits.dmi'
 
-	species_restricted = list(BODYTYPE_HUMAN, BODYTYPE_SKRELL, BODYTYPE_IPC_BISHOP, BODYTYPE_IPC_ZENGHU)
+	species_restricted = list(BODYTYPE_HUMAN, BODYTYPE_SKRELL)
 	sprite_sheets_refit = list(
 		BODYTYPE_UNATHI = 'icons/mob/species/unathi/suit.dmi',
 		BODYTYPE_TAJARA = 'icons/mob/species/tajaran/suit.dmi',
@@ -87,7 +87,7 @@
 	var/obj/item/clothing/shoes/magboots/boots = null // Deployable boots, if any.
 	var/obj/item/clothing/head/helmet/helmet = null   // Deployable helmet, if any.
 	var/obj/item/tank/tank = null              // Deployable tank, if any.
-	var/obj/item/device/suit_cooling_unit/cooler = null // Deployable suit cooler, if any
+	var/obj/item/suit_cooling_unit/cooler = null // Deployable suit cooler, if any
 
 /obj/item/clothing/suit/space/void/get_examine_text(mob/user, distance, is_adjacent, infix, suffix)
 	. = ..()
@@ -96,7 +96,7 @@
 		part_list += "\a [I]"
 	. +=  "\The [src] has [english_list(part_list)] installed."
 	if(tank && distance <= 1)
-		. += SPAN_NOTICE("The wrist-mounted pressure gauge reads [max(round(tank.air_contents.return_pressure()),0)] kPa remaining in \the [tank].")
+		. += SPAN_NOTICE("The wrist-mounted pressure gauge reads [max(round(XGM_PRESSURE(tank.air_contents)),0)] kPa remaining in \the [tank].")
 	if (cooler && distance <= 1)
 		. += SPAN_NOTICE("The mounted cooler's battery charge reads [round(cooler.cell.percent())]%")
 
@@ -176,7 +176,7 @@
 /obj/item/clothing/suit/space/void/verb/toggle_helmet()
 
 	set name = "Toggle Helmet"
-	set category = "Object"
+	set category = "Object.Equipped"
 	set src in usr
 
 	if(!istype(src.loc,/mob/living)) return
@@ -209,7 +209,7 @@
 /obj/item/clothing/suit/space/void/verb/eject_tank()
 
 	set name = "Eject Voidsuit Tank"
-	set category = "Object"
+	set category = "Object.Equipped"
 	set src in view(1)
 
 	var/mob/living/user = usr
@@ -233,7 +233,7 @@
 /obj/item/clothing/suit/space/void/verb/eject_cooler()
 
 	set name = "Eject Suit Cooler"
-	set category = "Object"
+	set category = "Object.Equipped"
 	set src in view(1)
 
 	var/mob/living/user = usr
@@ -261,14 +261,14 @@
 
 	if(!istype(user,/mob/living)) return
 
-	if(istype(attacking_item, /obj/item/clothing/accessory) || istype(attacking_item, /obj/item/device/hand_labeler))
+	if(istype(attacking_item, /obj/item/clothing/accessory) || istype(attacking_item, /obj/item/hand_labeler))
 		return ..()
 
 	if(user.get_inventory_slot(src) == slot_wear_suit)
 		to_chat(user, SPAN_WARNING("You cannot modify \the [src] while it is being worn."))
 		return
 
-	if(attacking_item.isscrewdriver())
+	if(attacking_item.tool_behaviour == TOOL_SCREWDRIVER)
 		if(helmet || boots || tank || cooler)
 			var/choice = tgui_input_list(usr, "What component would you like to remove?", "Component Removal", list(helmet,boots,tank,cooler))
 			if(!choice) return
@@ -314,6 +314,8 @@
 	else if(istype(attacking_item,/obj/item/tank))
 		if(tank)
 			to_chat(user, "\The [src] already has an airtank installed.")
+		else if(cooler)
+			to_chat(user, "\The [src] already has a suit cooler installed, there is no room for an airtank.")
 		else if(istype(attacking_item,/obj/item/tank/phoron))
 			to_chat(user, "\The [attacking_item] cannot be inserted into \the [src]'s storage compartment.")
 		else
@@ -322,9 +324,11 @@
 			user.drop_from_inventory(attacking_item, src)
 			tank = attacking_item
 		return
-	else if (istype(attacking_item, /obj/item/device/suit_cooling_unit))
+	else if (istype(attacking_item, /obj/item/suit_cooling_unit))
 		if(cooler)
 			to_chat(user, "\The [src] already has a suit cooler installed.")
+		else if(tank)
+			to_chat(user, "\The [src] already has an airtank installed, there is no room for a suit cooler.")
 		else
 			playsound(src, 'sound/items/Deconstruct.ogg', 30, 1)
 			to_chat(user, "You insert \the [attacking_item] into \the [src]'s storage compartment.")

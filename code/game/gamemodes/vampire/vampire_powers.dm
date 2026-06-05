@@ -68,7 +68,7 @@
 	vampire.status |= VAMP_DRAINING
 
 	visible_message(SPAN_DANGER("[src] bites \the [T]'s neck!"), SPAN_DANGER("You bite \the [T]'s neck and begin to drain their blood."), SPAN_NOTICE("You hear a soft puncture and a wet sucking noise."))
-	if(T.mind.assigned_role == "Chaplain" && !(vampire.status & VAMP_FULLPOWER))
+	if(T.mind?.assigned_role == "Chaplain" && !(vampire.status & VAMP_FULLPOWER))
 		to_chat(src, SPAN_DANGER("\The [T]'s blood burns like venom in your throat! Your stomach churns with sickness, and you fall to the ground, retching in disgust!"))
 		to_chat(T, SPAN_DANGER("[src] sinks [src.get_pronoun("his")] fangs into your neck, and you feel your blood draining - before [src.get_pronoun("he")] collapses, gagging and choking!"))
 		src.adjustToxLoss(rand(10,20))
@@ -382,9 +382,9 @@
 
 	for(var/obj/machinery/door/window/WD in view(7))
 		if(get_dist(src, WD) > 5) //Windoors are strong, may only take damage instead of break if far away.
-			WD.take_damage(rand(12, 16) * 10)
+			WD.add_damage(rand(12, 16) * 10)
 		else
-			WD.shatter()
+			WD.add_damage(WD.health)
 
 	for(var/obj/machinery/light/L in view(7))
 		L.broken()
@@ -451,12 +451,21 @@
 	var/datum/vampire/owner_vampire = null
 	var/warning_level = 0
 
+/obj/effect/dummy/veil_walk/Initialize(mapload, ...)
+	. = ..()
+	RegisterSignal(src, COMSIG_ATOM_PRE_BULLET_ACT, PROC_REF(handle_bullet_act))
+
 /obj/effect/dummy/veil_walk/Destroy()
 	eject_all()
 
 	STOP_PROCESSING(SSprocessing, src)
 
 	return ..()
+
+/obj/effect/dummy/veil_walk/proc/handle_bullet_act(datum/source, obj/projectile/projectile)
+	SIGNAL_HANDLER
+
+	return COMPONENT_BULLET_BLOCKED
 
 /obj/effect/dummy/veil_walk/proc/eject_all()
 	for(var/atom/movable/A in src)
@@ -465,7 +474,9 @@
 			var/mob/M = A
 			M.reset_view(null)
 
-/obj/effect/dummy/veil_walk/relaymove(var/mob/user, direction)
+/obj/effect/dummy/veil_walk/relaymove(mob/living/user, direction)
+	. = ..()
+
 	if(user != owner_mob)
 		return
 	if(ghost_last_move + ghost_move_delay > world.time)
@@ -473,7 +484,7 @@
 	ghost_last_move = world.time
 
 	var/turf/new_loc = get_step(src, direction)
-	if(new_loc.turf_flags & TURF_FLAG_NOJAUNT || istype(new_loc.loc, /area/chapel))
+	if(new_loc.turf_flags & TURF_FLAG_NOJAUNT || istype(new_loc.loc, /area/horizon/service/chapel))
 		to_chat(usr, SPAN_WARNING("Some strange aura is blocking the way!"))
 		return
 
@@ -571,9 +582,6 @@
 /obj/effect/dummy/veil_walk/ex_act(vars)
 	return
 
-/obj/effect/dummy/veil_walk/bullet_act(vars)
-	return
-
 // Heals the vampire at the cost of blood.
 /mob/living/carbon/human/proc/vampire_bloodheal()
 	set category = "Vampire"
@@ -664,7 +672,7 @@
 				else
 					E.germ_level = 0
 					blood_used += 0.25
-			for(var/datum/wound/W in E.wounds)
+			for(var/datum/wound/W as anything in E.wounds)
 				if(W.germ_level > 0)
 					W.germ_level = max(0, W.germ_level - 50)
 					blood_used += 0.5
@@ -753,7 +761,7 @@
 		return
 
 	to_chat(T, SPAN_DANGER("Your mind blanks as you finish feeding from [src]'s wrist."))
-	thralls.add_antagonist(T.mind, 1, 1, 0, 1, 1)
+	GLOB.thralls.add_antagonist(T.mind, 1, 1, 0, 1, 1)
 
 	var/datum/vampire/T_vampire = T.mind.antag_datums[MODE_VAMPIRE]
 	T_vampire.assign_master(T, src, vampire)
@@ -907,7 +915,7 @@
 					to_chat(src, SPAN_NOTICE("[denial_response]"))
 					return
 
-				thralls.remove_antagonist(T.mind, 0, 0)
+				GLOB.thralls.remove_antagonist(T.mind, 0, 0)
 				qdel(draining_vamp)
 				draining_vamp = null
 			else
@@ -940,7 +948,7 @@
 
 	// You ain't goin' anywhere, bud.
 	if(!T.client && T.mind)
-		for(var/mob/abstract/observer/ghost in GLOB.player_list)
+		for(var/mob/abstract/ghost/observer/ghost in GLOB.player_list)
 			if(ghost.mind == T.mind)
 				ghost.can_reenter_corpse = TRUE
 				ghost.reenter_corpse()
@@ -948,7 +956,7 @@
 				to_chat(T, SPAN_DANGER("A dark force pushes you back into your body. You find yourself somehow still clinging to life."))
 
 	T.Weaken(15)
-	vamp.add_antagonist(T.mind, 1, 1, 0, 0, 1)
+	GLOB.vamp.add_antagonist(T.mind, 1, 1, 0, 0, 1)
 
 	admin_attack_log(src, T, "successfully embraced [key_name(T)]", "was successfully embraced by [key_name(src)]", "successfully embraced and turned into a vampire")
 

@@ -2,7 +2,7 @@
 	name = "Omgolo Smuggler Base"
 	description = "A gas giant. Its planetary ring is home to several mining stations, hidden smuggler outposts, and tourist platforms."
 	prefix = "away_site/uueoaesa/omgolo/"
-	suffixes = list("omgolo_smuggler.dmm")
+	suffix = "omgolo_smuggler.dmm"
 	sectors = list(SECTOR_UUEOAESA)
 	spawn_weight = 1
 	spawn_cost = 2
@@ -47,7 +47,6 @@
 	name = "Abandoned Smuggler's Base"
 	icon_state = "bluenew"
 	requires_power = TRUE
-	dynamic_lighting = TRUE
 	no_light_control = FALSE
 	base_turf = /turf/space
 	area_flags = AREA_FLAG_RAD_SHIELDED

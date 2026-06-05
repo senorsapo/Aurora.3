@@ -12,8 +12,16 @@
 	desc = "This rather dangerous looking armor will hopefully shock your enemies, and not you in the process."
 	icon_state = "tesla_armor_1"
 	blood_overlay_type = "armor"
-	slowdown = 1
-	armor = list(melee = 0, bullet = 0, laser = 0, energy = 0, bomb = 0, bio = 0, rad = 0)
+	slowdown = 0.5
+	armor = list(
+		MELEE = 0,
+		BULLET = 0,
+		LASER = 0,
+		ENERGY = 0,
+		BOMB = 0,
+		BIO = 0,
+		RAD = 0
+	)
 	action_button_name = "Toggle Tesla Armor"
 	var/active = 1	//Determines if the armor will zap or block
 	var/ready = 1 //Determines if the next attack will be blocked, as well if a strong lightning bolt is sent out at the attacker.
@@ -24,21 +32,21 @@
 /obj/item/clothing/suit/armor/tesla/handle_shield(mob/user, var/on_back, var/damage, atom/damage_source = null, mob/attacker = null, var/def_zone = null, var/attack_text = "the attack")
 	//First, some retaliation.
 	if(active)
-		if(istype(damage_source, /obj/item/projectile))
-			var/obj/item/projectile/P = damage_source
+		if(istype(damage_source, /obj/projectile))
+			var/obj/projectile/P = damage_source
 			if(P.firer && get_dist(user, P.firer) <= 3)
 				if(ready)
-					shoot_lightning(P.firer, 2000)
+					INVOKE_ASYNC(src, PROC_REF(shoot_lightning), P.firer, 2000)
 				else
-					shoot_lightning(P.firer, 1000, /obj/item/projectile/beam/lightning/small)
+					INVOKE_ASYNC(src, PROC_REF(shoot_lightning), P.firer, 1000, /obj/projectile/beam/lightning/small)
 
 		else
 			if(attacker && attacker != user)
 				if(get_dist(user, attacker) <= 3) //Anyone farther away than three tiles is too far to shoot lightning at.
 					if(ready)
-						shoot_lightning(attacker, 2000)
+						INVOKE_ASYNC(src, PROC_REF(shoot_lightning), attacker, 2000)
 					else
-						shoot_lightning(attacker, 1000, /obj/item/projectile/beam/lightning/small)
+						INVOKE_ASYNC(src, PROC_REF(shoot_lightning), attacker, 1000, /obj/projectile/beam/lightning/small)
 
 		//Deal with protecting our wearer now.
 		if(ready)
@@ -46,8 +54,8 @@
 			addtimer(CALLBACK(src, PROC_REF(recharge), user), cooldown_to_charge)
 			visible_message(SPAN_DANGER("\The [user]'s [src.name] blocks [attack_text]!"))
 			update_icon()
-			return PROJECTILE_STOPPED
-	return FALSE
+			return BULLET_ACT_BLOCK
+	return BULLET_ACT_HIT
 
 /obj/item/clothing/suit/armor/tesla/proc/recharge(var/mob/user)
 	ready = TRUE
@@ -65,11 +73,12 @@
 	if(active && ready)
 		icon_state = ready_icon_state
 		item_state = ready_icon_state
-		set_light(2, 1, l_color = "#006AFF")
+		set_light_range_power_color(2, 1, "#006AFF")
+		set_light_on(TRUE)
 	else
 		icon_state = normal_icon_state
 		item_state = normal_icon_state
-		set_light(0, 0, l_color = "#000000")
+		set_light_on(FALSE)
 
 	if(ishuman(loc))
 		var/mob/living/carbon/human/H = loc
@@ -77,8 +86,8 @@
 		H.update_action_buttons()
 	..()
 
-/obj/item/clothing/suit/armor/tesla/proc/shoot_lightning(mob/target, power, lightning_type = /obj/item/projectile/beam/lightning)
-	var/obj/item/projectile/beam/lightning/lightning = new lightning_type(get_turf(src))
+/obj/item/clothing/suit/armor/tesla/proc/shoot_lightning(mob/target, power, lightning_type = /obj/projectile/beam/lightning)
+	var/obj/projectile/beam/lightning/lightning = new lightning_type(get_turf(src))
 	lightning.power = power
 	lightning.old_style_target(target)
 	lightning.fire()

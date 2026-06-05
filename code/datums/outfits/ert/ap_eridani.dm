@@ -14,7 +14,7 @@
 	back = /obj/item/storage/backpack/satchel/sec
 	belt = /obj/item/storage/belt/military
 	id = /obj/item/card/id/distress/ap_eridani
-	l_ear = /obj/item/device/radio/headset/distress
+	l_ear = /obj/item/radio/headset/distress
 	l_pocket = /obj/item/grenade/chem_grenade/teargas
 	r_pocket = /obj/item/tank/emergency_oxygen/double
 
@@ -29,10 +29,10 @@
 
 	belt_contents = list(
 		/obj/item/ammo_magazine/c45m/auto = 3,
-		/obj/item/device/flash = 1,
+		/obj/item/flash = 1,
 		/obj/item/handcuffs/ziptie = 1,
 		/obj/item/melee/baton/stunrod = 1,
-		/obj/item/device/flashlight/maglight = 1,
+		/obj/item/flashlight/maglight = 1,
 		/obj/item/shield/riot/tact = 1,
 		/obj/item/grenade/flashbang = 1
 	)
@@ -74,7 +74,7 @@
 
 	belt_contents = list(
 		/obj/item/ammo_magazine/c45m/auto = 3,
-		/obj/item/device/flash = 1,
+		/obj/item/flash = 1,
 		/obj/item/handcuffs/ziptie = 1,
 		/obj/item/melee/baton/stunrod = 1,
 		/obj/item/grenade/flashbang = 1,
@@ -85,20 +85,20 @@
 /obj/outfit/admin/ert/ap_eridani/doctor
 	name = "Eridani Medical Officer"
 
-	uniform = /obj/item/clothing/under/rank/medical/first_responder/pmc/epmc
+	uniform = /obj/item/clothing/under/rank/medical/paramedic/pmc/epmc
 	suit = /obj/item/clothing/suit/storage/medical_chest_rig
-	suit_store = /obj/item/clothing/head/hardhat/first_responder
+	suit_store = /obj/item/clothing/head/hardhat/paramedic
 	head =  /obj/item/clothing/head/beret/corporate/pmc/epmc
 	mask = /obj/item/clothing/mask/surgical
 	glasses = /obj/item/clothing/glasses/hud/health/aviator
 	shoes = /obj/item/clothing/shoes/combat
 	gloves = /obj/item/clothing/gloves/latex/nitrile
-	belt = /obj/item/storage/belt/medical/first_responder/combat
+	belt = /obj/item/storage/belt/medical/paramedic/combat
 	back = /obj/item/storage/backpack/satchel/med
 	accessory = /obj/item/clothing/accessory/holster/thigh
-	accessory_contents = list(/obj/item/gun/energy/disruptorpistol/magnum = 1)
-	r_ear = /obj/item/device/flashlight/pen
-	l_pocket = /obj/item/device/healthanalyzer
+	accessory_contents = list(/obj/item/gun/projectile/plasma/bolter/pistol = 1)
+	r_ear = /obj/item/flashlight/pen
+	l_pocket = /obj/item/healthanalyzer
 	r_pocket = /obj/item/melee/telebaton
 	l_hand = /obj/item/clothing/head/helmet/space/void/medical
 	r_hand = /obj/item/clothing/suit/space/void/medical
@@ -108,11 +108,12 @@
 		/obj/item/storage/box/survival = 1,
 		/obj/item/storage/firstaid/adv = 1,
 		/obj/item/storage/firstaid/surgery = 1,
-		/obj/item/device/advanced_healthanalyzer = 1,
+		/obj/item/advanced_healthanalyzer = 1,
 		/obj/item/clothing/accessory/storage/pouches/black = 1,
 		/obj/item/reagent_containers/glass/bottle/thetamycin = 1,
 		/obj/item/surgery/scalpel/manager = 1,
-		/obj/item/tank/emergency_oxygen/double = 1
+		/obj/item/tank/emergency_oxygen/double = 1,
+		/obj/item/ammo_magazine/plasma/light/pistol = 2
 	)
 
 	belt_contents = list(
@@ -129,19 +130,19 @@
 /obj/outfit/admin/ert/ap_eridani/corpsman
 	name = "Eridani Corpsman"
 
-	uniform = /obj/item/clothing/under/rank/medical/first_responder/pmc/epmc
+	uniform = /obj/item/clothing/under/rank/medical/paramedic/pmc/epmc
 	suit = /obj/item/clothing/suit/storage/medical_chest_rig
-	suit_store = /obj/item/clothing/head/hardhat/first_responder
+	suit_store = /obj/item/clothing/head/hardhat/paramedic
 	head = /obj/item/clothing/head/softcap/pmc/epmc
 	mask = /obj/item/clothing/mask/surgical
 	glasses = /obj/item/clothing/glasses/hud/health/aviator
 	gloves = /obj/item/clothing/gloves/latex/nitrile
 	shoes = /obj/item/clothing/shoes/combat
 	back = /obj/item/storage/backpack/messenger/med
-	belt = /obj/item/storage/belt/medical/first_responder/combat
+	belt = /obj/item/storage/belt/medical/paramedic/combat
 	accessory = /obj/item/clothing/accessory/holster/thigh
-	accessory_contents = list(/obj/item/gun/energy/disruptorpistol/magnum = 1)
-	l_pocket = /obj/item/device/healthanalyzer
+	accessory_contents = list(/obj/item/gun/projectile/plasma/bolter/pistol = 1)
+	l_pocket = /obj/item/healthanalyzer
 	r_pocket = /obj/item/crowbar
 	l_hand = /obj/item/storage/firstaid/adv
 
@@ -151,7 +152,8 @@
 		/obj/item/storage/firstaid/combat = 1,
 		/obj/item/clothing/accessory/storage/pouches/black = 1,
 		/obj/item/reagent_containers/glass/bottle/thetamycin = 1,
-		/obj/item/storage/pill_bottle/mortaphenyl = 1
+		/obj/item/storage/pill_bottle/mortaphenyl = 1,
+		/obj/item/ammo_magazine/plasma/light/pistol = 2
 	)
 
 	belt_contents = list(

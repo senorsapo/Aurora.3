@@ -40,7 +40,7 @@
 	desc = "An advanced ion propulsion device, using energy and a minute amount of gas to generate thrust."
 	icon = 'icons/obj/ship_engine.dmi'
 	icon_state = "nozzle"
-	power_channel = ENVIRON
+	power_channel = AREA_USAGE_ENVIRON
 	idle_power_usage = 19600
 	anchored = TRUE
 	component_types = list(
@@ -52,7 +52,7 @@
 
 	var/datum/ship_engine/ion/controller
 	var/thrust_limit = 1
-	var/on = 1
+	var/on = TRUE
 	var/burn_cost = 36000
 	var/generated_thrust = 2.5
 
@@ -66,11 +66,14 @@
 
 /obj/machinery/ion_engine/proc/get_status()
 	. = list()
-	.+= "Location: [get_area(src)]."
-	if(!powered())
-		.+= "Insufficient power to operate."
 
-	. = jointext(.,"<br>")
+	. += list(list(
+		"text" = "Location: [get_area(src)].",
+		"severity" = "info"
+	))
+
+	if(!powered())
+		. += list(list("text" = "Insufficient power to operate.", "severity" = "bad"))
 
 /obj/machinery/ion_engine/proc/burn(var/power_modifier = 1)
 	if(!on && !powered())

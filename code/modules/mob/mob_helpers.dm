@@ -1,5 +1,8 @@
 // fun if you want to typecast humans/monkeys/etc without writing long path-filled lines.
 
+/**
+ * Returns mob_size <= MOB_SMALL if used on a /mob/living.
+ */
 /proc/issmall(A)
 	if(A && istype(A, /mob/living))
 		var/mob/living/L = A
@@ -25,7 +28,7 @@
 /proc/isMMI(A)
 	if(isbrain(A))
 		var/mob/living/carbon/brain/B = A
-		return istype(B.container, /obj/item/device/mmi)
+		return istype(B.container, /obj/item/mmi)
 
 /mob/living/bot/isSynthetic()
 	return 1
@@ -39,11 +42,12 @@
 /mob/living/carbon/human/isMonkey()
 	return istype(species, /datum/species/monkey)
 
-
 /proc/ishuman_species(A)
-	if(istype(A, /mob/living/carbon/human) && (A:get_species() == SPECIES_HUMAN))
-		return 1
-	return 0
+	if(istype(A, /mob/living/carbon/human))
+		var/mob/living/carbon/human/H = A
+		if(H.get_species() == SPECIES_HUMAN)
+			return TRUE
+	return FALSE
 
 /proc/isoffworlder(A)
 	if(ishuman(A))
@@ -71,7 +75,8 @@
 
 /proc/istajara(A)
 	if(istype(A, /mob/living/carbon/human))
-		switch(A:get_species())
+		var/mob/living/carbon/human/H = A
+		switch(H.get_species())
 			if (SPECIES_TAJARA)
 				return 1
 			if(SPECIES_TAJARA_ZHAN)
@@ -86,7 +91,8 @@
 
 /proc/isskrell(A)
 	if(istype(A, /mob/living/carbon/human))
-		switch(A:get_species())
+		var/mob/living/carbon/human/H = A
+		switch(H.get_species())
 			if (SPECIES_SKRELL)
 				return 1
 			if (SPECIES_SKRELL_AXIORI)
@@ -97,12 +103,17 @@
 
 /proc/isvaurca(A, var/isbreeder = FALSE)
 	if(istype(A, /mob/living/carbon/human))
-		switch(A:get_species())
+		var/mob/living/carbon/human/H = A
+		switch(H.get_species())
 			if(SPECIES_VAURCA_WORKER)
 				if(isbreeder)
 					return FALSE
 				return TRUE
 			if(SPECIES_VAURCA_WARRIOR)
+				if(isbreeder)
+					return FALSE
+				return TRUE
+			if(SPECIES_VAURCA_ATTENDANT)
 				if(isbreeder)
 					return FALSE
 				return TRUE
@@ -139,7 +150,10 @@
 /mob/living/carbon/alien/diona/is_diona()
 	return DIONA_NYMPH
 
-/proc/is_mob_special(A) // determines special mobs. has restrictions on certain things, like welderbombing
+/**
+ * Determines special mobs; places restrictions on certain things, like welderbombing.
+ */
+/proc/is_mob_special(A)
 	if(isrevenant(A))
 		return TRUE
 	if(iszombie(A))
@@ -147,9 +161,11 @@
 	return FALSE
 
 /proc/isskeleton(A)
-	if(istype(A, /mob/living/carbon/human) && (A:get_species() == SPECIES_SKELETON))
-		return 1
-	return 0
+	if(istype(A, /mob/living/carbon/human))
+		var/mob/living/carbon/human/H = A
+		if(H.get_species() == SPECIES_SKELETON)
+			return TRUE
+	return FALSE
 
 /proc/iszombie(A)
 	if(ishuman(A))
@@ -184,7 +200,8 @@
 
 /proc/islesserform(A)
 	if(istype(A, /mob/living/carbon/human))
-		switch(A:get_species())
+		var/mob/living/carbon/human/H = A
+		switch(H.get_species())
 			if (SPECIES_MONKEY)
 				return 1
 			if (SPECIES_MONKEY_TAJARA)
@@ -245,8 +262,8 @@
 
 //TODO: Integrate defence zones and targeting body parts with the actual organ system, move these into organ definitions.
 
-//The base miss chance for the different defence zones
-var/list/global/base_miss_chance = list(
+///The base miss chance for the different defence zones
+GLOBAL_LIST_INIT(base_miss_chance, list(
 	BP_HEAD = 70,
 	BP_CHEST = 10,
 	BP_GROIN = 20,
@@ -258,11 +275,11 @@ var/list/global/base_miss_chance = list(
 	BP_R_HAND = 60,
 	BP_L_FOOT = 60,
 	BP_R_FOOT = 60
-)
+))
 
-//Used to weight organs when an organ is hit randomly (i.e. not a directed, aimed attack).
-//Also used to weight the protection value that armor provides for covering that body part when calculating protection from full-body effects.
-var/list/global/organ_rel_size = list(
+///Used to weight organs when an organ is hit randomly (i.e. not a directed, aimed attack).
+///Also used to weight the protection value that armor provides for covering that body part when calculating protection from full-body effects.
+GLOBAL_LIST_INIT(organ_rel_size, list(
 	BP_HEAD = 25,
 	BP_CHEST = 70,
 	BP_GROIN = 30,
@@ -274,7 +291,17 @@ var/list/global/organ_rel_size = list(
 	BP_R_HAND = 10,
 	BP_L_FOOT = 10,
 	BP_R_FOOT = 10
-)
+))
+
+/**
+ * Find the mob at the bottom of a buckle chain.
+ */
+/mob/proc/lowest_buckled_mob()
+	. = src
+	//buckled -> buckled_to from TG
+	if(buckled_to && ismob(buckled_to))
+		var/mob/Buckled = buckled_to
+		. = Buckled.lowest_buckled_mob()
 
 /proc/check_zone(zone)
 	if(!zone)
@@ -286,36 +313,26 @@ var/list/global/organ_rel_size = list(
 			zone = BP_HEAD
 	return zone
 
-// Returns zone with a certain probability. If the probability fails, or no zone is specified, then a random body part is chosen.
-// Do not use this if someone is intentionally trying to hit a specific body part.
-// Use get_zone_with_miss_chance() for that.
-/proc/ran_zone(zone, probability)
-	if (zone)
+/**
+ * Return the zone or randomly, another valid zone
+ *
+ * _Do not use this if someone is intentionally trying to hit a specific body part - use get_zone_with_miss_chance() for that_
+ *
+ * probability controls the chance it chooses the passed in zone, or another random zone
+ * defaults to 80
+ */
+/proc/ran_zone(zone, probability = 80, list/weighted_list)
+	if(prob(probability))
 		zone = check_zone(zone)
-		if (prob(probability))
-			return zone
+	else
+		zone = pick_weight(weighted_list ? weighted_list : GLOB.organ_rel_size) //Slightly different from TG, we have a list with organ sizes
+	return zone
 
-	var/ran_zone = zone
-	while (ran_zone == zone)
-		ran_zone = pick (
-			organ_rel_size[BP_HEAD]; BP_HEAD,
-			organ_rel_size[BP_CHEST]; BP_CHEST,
-			organ_rel_size[BP_GROIN]; BP_GROIN,
-			organ_rel_size[BP_L_ARM]; BP_L_ARM,
-			organ_rel_size[BP_R_ARM]; BP_R_ARM,
-			organ_rel_size[BP_L_LEG]; BP_L_LEG,
-			organ_rel_size[BP_R_LEG]; BP_R_LEG,
-			organ_rel_size[BP_L_HAND]; BP_L_HAND,
-			organ_rel_size[BP_R_HAND]; BP_R_HAND,
-			organ_rel_size[BP_L_FOOT]; BP_L_FOOT,
-			organ_rel_size[BP_R_FOOT]; BP_R_FOOT
-		)
-
-	return ran_zone
-
-// Emulates targetting a specific body part, and miss chances
-// May return null if missed
-// miss_chance_mod may be negative.
+/**
+ * Emulates targetting a specific body part, and miss chances.
+ * May return null if missed.
+ * miss_chance_mod can be negative.
+ */
 /proc/get_zone_with_miss_chance(zone, var/mob/target, var/miss_chance_mod = 0, var/ranged_attack=0, var/point_blank = FALSE)
 	zone = check_zone(zone)
 
@@ -334,23 +351,25 @@ var/list/global/organ_rel_size = list(
 
 /mob/proc/calculate_zone_with_miss_chance(var/zone, var/miss_chance_mod)
 	var/miss_chance = 10
-	if (zone in base_miss_chance)
-		miss_chance = base_miss_chance[zone]
+	if (zone in GLOB.base_miss_chance)
+		miss_chance = GLOB.base_miss_chance[zone]
 	miss_chance = max(miss_chance + miss_chance_mod, 0)
 	if(prob(miss_chance))
 		if(prob(70))
 			return null
-		return pick(base_miss_chance)
+		return pick(GLOB.base_miss_chance)
 	return zone
 
-// never a chance to miss, but you might not hit what you want to hit
+/**
+ * No a chance to miss, but you might not hit what you want to hit.
+ */
 /mob/living/heavy_vehicle/calculate_zone_with_miss_chance(zone, miss_chance_mod)
 	var/miss_chance = 10
-	if(zone in base_miss_chance)
-		miss_chance = base_miss_chance[zone]
+	if(zone in GLOB.base_miss_chance)
+		miss_chance = GLOB.base_miss_chance[zone]
 	miss_chance = max(miss_chance + miss_chance_mod, 0)
 	if(prob(miss_chance))
-		return pick(base_miss_chance)
+		return pick(GLOB.base_miss_chance)
 	return zone
 
 /**
@@ -372,6 +391,9 @@ var/list/global/organ_rel_size = list(
 		chars[i] = "*"
 	return sanitize(jointext(chars, ""))
 
+/**
+ * The speech impediment, not the other thing.
+ */
 /proc/slur(phrase, strength = 100)
 	phrase = html_decode(phrase)
 	var/leng = length_char(phrase)
@@ -400,13 +422,18 @@ var/list/global/organ_rel_size = list(
 				if (7)
 					newletter += "'"
 				else
-					. = null // For dreamchecker, does nothing
+					. = null // For dreamchecker, does nothing.
 		newphrase += "[newletter]"
 		counter -= 1
 	return newphrase
 
-/proc/Gibberish(t, p)//t is the inputted message, and any value higher than 70 for p will cause letters to be replaced instead of added
-	/* Turn text into complete gibberish! */
+/**
+ * Turns text into complete gibberish.
+ *
+ * * t - inputted message
+ * * p - higher than 70 cause letters to be replaced instead of added
+ */
+/proc/Gibberish(t, p)
 	var/returntext = ""
 	for(var/i = 1, i <= length(t), i++)
 
@@ -422,13 +449,14 @@ var/list/global/organ_rel_size = list(
 
 	return returntext
 
-
+/**
+ * Stuttering. Is this even used anywhere???
+ *
+ * The difference with stutter is that this proc can stutter more than 1 letter
+ * The issue here is that anything that does not have a space is treated as one word (in many instances). For instance, "LOOKING," is a word, including the comma.
+ * It's fairly easy to fix if dealing with single letters but not so much with compounds of letters.
+ */
 /proc/ninjaspeak(n)
-/*
-The difference with stutter is that this proc can stutter more than 1 letter
-The issue here is that anything that does not have a space is treated as one word (in many instances). For instance, "LOOKING," is a word, including the comma.
-It's fairly easy to fix if dealing with single letters but not so much with compounds of letters./N
-*/
 	var/te = html_decode(n)
 	var/t = ""
 	n = length(n)
@@ -442,37 +470,61 @@ It's fairly easy to fix if dealing with single letters but not so much with comp
 			n_letter = copytext(te, p, p+n_mod)
 		if (prob(50))
 			if (prob(30))
-				n_letter = text("[n_letter]-[n_letter]-[n_letter]")
+				n_letter = "[n_letter]-[n_letter]-[n_letter]"
 			else
-				n_letter = text("[n_letter]-[n_letter]")
+				n_letter = "[n_letter]-[n_letter]"
 		else
-			n_letter = text("[n_letter]")
-		t = text("[t][n_letter]")
+			n_letter = "[n_letter]"
+		t = "[t][n_letter]"
 		p=p+n_mod
 	return sanitize(t)
 
-
-#define TICKS_PER_RECOIL_ANIM 2
-#define PIXELS_PER_STRENGTH_VAL 16
-
-/proc/shake_camera(mob/M, duration, strength = 1)
-	var/current_time = world.time
-	if(!M || !M.client || (M.shakecamera > current_time)|| M.stat || isEye(M) || isAI(M))
+#define TILES_PER_SECOND 0.7
+/// Shake the camera of the person viewing the mob SO REAL!
+/// Takes the mob to shake, the time span to shake for, and the amount of tiles we're allowed to shake by in tiles
+/// Duration isn't taken as a strict limit, since we don't trust our coders to not make things feel shitty. So it's more like a soft cap.
+/proc/shake_camera(mob/M, duration, strength=1)
+	if(!M || !M.client || duration < 1)
 		return
-	if(((M.client.view != world.view) || (M.client.pixel_x != 0) || (M.client.pixel_y != 0))) //to prevent it while zooming, because zoom does not play well with this code
-		return
-	M.shakecamera = current_time + max(TICKS_PER_RECOIL_ANIM, duration)
-	strength = abs(strength)*PIXELS_PER_STRENGTH_VAL
-	var/steps = min(1, FLOOR(duration/TICKS_PER_RECOIL_ANIM, 1))-1
-	animate(M.client, pixel_x = rand(-(strength), strength), pixel_y = rand(-(strength), strength), time = TICKS_PER_RECOIL_ANIM, easing = JUMP_EASING|EASE_IN)
-	if(steps)
-		for(var/i = 1 to steps)
-			animate(pixel_x =  0 + rand(-(strength), strength), pixel_y = 0 + rand(-(strength), strength), time = TICKS_PER_RECOIL_ANIM, easing = JUMP_EASING|EASE_IN)
-	animate(pixel_x = 0, pixel_y = 0, time = TICKS_PER_RECOIL_ANIM)
+	var/client/C = M.client
+	var/oldx = C.pixel_x
+	var/oldy = C.pixel_y
+	var/max_x = strength*ICON_SIZE_X
+	var/max_y = strength*ICON_SIZE_Y
+	var/min_x = -(strength*ICON_SIZE_X)
+	var/min_y = -(strength*ICON_SIZE_Y)
+
+	//How much time to allot for each pixel moved
+	var/time_scalar = (1 / ICON_SIZE_ALL) * TILES_PER_SECOND
+	var/last_x = oldx
+	var/last_y = oldy
+
+	var/time_spent = 0
+	while(time_spent < duration)
+		//Get a random pos in our box
+		var/x_pos = rand(min_x, max_x) + oldx
+		var/y_pos = rand(min_y, max_y) + oldy
+
+		//We take the smaller of our two distances so things still have the propencity to feel somewhat jerky
+		var/time = round(max(min(abs(last_x - x_pos), abs(last_y - y_pos)) * time_scalar, 1))
+
+		if (time_spent == 0)
+			animate(C, pixel_x=x_pos, pixel_y=y_pos, time=time)
+		else
+			animate(pixel_x=x_pos, pixel_y=y_pos, time=time)
+
+		last_x = x_pos
+		last_y = y_pos
+		//We go based on time spent, so there is a chance we'll overshoot our duration. Don't care
+		time_spent += time
+
+	animate(pixel_x=oldx, pixel_y=oldy, time=3)
+
+#undef TILES_PER_SECOND
 
 /proc/findname(msg)
 	for(var/mob/M in GLOB.mob_list)
-		if (M.real_name == text("[msg]"))
+		if (M.real_name == "[msg]")
 			return 1
 	return 0
 
@@ -486,8 +538,7 @@ It's fairly easy to fix if dealing with single letters but not so much with comp
 
 	return 0
 
-//converts intent-strings into numbers and back
-var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
+///converts intent-strings into numbers and back
 /proc/intent_numeric(argument)
 	if(istext(argument))
 		switch(argument)
@@ -582,8 +633,8 @@ var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
 					follow = "[ghost_follow_link(subject, M)] "
 				if(M.stat != DEAD && M.client.holder)
 					follow = "([admin_jump_link(subject, M.client.holder)]) "
-				var/mob/abstract/observer/DM
-				if(istype(subject, /mob/abstract/observer))
+				var/mob/abstract/ghost/observer/DM
+				if(istype(subject, /mob/abstract/ghost/observer))
 					DM = subject
 				if(M.client.holder) 							// What admins see
 					lname = "[keyname][(DM && DM.anonsay) ? "*" : (DM ? "" : "^")] ([name])"
@@ -802,6 +853,8 @@ var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
 		return slot_shoes
 	else if (H.wrists == src)
 		return slot_wrists
+	else if (H.pants == src)
+		return slot_pants
 	else
 		return null//We failed to find the slot
 
@@ -990,9 +1043,9 @@ var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
 	else if (ckey)
 		// To avoid runtimes during adminghost.
 		if (copytext(ckey, 1, 2) == "@")
-			P = preferences_datums[copytext(ckey, 2)]
+			P = GLOB.preferences_datums[copytext(ckey, 2)]
 		else
-			P = preferences_datums[ckey]
+			P = GLOB.preferences_datums[ckey]
 	else
 		return null
 
@@ -1008,9 +1061,9 @@ var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
 	else if (ckey)
 		// To avoid runtimes during adminghost.
 		if (copytext(ckey, 1, 2) == "@")
-			P = preferences_datums[copytext(ckey, 2)]
+			P = GLOB.preferences_datums[copytext(ckey, 2)]
 		else
-			P = preferences_datums[ckey]
+			P = GLOB.preferences_datums[ckey]
 	else
 		return 0
 
@@ -1030,9 +1083,9 @@ var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
 	else if (ckey)
 		// To avoid runtimes during adminghost.
 		if (copytext(ckey, 1, 2) == "@")
-			P = preferences_datums[copytext(ckey, 2)]
+			P = GLOB.preferences_datums[copytext(ckey, 2)]
 		else
-			P = preferences_datums[ckey]
+			P = GLOB.preferences_datums[ckey]
 	else
 		return
 
@@ -1088,11 +1141,11 @@ var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
 
 #undef SAFE_PERP
 
-/mob/proc/get_multitool(var/obj/P)
-	if(P?.ismultitool())
+/mob/proc/get_multitool(var/obj/item/P)
+	if(P?.tool_behaviour == TOOL_MULTITOOL)
 		return P
 
-/mob/abstract/observer/get_multitool()
+/mob/abstract/ghost/observer/get_multitool()
 	return can_admin_interact() && ..(ghost_multitool)
 
 /mob/living/carbon/human/get_multitool()
@@ -1199,6 +1252,7 @@ var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
 
 /mob/proc/set_intent(var/set_intent)
 	a_intent = set_intent
+	SEND_SIGNAL(src, COMSIG_INTENT_CHANGE, set_intent)
 
 /mob/proc/get_accent_icon(var/datum/language/speaking, var/mob/hearer, var/force_accent)
 	SHOULD_CALL_PARENT(TRUE)
@@ -1207,11 +1261,11 @@ var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
 		var/datum/accent/a = SSrecords.accents[used_accent]
 		if(istype(a))
 			if(hearer && hearer.client && hearer.client.prefs?.toggles_secondary & ACCENT_TAG_TEXT)
-				return {"<a href='byond://?src=\ref[src];accent_tag=[url_encode(a)]'>([a.text_tag])</a>"}
+				return {"<a href='byond://?src=[REF(src)];accent_tag=[url_encode(a)]'>([a.text_tag])</a>"}
 			else
 				var/datum/asset/spritesheet/S = get_asset_datum(/datum/asset/spritesheet/chat)
 				var/final_icon = "accent-[a.tag_icon]"
-				return {"<span onclick="window.location.href='byond://?src=\ref[src];accent_tag=[url_encode(a)]'">[S.icon_tag(final_icon)]</span>"}
+				return {"<span onclick="window.location.href='byond://?src=[REF(src)];accent_tag=[url_encode(a)]'">[S.icon_tag(final_icon)]</span>"}
 
 /mob/assign_player(var/mob/user)
 	ckey = user.ckey
@@ -1241,6 +1295,8 @@ var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
 			if(M.client)
 				M.client.eye = M.client.mob
 				M.client.perspective = MOB_PERSPECTIVE
+
+
 
 /mob/proc/in_neck_grab()
 	for(var/thing in grabbed_by)
@@ -1292,9 +1348,6 @@ var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
 	if(camera)
 		camera.c_tag = real_name
 
-/mob/proc/get_talk_bubble()
-	return 'icons/mob/talk.dmi'
-
 /mob/proc/adjust_typing_indicator_offsets(var/atom/movable/typing_indicator/indicator)
 	return
 
@@ -1332,3 +1385,7 @@ var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
 		message_notifications.Cut(1, 2)
 
 	message_notifications[key_check] = world.time + next_message_time
+
+/// Gets a mob's strength.
+/mob/proc/get_mob_strength()
+	return mob_weight + mob_strength

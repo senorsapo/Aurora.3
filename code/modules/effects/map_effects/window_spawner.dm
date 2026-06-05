@@ -33,7 +33,7 @@
 /obj/effect/map_effect/window_spawner/attack_ghost()
 	attack_generic()
 
-/obj/effect/map_effect/window_spawner/attack_generic()
+/obj/effect/map_effect/window_spawner/attack_generic(mob/user, damage, attack_message, environment_smash, armor_penetration, attack_flags, damage_type)
 	activate()
 
 /obj/effect/map_effect/window_spawner/Initialize(mapload)
@@ -56,10 +56,12 @@
 	if(spawn_grille)
 		new grille_path(loc)
 	if(spawn_firedoor)
-		new firedoor_path(loc)
+		var/obj/machinery/door/firedoor/new_firedoor = new firedoor_path(loc)
+		if(req_one_access)
+			new_firedoor.req_one_access = req_one_access
 	if(!single_window)
 		var/list/neighbours = list()
-		for (var/dir in GLOB.cardinal)
+		for (var/dir in GLOB.cardinals)
 			var/turf/T = get_step(src, dir)
 			var/obj/effect/map_effect/window_spawner/other = locate(/obj/effect/map_effect/window_spawner) in T
 			if(!other)
@@ -246,6 +248,11 @@
 	icon_state = "full_rwindow_shuttle"
 	frame_color = "#6C7364"
 	color = "#6C7364"
+
+/obj/effect/map_effect/window_spawner/full/shuttle/industrial
+	icon_state = "full_rwindow_shuttle"
+	frame_color = "#6E5B4A"
+	color = "#6E5B4A"
 
 //Coalition window frames
 /obj/effect/map_effect/window_spawner/full/shuttle/coalition

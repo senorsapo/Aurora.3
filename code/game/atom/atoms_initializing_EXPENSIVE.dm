@@ -129,20 +129,25 @@
 			reagents.maximum_volume += max(LAZYACCESS(reagents_to_add, v) - REAGENTS_FREE_SPACE(reagents), 0)
 			reagents.add_reagent(v, LAZYACCESS(reagents_to_add, v), LAZYACCESS(reagent_data, v))
 
-	if (light_power && light_range)
+	if(light_system != MOVABLE_LIGHT && light_system != DIRECTIONAL_LIGHT && light_power && light_range)
 		update_light()
 
-	if (opacity && isturf(loc))
-		var/turf/T = loc
-		T.has_opaque_atom = TRUE // No need to recalculate it in this case, it's guaranteed to be on afterwards anyways.
+	if(loc)
+		SEND_SIGNAL(loc, COMSIG_ATOM_INITIALIZED_ON, src) // used for large_object_transparency component
 
-	#ifdef AO_USE_LIGHTING_OPACITY
-		if (!mapload)
-			T.regenerate_ao()
-	#endif
+	if(isturf(loc) && opacity)
+		var/turf/opaque_turf = loc
+		opaque_turf.directional_opacity = ALL_CARDINALS // No need to recalculate it in this case, it's guaranteed to be on afterwards anyways.
 
-	if (update_icon_on_init)
+	if(update_icon_on_init)
 		SSicon_update.add_to_queue(src)
+
+	//Finally an aurora snowflake code that matters,
+	//this try to ensure noone is stupid enough to instantiate an abstract type
+	if(is_abstract(src))
+		var/datum/space_level/L = SSmapping.get_level(z)
+		stack_trace("Atom [src] ([type]) \[ X:[x] Y:[y] Z:[z] (Space level: [L ? L.name : "NOT FOUND"]) \] is abstract, but is trying to initialize!")
+		return INITIALIZE_HINT_QDEL
 
 	return INITIALIZE_HINT_NORMAL
 

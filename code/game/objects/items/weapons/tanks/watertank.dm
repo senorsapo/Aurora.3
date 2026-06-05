@@ -5,7 +5,7 @@
 	icon_state = "waterpack"
 	item_state = "waterpack"
 	contained_sprite = 1
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	slot_flags = SLOT_BACK
 
 	var/obj/item/reagent_containers/spray/chemsprayer/mister/noz
@@ -25,7 +25,7 @@
 
 /obj/item/watertank/verb/toggle_mister()
 	set name = "Toggle Mister"
-	set category = "Object"
+	set category = "Object.Equipped"
 	set src in usr
 
 	var/mob/living/carbon/human/user
@@ -97,7 +97,7 @@
 	icon_state = "mister"
 	item_state = "mister"
 	contained_sprite = 1
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	amount_per_transfer_from_this = 50
 	volume = 500
 	slot_flags = 0
@@ -114,7 +114,7 @@
 	return
 
 /obj/item/reagent_containers/spray/chemsprayer/mister/Move()
-	..()
+	. = ..()
 	if(loc != tank.loc)
 		forceMove(tank.loc)
 

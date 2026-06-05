@@ -53,18 +53,18 @@ export const CommandCommunications = (props, context) => {
   const [choosingAlert, setChoosingAlert] = useLocalState<boolean>(
     context,
     `choosingAlert`,
-    false
+    false,
   );
 
   const [firstLine, setFirstLine] = useLocalState<string>(
     context,
     `firstLine`,
-    ''
+    '',
   );
   const [secondLine, setSecondLine] = useLocalState<string>(
     context,
     `secondLine`,
-    ''
+    '',
   );
 
   return (
@@ -179,7 +179,8 @@ export const CommandCommunications = (props, context) => {
                 icon="trash"
                 onClick={() => act('setstatus', { target: 'blank' })}
               />
-            }>
+            }
+          >
             <Button
               content="Ship Time"
               icon="clock"
@@ -204,7 +205,8 @@ export const CommandCommunications = (props, context) => {
                     })
                   }
                 />
-              }>
+              }
+            >
               <Input
                 value={firstLine}
                 placeholder="First line"
@@ -220,8 +222,16 @@ export const CommandCommunications = (props, context) => {
             </Section>
             <Section title="Alerts">
               <Button
+                content="Blue Alert"
+                icon="circle-exclamation"
+                color="blue"
+                onClick={() =>
+                  act('setstatus', { target: 'alert', alert: 'bluealert' })
+                }
+              />
+              <Button
                 content="Red Alert"
-                icon="traffic-light"
+                icon="triangle-exclamation"
                 color="red"
                 onClick={() =>
                   act('setstatus', { target: 'alert', alert: 'redalert' })
@@ -241,6 +251,14 @@ export const CommandCommunications = (props, context) => {
                 color="yellow"
                 onClick={() =>
                   act('setstatus', { target: 'alert', alert: 'biohazard' })
+                }
+              />
+              <Button
+                content="Radiation"
+                icon="radiation"
+                color="yellow"
+                onClick={() =>
+                  act('setstatus', { target: 'alert', alert: 'radiation' })
                 }
               />
             </Section>
@@ -263,7 +281,7 @@ export const MessageList = (props, context) => {
   const [viewingMessage, setViewingMessage] = useLocalState<number | null>(
     context,
     'viewingMessage',
-    null
+    null,
   );
 
   return viewingMessage ? (
@@ -300,7 +318,8 @@ export const MessageList = (props, context) => {
                   onClick={() => act('delmessage', { messageid: message.id })}
                 />
               </>
-            }>
+            }
+          >
             <Box
               style={{ 'white-space': 'pre-line' }}
               dangerouslySetInnerHTML={processMessage(message.contents)}

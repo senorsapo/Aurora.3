@@ -3,10 +3,17 @@
 
 /obj/item/inflatable
 	name = "inflatable"
-	desc_info = "Inflate by using it in your hand. The inflatable barrier will inflate on the turf you are standing on. To deflate it, use the 'deflate' verb."
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	icon = 'icons/obj/item/inflatables.dmi'
+	item_state = "folded"
+	contained_sprite = TRUE
 	var/deploy_path = null
+
+/obj/item/inflatable/mechanics_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "Inflate by using it in your hand. The inflatable barrier will inflate on the turf you are standing on."
+	. += "To deflate it, use the 'deflate' verb or ctrl-click on it."
+	. += "<b>When passing through an airlock made of inflatables, GO SLOWLY!</b>"
 
 /obj/item/inflatable/attack_self(mob/user)
 	if(!deploy_path)
@@ -33,7 +40,6 @@
 /obj/structure/inflatable
 	name = "inflatable"
 	desc = "An inflated membrane. Do not puncture."
-	desc_info = "To remove these safely, use the 'deflate' verb.  Hitting these with any objects will probably puncture and break it forever."
 	icon = 'icons/obj/item/inflatables.dmi'
 	icon_state = "wall"
 
@@ -41,10 +47,20 @@
 	anchored = TRUE
 	atmos_canpass = CANPASS_DENSITY
 
+	maxhealth = OBJECT_HEALTH_FRAGILE
+
 	var/deflating = FALSE
 	var/undeploy_path = null
 	var/torn_path = null
-	var/health = 15
+
+
+/obj/structure/inflatable/mechanics_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "To deflate it safely, use the 'deflate' verb or ctrl-click on it."
+	. += "Hitting these with any objects will probably puncture and break it forever."
+
+/obj/structure/inflatable/on_death()
+	deflate(TRUE)
 
 /obj/structure/inflatable/wall
 	name = "inflatable wall"
@@ -60,21 +76,28 @@
 	return ..()
 
 /obj/structure/inflatable/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
+	if(mover?.movement_type & PHASING)
+		return TRUE
+
 	if(isprojectile(mover))
 		visible_message(SPAN_DANGER("\The [src] rapidly deflates!"))
 		deflate(TRUE)
 		return TRUE
 	return FALSE
 
-/obj/structure/inflatable/bullet_act(var/obj/item/projectile/Proj)
-	var/proj_damage = Proj.get_structure_damage()
+/obj/structure/inflatable/bullet_act(obj/projectile/hitting_projectile, def_zone, piercing_hit)
+	var/proj_damage = hitting_projectile.get_structure_damage()
 	if(!proj_damage)
 		return
 
-	bullet_ping(Proj)
+	. = ..()
+	if(. != BULLET_ACT_HIT)
+		return .
+
+	bullet_ping(hitting_projectile)
 
 	health -= proj_damage
-	..()
+
 	if(health <= 0)
 		deflate(TRUE)
 	return
@@ -160,13 +183,13 @@
 	set category = "Object"
 	set src in oview(1)
 
-	if(isobserver(usr) || usr.restrained() || !usr.Adjacent(src))
+	if(isghost(usr) || usr.restrained() || !usr.Adjacent(src))
 		return
 
 	verbs -= /obj/structure/inflatable/verb/hand_deflate
 	deflate()
 
-/obj/structure/inflatable/attack_generic(var/mob/user, var/damage, var/attack_verb)
+/obj/structure/inflatable/attack_generic(mob/user, damage, attack_message, environment_smash, armor_penetration, attack_flags, damage_type)
 	health -= damage
 	user.do_attack_animation(src)
 	if(health <= 0)
@@ -178,8 +201,6 @@
 
 /obj/structure/inflatable/door //Based on mineral door code
 	name = "inflatable door"
-	desc_info = "Click the door to open or close it.  It only stops air while closed.<br>\
-	To remove these safely, use the 'deflate' verb.  Hitting these with any objects will probably puncture and break it forever."
 	density = TRUE
 	anchored = TRUE
 	opacity = FALSE
@@ -190,6 +211,14 @@
 
 	var/state = STATE_CLOSED
 	var/isSwitchingStates = FALSE
+
+/obj/structure/inflatable/door/mechanics_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "Click the door to open or close it. It only stops air while closed."
+	. += "<b>When passing through an airlock made of inflatables, GO SLOWLY!</b>"
+	. += "To deflate it safely, use the 'deflate' verb or ctrl-click on it."
+	. += "Hitting these with any objects will probably puncture and break it forever."
+	. += "<b>FOR THE SECOND TIME: GO SLOWLY TO MAKE SURE THE DOORS ARE FULLY CLOSED!</b>"
 
 /obj/structure/inflatable/door/attack_ai(mob/user)
 	if(isAI(user)) //so the AI can't open it
@@ -203,6 +232,8 @@
 /obj/structure/inflatable/door/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
 	if(air_group)
 		return state
+	if(mover?.movement_type & PHASING)
+		return TRUE
 	if(istype(mover, /obj/effect/beam))
 		return !opacity
 	if(isprojectile(mover))
@@ -265,6 +296,12 @@
 	name = "torn inflatable wall"
 	desc = "A folded membrane which rapidly expands into a large cubical shape on activation. It is too torn to be usable."
 	icon_state = "folded_wall-torn"
+	persistency_considered_trash = TRUE
+
+/obj/item/inflatable/torn/persistent_objects_apply_content(content, x, y, z)
+	src.x = x
+	src.y = y
+	src.z = z
 
 /obj/item/inflatable/torn/attack_self(mob/user)
 	to_chat(user, SPAN_NOTICE("The inflatable wall is too torn to be inflated!"))
@@ -274,6 +311,12 @@
 	name = "torn inflatable door"
 	desc = "A folded membrane which rapidly expands into a simple door on activation. It is too torn to be usable."
 	icon_state = "folded_door-torn"
+	persistency_considered_trash = TRUE
+
+/obj/item/inflatable/door/torn/persistent_objects_apply_content(content, x, y, z)
+	src.x = x
+	src.y = y
+	src.z = z
 
 /obj/item/inflatable/door/torn/attack_self(mob/user)
 	to_chat(user, SPAN_NOTICE("The inflatable door is too torn to be inflated!"))
@@ -286,9 +329,9 @@
 	icon_state = "inf_box"
 	item_state = "inf_box"
 	contained_sprite = TRUE
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	display_contents_with_number = TRUE
-	max_storage_space = 28
+	max_storage_space = DEFAULT_BACKPACK_STORAGE
 	force_column_number = 3 // we want 4 slots to appear, so 3 columns + 1 free (to insert stuff)
 	storage_slots = 14
 	can_hold = list(/obj/item/inflatable)
@@ -297,6 +340,8 @@
 	use_sound = 'sound/items/storage/briefcase.ogg'
 	drop_sound = 'sound/items/drop/backpack.ogg'
 	pickup_sound = 'sound/items/pickup/backpack.ogg'
+
+	contained_sprite = TRUE
 
 /obj/item/storage/bag/inflatable/emergency
 	name = "emergency inflatable barrier box"

@@ -161,10 +161,10 @@
 	name = "adjusted light fixture"
 	},
 /obj/structure/table/standard,
-/obj/item/storage/box/sharps{
+/obj/item/storage/box/unique/sharps{
 	pixel_x = -5
 	},
-/obj/item/device/mass_spectrometer{
+/obj/item/mass_spectrometer{
 	pixel_x = 6;
 	pixel_y = 2
 	},
@@ -474,8 +474,7 @@
 	pixel_y = 6
 	},
 /obj/item/storage/toolbox/mechanical{
-	pixel_x = 2;
-	pixel_y = 0
+	pixel_x = 2
 	},
 /turf/simulated/floor/tiled/white,
 /area/space)
@@ -576,10 +575,10 @@
 	name = "adjusted light fixture"
 	},
 /obj/structure/table/standard,
-/obj/item/storage/box/sharps{
+/obj/item/storage/box/unique/sharps{
 	pixel_x = -5
 	},
-/obj/item/device/mass_spectrometer{
+/obj/item/mass_spectrometer{
 	pixel_x = 6;
 	pixel_y = 2
 	},
@@ -632,7 +631,7 @@
 "kO" = (
 /obj/structure/table/stone/marble,
 /obj/item/clipboard,
-/obj/item/device/flashlight/pen,
+/obj/item/flashlight/pen,
 /turf/simulated/floor/tiled/full,
 /area/space)
 "kP" = (
@@ -1058,11 +1057,11 @@
 	pixel_x = -8;
 	pixel_y = 4
 	},
-/obj/item/device/flashlight/pen{
+/obj/item/flashlight/pen{
 	pixel_x = 6;
 	pixel_y = 8
 	},
-/obj/item/device/flashlight/pen{
+/obj/item/flashlight/pen{
 	pixel_x = 6;
 	pixel_y = 8
 	},
@@ -2026,7 +2025,7 @@
 /area/space)
 "He" = (
 /obj/structure/table/standard,
-/obj/item/device/advanced_healthanalyzer,
+/obj/item/advanced_healthanalyzer,
 /turf/simulated/floor/tiled/white,
 /area/space)
 "Hq" = (
@@ -2142,10 +2141,10 @@
 /area/space)
 "JO" = (
 /obj/structure/table/standard,
-/obj/item/storage/box/sharps{
+/obj/item/storage/box/unique/sharps{
 	pixel_x = -5
 	},
-/obj/item/device/mass_spectrometer{
+/obj/item/mass_spectrometer{
 	pixel_x = 6;
 	pixel_y = 2
 	},
@@ -2342,11 +2341,11 @@
 	pixel_x = 8;
 	pixel_y = 4
 	},
-/obj/item/device/flashlight/pen{
+/obj/item/flashlight/pen{
 	pixel_x = -6;
 	pixel_y = 8
 	},
-/obj/item/device/flashlight/pen{
+/obj/item/flashlight/pen{
 	pixel_x = -6;
 	pixel_y = 8
 	},
@@ -2412,10 +2411,10 @@
 /area/space)
 "MY" = (
 /obj/structure/table/standard,
-/obj/item/storage/box/sharps{
+/obj/item/storage/box/unique/sharps{
 	pixel_x = -5
 	},
-/obj/item/device/mass_spectrometer{
+/obj/item/mass_spectrometer{
 	pixel_x = 6;
 	pixel_y = 2
 	},
@@ -2515,8 +2514,7 @@
 	},
 /obj/structure/sink{
 	dir = 8;
-	pixel_x = -12;
-	pixel_y = 0
+	pixel_x = -12
 	},
 /obj/structure/mirror{
 	pixel_x = -28
@@ -2595,7 +2593,7 @@
 /obj/effect/floor_decal/spline/plain/green{
 	dir = 1
 	},
-/obj/item/storage/box/freezer/organcooler{
+/obj/item/storage/box/unique/freezer/organcooler{
 	pixel_x = -1;
 	pixel_y = 15
 	},
@@ -2684,8 +2682,7 @@
 	pixel_y = 6
 	},
 /obj/item/storage/toolbox/mechanical{
-	pixel_x = 2;
-	pixel_y = 0
+	pixel_x = 2
 	},
 /turf/simulated/floor/tiled/white,
 /area/space)
@@ -3106,7 +3103,6 @@
 "WH" = (
 /obj/machinery/body_scanconsole{
 	dir = 1;
-	layer = 3.01;
 	pixel_y = 6
 	},
 /turf/simulated/floor/tiled/white,
@@ -3151,40 +3147,40 @@
 /area/space)
 "Xe" = (
 /obj/structure/table/standard,
-/obj/item/device/radio{
+/obj/item/radio{
 	pixel_x = -6;
 	pixel_y = 6
 	},
-/obj/item/device/radio{
+/obj/item/radio{
 	pixel_x = -6;
 	pixel_y = 6
 	},
-/obj/item/device/radio{
+/obj/item/radio{
 	pixel_x = 5;
 	pixel_y = 6
 	},
-/obj/item/device/radio{
+/obj/item/radio{
 	pixel_x = 5;
 	pixel_y = 6
 	},
-/obj/item/device/gps/medical{
+/obj/item/gps/medical{
 	pixel_x = -7
 	},
-/obj/item/device/gps/medical{
+/obj/item/gps/medical{
 	pixel_x = 5
 	},
-/obj/item/device/gps/medical{
+/obj/item/gps/medical{
 	pixel_x = -7
 	},
-/obj/item/device/gps/medical{
+/obj/item/gps/medical{
 	pixel_x = 5
 	},
-/obj/item/storage/belt/medical/first_responder,
-/obj/item/storage/belt/medical/first_responder,
-/obj/item/storage/belt/medical/first_responder,
-/obj/item/storage/belt/medical/first_responder,
-/obj/item/storage/belt/medical/first_responder,
-/obj/item/storage/belt/medical/first_responder,
+/obj/item/storage/belt/medical/paramedic,
+/obj/item/storage/belt/medical/paramedic,
+/obj/item/storage/belt/medical/paramedic,
+/obj/item/storage/belt/medical/paramedic,
+/obj/item/storage/belt/medical/paramedic,
+/obj/item/storage/belt/medical/paramedic,
 /obj/effect/floor_decal/spline/plain/green,
 /turf/simulated/floor/tiled/white,
 /area/space)
@@ -3283,7 +3279,6 @@
 	},
 /obj/machinery/body_scanconsole{
 	dir = 1;
-	layer = 3.01;
 	pixel_y = 6
 	},
 /turf/simulated/floor/tiled/white,

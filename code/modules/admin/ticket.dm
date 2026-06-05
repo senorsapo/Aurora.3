@@ -162,25 +162,28 @@ GLOBAL_LIST_EMPTY(ticket_panels)
 	if (status != TICKET_CLOSED)
 		return
 
-	if (!establish_db_connection(GLOB.dbcon))
+	if (!SSdbcore.Connect())
 		return
 
-	var/DBQuery/Q = GLOB.dbcon.NewQuery({"INSERT INTO ss13_tickets
+	var/datum/db_query/query = SSdbcore.NewQuery({"INSERT INTO ss13_tickets
 		(game_id, message_count, admin_count, admin_list, opened_by, taken_by, closed_by, response_delay, opened_at, closed_at)
-	VALUES
-		(:g_id:, :m_count:, :a_count:, :a_list:, :opened_by:, :taken_by:, :closed_by:, :delay:, :opened_at:, :closed_at:)"})
-	Q.Execute(list(
-		"g_id" = GLOB.round_id,
-		"m_count" = length(msgs),
-		"a_count" = length(assigned_admins),
-		"a_list" = json_encode(assigned_admins),
-		"opened_by" = owner,
-		"taken_by" = length(assigned_admins) ? assigned_admins[1] : null,
-		"closed_by" = closed_by,
-		"delay" = response_time || -1,
-		"opened_at" = SQLtime(opened_rt),
-		"closed_at" = SQLtime(closed_rt)
-	))
+		VALUES (:g_id, :m_count, :a_count, :a_list, :opened_by, :taken_by, :closed_by, :delay, :opened_at, :closed_at)"},
+		list(
+			"g_id" = GLOB.round_id,
+			"m_count" = length(msgs),
+			"a_count" = length(assigned_admins),
+			"a_list" = json_encode(assigned_admins),
+			"opened_by" = owner,
+			"taken_by" = length(assigned_admins) ? assigned_admins[1] : null,
+			"closed_by" = closed_by,
+			"delay" = response_time || -1,
+			"opened_at" = SQLtime(opened_rt),
+			"closed_at" = SQLtime(closed_rt)
+		),
+		TRUE
+	)
+	query.SetSuccessCallback(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(qdel)))
+	query.Execute()
 
 /datum/ticket/proc/append_message(m_from, m_to, msg)
 	msgs += new /datum/ticket_msg(m_from, m_to, msg)
@@ -234,18 +237,18 @@ GLOBAL_LIST_EMPTY(ticket_panels)
 			ticket_dat += "<li style='padding-bottom:10px;color:[color]'>"
 			if(open_ticket && open_ticket == ticket)
 				ticket_dat += "<i>"
-			ticket_dat += "Ticket #[id] - [ticket.owner] [owner_client ? "" : "(DC)"] - [status]<br /><a href='byond://?src=\ref[src];action=view;ticket=\ref[ticket]'>VIEW</a>"
+			ticket_dat += "Ticket #[id] - [ticket.owner] [owner_client ? "" : "(DC)"] - [status]<br /><a href='byond://?src=[REF(src)];action=view;ticket=[REF(ticket)]'>VIEW</a>"
 			if(ticket.status)
-				ticket_dat += " - <a href='byond://?src=\ref[src];action=pm;ticket=\ref[ticket]'>PM</a>"
+				ticket_dat += " - <a href='byond://?src=[REF(src)];action=pm;ticket=[REF(ticket)]'>PM</a>"
 				if(valid_holder)
-					ticket_dat += " - <a href='byond://?src=\ref[src];action=take;ticket=\ref[ticket]'>[(ticket.status == TICKET_OPEN) ? "TAKE" : "JOIN"]</a>"
+					ticket_dat += " - <a href='byond://?src=[REF(src)];action=take;ticket=[REF(ticket)]'>[(ticket.status == TICKET_OPEN) ? "TAKE" : "JOIN"]</a>"
 				if(ticket.status != TICKET_CLOSED && (valid_holder || ticket.status == TICKET_OPEN))
-					ticket_dat += " - <a href='byond://?src=\ref[src];action=close;ticket=\ref[ticket]'>CLOSE</a>"
+					ticket_dat += " - <a href='byond://?src=[REF(src)];action=close;ticket=[REF(ticket)]'>CLOSE</a>"
 			if(valid_holder)
 				var/ref_mob = ""
 				if(owner_client)
-					ref_mob = "\ref[owner_client.mob]"
-				ticket_dat += " - <A HREF='?_src_=holder;adminmoreinfo=[ref_mob]'>?</A> - <A HREF='?_src_=holder;adminplayeropts=[ref_mob]'>PP</A> - <A HREF='?_src_=vars;Vars=[ref_mob]'>VV</A> - <A HREF='?_src_=holder;subtlemessage=[ref_mob]'>SM</A>[owner_client ? "- [admin_jump_link(owner_client.mob, src)]" : ""]"
+					ref_mob = "[REF(owner_client.mob)]"
+				ticket_dat += " - <A href='byond://?_src_=holder;adminmoreinfo=[ref_mob]'>?</A> - <A href='byond://?_src_=holder;adminplayeropts=[ref_mob]'>PP</A> - <A href='byond://?_src_=vars;Vars=[ref_mob]'>VV</A> - <A href='byond://?_src_=holder;subtlemessage=[ref_mob]'>SM</A>[owner_client ? "- [admin_jump_link(owner_client.mob, src)]" : ""]"
 			if(open_ticket && open_ticket == ticket)
 				ticket_dat += "</i>"
 			ticket_dat += "</li>"
@@ -254,7 +257,7 @@ GLOBAL_LIST_EMPTY(ticket_panels)
 		dat += "<br /><div style='width:50%;float:left;'><p><b>Available tickets:</b></p><ul>[jointext(ticket_dat, null)]</ul></div>"
 
 		if(open_ticket)
-			dat += "<div style='width:50%;float:left;'><p><b>\[<a href='byond://?src=\ref[src];action=unview;'>X</a>\] Messages for ticket #[open_ticket.id]:</b></p>"
+			dat += "<div style='width:50%;float:left;'><p><b>\[<a href='byond://?src=[REF(src)];action=unview;'>X</a>\] Messages for ticket #[open_ticket.id]:</b></p>"
 
 			var/list/msg_dat = list()
 			for(var/datum/ticket_msg/msg in open_ticket.msgs)
@@ -297,7 +300,7 @@ GLOBAL_LIST_EMPTY(ticket_panels)
 		if("close")
 			ticket.close(usr.client)
 		if("pm")
-			if(check_rights(R_MOD|R_ADMIN) && ticket.owner != usr.ckey)
+			if(ticket.owner != usr.ckey && check_rights(R_MOD|R_ADMIN))
 				usr.client.cmd_admin_pm(client_by_ckey(ticket.owner), ticket = ticket)
 			else if(ticket.status == TICKET_ASSIGNED)
 				// manually check that the target client exists here as to not spam the usr for each logged out admin on the ticket

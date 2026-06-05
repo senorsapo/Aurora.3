@@ -3,7 +3,7 @@
 	icon = 'icons/obj/item/ore.dmi'
 	icon_state = "ore"
 	randpixel = 8
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	throwforce = 10
 	var/datum/geosample/geologic_data
 	var/material
@@ -96,8 +96,8 @@
 	material = null
 
 /obj/item/ore/attackby(obj/item/attacking_item, mob/user)
-	if(istype(attacking_item,/obj/item/device/core_sampler))
-		var/obj/item/device/core_sampler/C = attacking_item
+	if(istype(attacking_item,/obj/item/core_sampler))
+		var/obj/item/core_sampler/C = attacking_item
 		C.sample_item(src, user)
 	else
 		return ..()

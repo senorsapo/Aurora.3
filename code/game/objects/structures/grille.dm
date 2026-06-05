@@ -1,23 +1,54 @@
 /obj/structure/grille
 	name = "grille"
-	desc = "A flimsy lattice of metal rods, with screws to secure it to the floor."
-	desc_info = "A powered and knotted wire underneath this will cause the grille to shock anyone not wearing insulated gloves.<br>\
-	Wirecutters will turn the grille into metal rods instantly.  Grilles are made with metal rods.<br>\
-	Can be fixed with a single metal rod if damaged."
+	desc = "A flimsy lattice of metal rods."
 	icon = 'icons/obj/structures.dmi'
 	icon_state = "grille"
 	density = TRUE
 	anchored = TRUE
+	pass_flags_self = PASSGRILLE
 	obj_flags = OBJ_FLAG_CONDUCTABLE | OBJ_FLAG_MOVES_UNSUPPORTED
 	explosion_resistance = 1
-	layer = BELOW_OBJ_LAYER
-	var/health = 10
+	layer = BELOW_WINDOW_LAYER
+	maxhealth = OBJECT_HEALTH_FRAGILE
+	armor = list(
+		MELEE = ARMOR_MELEE_KNIVES,
+		LASER = ARMOR_LASER_SMALL,
+		ENERGY = ARMOR_ENERGY_SMALL
+	)
 	var/destroyed = 0
+
+/obj/structure/grille/get_damage_condition_hints(mob/user, distance, is_adjacent)
+	if(health < initial(health))
+		var/state
+		var/current_damage = health / initial(health)
+		switch(current_damage)
+			if(0 to 0.3)
+				state = SPAN_DANGER("The grille is barely in one piece!")
+			if(0.3 to 0.8)
+				state = SPAN_ALERT("The grille has taken some serious damage.")
+			if(0.8 to 1)
+				state = SPAN_NOTICE("The grille is in less than perfect condition.")
+		. = state
+
+/obj/structure/grille/mechanics_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "A powered and knotted wire underneath this will cause the grille to shock anyone not wearing insulated gloves."
+
+/obj/structure/grille/assembly_hints(mob/user, distance, is_adjacent)
+	. += ..()
+
+/obj/structure/grille/disassembly_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "These could be easily <b>cut</b> through."
+
+/obj/structure/grille/feedback_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "\the [src] [anchored ? "is" : "could be"] anchored to the floor with some <b>screws<b/>."
 
 /obj/structure/grille/over
 	name = "over-frame grille"
 	icon = 'icons/obj/smooth/window/grille_over.dmi'
-	layer = BELOW_OBJ_LAYER
+	layer = BELOW_WINDOW_LAYER
 	smoothing_flags = SMOOTH_MORE
 	canSmoothWith = list(
 		/turf/simulated/wall,
@@ -25,6 +56,7 @@
 		/turf/unsimulated/wall/steel,
 		/turf/unsimulated/wall/darkshuttlewall,
 		/turf/unsimulated/wall/riveted,
+		/turf/unsimulated/wall/fakepdoor,
 		/obj/structure/window_frame,
 		/obj/structure/window_frame/unanchored,
 		/obj/structure/window_frame/empty,
@@ -72,9 +104,11 @@
 	else
 		icon_state = initial(icon_state)
 
-/obj/structure/grille/CollidedWith(atom/user)
-	if(ismob(user))
-		shock(user, 70)
+/obj/structure/grille/CollidedWith(atom/bumped_atom)
+	. = ..()
+
+	if(ismob(bumped_atom))
+		shock(bumped_atom, 70)
 
 /obj/structure/grille/attack_hand(mob/user as mob)
 
@@ -101,51 +135,59 @@
 	attack_generic(user,damage_dealt,attack_message)
 
 /obj/structure/grille/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
-	if(air_group || (height==0)) return 1
-	if(istype(mover) && mover.checkpass(PASSGRILLE))
-		return 1
+	if(air_group || (height==0))
+		return TRUE
+	if(mover?.movement_type & PHASING)
+		return TRUE
+	if(istype(mover) && mover.pass_flags & PASSGRILLE)
+		return TRUE
 	else
-		if(istype(mover, /obj/item/projectile))
+		if(istype(mover, /obj/projectile))
 			return prob(30)
 		else
 			return !density
 
-/obj/structure/grille/bullet_act(var/obj/item/projectile/Proj)
-	if(!Proj)	return
+/obj/structure/grille/bullet_act(obj/projectile/hitting_projectile, def_zone, piercing_hit)
+	. = ..()
+	if(. != BULLET_ACT_HIT)
+		return .
+
+	if(!hitting_projectile)
+		return BULLET_ACT_BLOCK
 
 	//Flimsy grilles aren't so great at stopping projectiles. However they can absorb some of the impact
-	var/damage = Proj.get_structure_damage()
+	var/damage = hitting_projectile.get_structure_damage()
 	var/passthrough = 0
 
-	if(!damage) return
+	if(!damage)
+		return BULLET_ACT_BLOCK
 
 	//20% chance that the grille provides a bit more cover than usual. Support structure for example might take up 20% of the grille's area.
 	//If they click on the grille itself then we assume they are aiming at the grille itself and the extra cover behaviour is always used.
-	switch(Proj.damage_type)
+	switch(hitting_projectile.damage_type)
 		if(DAMAGE_BRUTE)
 			//bullets
-			if(Proj.original == src || prob(20))
-				Proj.damage *= between(0, Proj.damage/60, 0.5)
+			if(hitting_projectile.original == src || prob(20))
+				hitting_projectile.damage *= between(0, hitting_projectile.damage/60, 0.5)
 				if(prob(max((damage-10)/25, 0))*100)
 					passthrough = 1
 			else
-				Proj.damage *= between(0, Proj.damage/60, 1)
+				hitting_projectile.damage *= between(0, hitting_projectile.damage/60, 1)
 				passthrough = 1
 		if(DAMAGE_BURN)
 			//beams and other projectiles are either blocked completely by grilles or stop half the damage.
-			if(!(Proj.original == src || prob(20)))
-				Proj.damage *= 0.5
+			if(!(hitting_projectile.original == src || prob(20)))
+				hitting_projectile.damage *= 0.5
 				passthrough = 1
 
 	if(passthrough)
-		. = PROJECTILE_CONTINUE
-		damage = between(0, (damage - Proj.damage)*(Proj.damage_type == DAMAGE_BRUTE? 0.4 : 1), 10) //if the bullet passes through then the grille avoids most of the damage
+		. = BULLET_ACT_HIT
+		damage = between(0, (damage - hitting_projectile.damage)*(hitting_projectile.damage_type == DAMAGE_BRUTE? 0.4 : 1), 10) //if the bullet passes through then the grille avoids most of the damage
 
-	src.health -= damage*0.2
-	spawn(0) healthcheck() //spawn to make sure we return properly if the grille is deleted
+	add_damage(damage * 0.2)
 
 /obj/structure/grille/attackby(obj/item/attacking_item, mob/user)
-	if(attacking_item.iswirecutter())
+	if(attacking_item.tool_behaviour == TOOL_WIRECUTTER)
 		if(!shock(user, 100))
 			playsound(loc, 'sound/items/Wirecutter.ogg', 100, 1)
 			new /obj/item/stack/rods(get_turf(src), destroyed ? 1 : 2)
@@ -158,7 +200,7 @@
 		playsound(loc, PC.fire_sound, 100, TRUE)
 		new /obj/item/stack/rods(get_turf(src), destroyed ? 1 : 2)
 		qdel(src)
-	else if((attacking_item.isscrewdriver()) && (istype(loc, /turf/simulated) || anchored))
+	else if((attacking_item.tool_behaviour == TOOL_SCREWDRIVER) && (istype(loc, /turf/simulated) || anchored))
 		if(!shock(user, 90))
 			playsound(loc, 'sound/items/Screwdriver.ogg', 100, 1)
 			anchored = !anchored
@@ -224,30 +266,19 @@
 		user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
 		user.do_attack_animation(src)
 		playsound(loc, 'sound/effects/grillehit.ogg', 80, 1)
-		switch(attacking_item.damtype)
-			if("fire")
-				health -= attacking_item.force
-			if("brute")
-				health -= attacking_item.force * 0.1
-	healthcheck()
+		add_damage(attacking_item.force)
+
 	..()
-	return
 
+/obj/structure/grille/on_death(damage, damage_flags, damage_type, armor_penetration, obj/weapon)
+	if(!destroyed)
+		density = FALSE
+		destroyed = TRUE
+		update_icon()
+		new /obj/item/stack/rods(get_turf(src))
 
-/obj/structure/grille/proc/healthcheck()
-	if(health <= 0)
-		if(!destroyed)
-			density = 0
-			destroyed = 1
-			update_icon()
-			new /obj/item/stack/rods(get_turf(src))
-
-		else
-			if(health <= -6)
-				new /obj/item/stack/rods(get_turf(src))
-				qdel(src)
-				return
-	return
+	else
+		. = ..()
 
 // shock user with probability prb (if all connections & power are working)
 // returns 1 if shocked, 0 otherwise
@@ -276,16 +307,8 @@
 /obj/structure/grille/fire_act(exposed_temperature, exposed_volume)
 	if(!destroyed)
 		if(exposed_temperature > T0C + 1500)
-			health -= 1
-			healthcheck()
+			add_damage(1)
 	..()
-
-/obj/structure/grille/attack_generic(var/mob/user, var/damage, var/attack_verb)
-	visible_message(SPAN_DANGER("[user] [attack_verb] the [src]!"))
-	user.do_attack_animation(src)
-	health -= damage
-	spawn(1) healthcheck()
-	return 1
 
 // Used in mapping to avoid
 /obj/structure/grille/broken
@@ -295,8 +318,7 @@
 
 /obj/structure/grille/broken/New()
 	..()
-	health = rand(-5, -1) //In the destroyed but not utterly threshold.
-	healthcheck() //Send this to healthcheck just in case we want to do something else with it.
+	add_damage(rand(-5, -1)) //In the destroyed but not utterly threshold.
 
 /obj/structure/grille/diagonal
 	icon_state = "grille_diagonal"
@@ -305,13 +327,13 @@
 	name = "cult grille"
 	desc = "A matrice built out of an unknown material, with some sort of force field blocking air around it"
 	icon_state = "grillecult"
-	health = 40 //Make it strong enough to avoid people breaking in too easily
+	maxhealth = OBJECT_HEALTH_VERY_LOW //Make it strong enough to avoid people breaking in too easily
 	appearance_flags = NO_CLIENT_COLOR
 
 /obj/structure/grille/cult/CanPass(atom/movable/mover, turf/target, height = 1.5, air_group = 0)
 	if(air_group)
 		return 0 //Make sure air doesn't drain
-	..()
+	. = ..()
 
 /obj/structure/grille/crescent/attack_hand()
 	return
@@ -319,14 +341,11 @@
 /obj/structure/grille/crescent/attackby()
 	return
 
-/obj/structure/grille/crescent/attack_generic()
+/obj/structure/grille/crescent/attack_generic(mob/user, damage, attack_message, environment_smash, armor_penetration, attack_flags, damage_type)
 	return
 
 /obj/structure/grille/crescent/ex_act(var/severity = 2.0)
 	return
 
-/obj/structure/grille/crescent/hitby()
-	return
-
-/obj/structure/grille/crescent/bullet_act()
+/obj/structure/grille/crescent/hitby(atom/movable/hitting_atom, skipcatch, hitpush, blocked, datum/thrownthing/throwingdatum)
 	return

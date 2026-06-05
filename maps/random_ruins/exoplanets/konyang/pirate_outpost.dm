@@ -9,7 +9,7 @@
 	sectors = list(SECTOR_HANEUNIM)
 
 	prefix = "konyang/"
-	suffixes = list("pirate_outpost.dmm")
+	suffix = "pirate_outpost.dmm"
 	shuttles_to_initialise = list(/datum/shuttle/autodock/overmap/konyang_pirate)
 
 	unit_test_groups = list(3)
@@ -19,7 +19,6 @@
 	name = "Konyang Pirate Outpost"
 	icon_state = "bluenew"
 	requires_power = FALSE
-	dynamic_lighting = TRUE
 	no_light_control = FALSE
 	base_turf = /turf/simulated/mineral
 	area_flags = AREA_FLAG_HIDE_FROM_HOLOMAP | AREA_FLAG_INDESTRUCTIBLE_TURFS

@@ -5,14 +5,14 @@
 	shoes = /obj/item/clothing/shoes/magboots
 	gloves = /obj/item/clothing/gloves/black/tajara
 	uniform = /obj/item/clothing/under/tajaran/cosmonaut
-	l_ear = /obj/item/device/radio/headset/distress
+	l_ear = /obj/item/radio/headset/distress
 	head = /obj/item/clothing/head/helmet/space/void/pra
 	suit = /obj/item/clothing/suit/space/void/pra
 	suit_store = /obj/item/tank/oxygen/red
 
 	belt = /obj/item/storage/belt/military
 	belt_contents = list(
-						/obj/item/ammo_magazine/boltaction = 5,
+						/obj/item/ammo_magazine/a68 = 3,
 						/obj/item/grenade/smokebomb = 1,
 						/obj/item/ammo_magazine/mc9mm = 1,
 						/obj/item/gun/projectile/pistol/adhomai = 1,
@@ -22,6 +22,7 @@
 	back = /obj/item/gun/projectile/automatic/rifle/adhomian
 	accessory = /obj/item/clothing/accessory/badge/hadii_card
 	r_pocket = /obj/item/crowbar/red
+	l_hand = /obj/item/martial_manual/tajara
 
 /obj/outfit/admin/ert/pra_cosmonaut/get_id_access()
 	return get_distress_access()
@@ -40,7 +41,7 @@
 
 	back = /obj/item/storage/backpack/satchel/leather
 	backpack_contents = list(
-						/obj/item/book/manual/pra_manifesto = 1,
+						/obj/item/versebook/pra = 1,
 						/obj/item/storage/box/hadii_card = 1,
 						/obj/item/gun/projectile/deagle/adhomai = 1,
 						/obj/item/clothing/accessory/holster/hip/brown = 1,
@@ -48,8 +49,9 @@
 						/obj/item/clothing/head/tajaran/cosmonaut_commissar = 1
 						)
 
-	l_pocket = /obj/item/device/megaphone
+	l_pocket = /obj/item/megaphone
 	accessory = /obj/item/clothing/accessory/hadii_pin
+	l_hand = /obj/item/martial_manual/tajara
 
 /obj/outfit/admin/ert/pra_cosmonaut/commander
 	name = "Kosmostrelki Commander"
@@ -68,10 +70,11 @@
 	backpack_contents = list(
 						/obj/item/gun/projectile/automatic/tommygun = 1,
 						/obj/item/clothing/accessory/holster/hip/brown = 1,
-						/obj/item/device/binoculars = 1,
+						/obj/item/binoculars = 1,
 						/obj/item/ammo_magazine/submachinedrum = 1)
 
-	l_pocket = /obj/item/device/megaphone
+	l_pocket = /obj/item/megaphone
+	l_hand = /obj/item/martial_manual/tajara
 
 /obj/outfit/admin/ert/pra_cosmonaut/tesla
 	name = "Tesla Trooper"
@@ -88,6 +91,7 @@
 						/obj/item/grenade/frag = 2,
 						/obj/item/grenade/smokebomb = 1,
 						/obj/item/gun/projectile/pistol/adhomai = 1,
+						/obj/item/martial_manual/tajara = 1,
 						/obj/item/material/knife/trench = 1
 						)
 
@@ -104,7 +108,7 @@
 
 	glasses = /obj/item/clothing/glasses/hud/health
 
-	belt = /obj/item/storage/belt/medical/first_responder/combat
+	belt = /obj/item/storage/belt/medical/paramedic/combat
 
 	back = /obj/item/storage/backpack/satchel/leather
 
@@ -113,7 +117,7 @@
 		/obj/item/ammo_magazine/c45uzi = 2,
 		/obj/item/storage/firstaid/combat = 1,
 		/obj/item/storage/firstaid/adv = 1,
-		/obj/item/device/flashlight/pen = 1,
+		/obj/item/flashlight/pen = 1,
 		/obj/item/gun/projectile/pistol/adhomai = 1
 	)
 
@@ -125,8 +129,10 @@
 		/obj/item/reagent_containers/glass/bottle/dexalin_plus = 1,
 		/obj/item/reagent_containers/glass/bottle/bicaridine = 1,
 		/obj/item/reagent_containers/glass/bottle/dermaline = 1,
-		/obj/item/device/healthanalyzer = 1
+		/obj/item/healthanalyzer = 1
 	)
+
+	l_hand = /obj/item/martial_manual/tajara
 
 /obj/outfit/admin/ert/pra_cosmonaut/engineer
 	name = "Kosmostrelki Sapper"
@@ -146,9 +152,10 @@
 
 	backpack_contents = list(
 		/obj/item/gun/projectile/shotgun/pump/rifle/obrez = 1,
-		/obj/item/ammo_magazine/boltaction = 4,
+		/obj/item/ammo_magazine/boltaction/adhomai = 4,
 		/obj/item/gun/projectile/pistol/adhomai = 1,
 		/obj/item/material/knife/trench = 1
 	)
 
 	belt_contents = null
+	l_hand = /obj/item/martial_manual/tajara

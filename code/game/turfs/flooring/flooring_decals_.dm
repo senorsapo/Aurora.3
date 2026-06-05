@@ -765,11 +765,6 @@
 /obj/effect/floor_decal/spline/fancy/wood/full
 	icon_state = "spline_fancy_full"
 
-/obj/effect/floor_decal/plaque
-	name = "plaque"
-	icon_state = "plaque"
-	outline = FALSE
-
 /obj/effect/floor_decal/carpet
 	name = "carpet"
 	icon = 'icons/turf/flooring/carpet.dmi'
@@ -930,7 +925,7 @@
 /obj/effect/floor_decal/sign/gtr
 	icon_state = "white_gtr"
 
-/obj/effect/floor_decal/sign/first_responder
+/obj/effect/floor_decal/sign/paramedic
 	icon_state = "white_emt"
 
 /obj/effect/floor_decal/sign/w

@@ -4,6 +4,8 @@
 	var/icon_state
 	var/datum/click_handler/build_mode/host
 	var/mob/user
+	/// This variable controls the permissions required to have this build mode added. Mainly used to prevent VV editing from being given to storytellers.
+	var/permission_requirement
 
 /datum/build_mode/New(var/host)
 	..()
@@ -12,6 +14,7 @@
 
 /datum/build_mode/Destroy()
 	host = null
+	user = null
 	. = ..()
 
 /datum/build_mode/proc/OnClick(var/atom/A, var/list/parameters)

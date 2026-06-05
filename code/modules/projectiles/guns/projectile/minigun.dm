@@ -5,7 +5,7 @@
 	icon_state = "holstered"
 	item_state = "holstered"
 	contained_sprite = 1
-	w_class = ITEMSIZE_LARGE
+	w_class = WEIGHT_CLASS_BULKY
 	slot_flags = SLOT_BACK
 	origin_tech = list(TECH_COMBAT = 8, TECH_MATERIAL = 6, TECH_MAGNET = 4, TECH_ILLEGAL = 7)
 	action_button_name = "Deploy the Gatling Machine Gun"
@@ -149,7 +149,7 @@
 /obj/item/gun/projectile/automatic/rifle/minigun/load_ammo(var/obj/item/A, mob/user)
 	return
 
-/obj/item/gun/projectile/automatic/rifle/minigun/unload_ammo(mob/user, var/allow_dump=1)
+/obj/item/gun/projectile/automatic/rifle/minigun/unload_ammo(mob/user, allow_dump = TRUE, drop_mag = FALSE)
 	return
 
 /obj/item/gun/projectile/automatic/rifle/minigun/dropped(mob/user)
@@ -161,6 +161,6 @@
 		user.update_inv_back()
 
 /obj/item/gun/projectile/automatic/rifle/minigun/Move()
-	..()
+	. = ..()
 	if(loc != source.loc)
 		INVOKE_ASYNC(source, TYPE_PROC_REF(/obj/item/minigunpack, remove_gun))

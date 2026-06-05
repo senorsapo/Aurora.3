@@ -109,6 +109,9 @@
 	set category = "Object"
 	set name = "Eject Primer"
 
+	if(use_check(usr))
+		return
+
 	if(!primer)
 		to_chat(usr, SPAN_WARNING("\The [src] doesn't have a primer!"))
 		return
@@ -119,7 +122,7 @@
 
 /obj/machinery/computer/operating/terminal
 	name = "patient monitoring terminal"
-	icon = 'icons/obj/machinery/modular_terminal.dmi'
+	icon = 'icons/obj/modular_computers/modular_terminal.dmi'
 	icon_screen = "med_comp"
 	icon_keyboard = "med_key"
 	icon_keyboard_emis = "med_key_mask"

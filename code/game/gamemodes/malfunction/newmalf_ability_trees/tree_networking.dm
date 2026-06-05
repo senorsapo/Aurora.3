@@ -111,7 +111,7 @@
 			if (!establish_db_connection(GLOB.dbcon))
 				to_chat(src, SPAN_NOTICE("Unable to connect to the database."))
 				return
-			var/DBQuery/query = GLOB.dbcon.NewQuery("SELECT title, message FROM ss13_ccia_general_notice_list WHERE deleted_at IS NULL")
+			var/datum/db_query/query = SSdbcore.NewQuery("SELECT title, message FROM ss13_ccia_general_notice_list WHERE deleted_at IS NULL")
 			query.Execute()
 
 			var/list/template_names = list()
@@ -120,6 +120,8 @@
 			while (query.NextRow())
 				template_names += query.item[1]
 				templates[query.item[1]] = query.item[2]
+
+			qdel(query)
 
 			// Catch empty list
 			if (!templates.len)
@@ -182,7 +184,7 @@
 			//	return
 			log_ability_use(user, "advanced encryption hack (SUCCESS - title: [reporttitle])")
 			to_world(SPAN_ALERT("New [SSatlas.current_map.company_name] Update available at all communication consoles."))
-			sound_to(world, ('sound/AI/commandreport.ogg'))
+			sound_to_playing_players('sound/AI/commandreport.ogg')
 			post_comm_message(reporttitle, reportbody)
 
 /datum/game_mode/malfunction/verb/elite_encryption_hack()
@@ -233,7 +235,7 @@
 	log_ability_use(user, "system override (STARTED)")
 	var/list/remaining_apcs = list()
 	for(var/obj/machinery/power/apc/A in SSmachinery.processing)
-		if(isNotStationLevel(A.z)) // Only station APCs
+		if(!is_station_level(A.z)) // Only station APCs
 			continue
 		if(A.hacker == user || A.aidisabled) 		// This one is already hacked, or AI control is disabled on it.
 			continue
@@ -279,7 +281,7 @@
 	sleep(300)
 	// Hack all APCs, including those built during hack sequence.
 	for(var/obj/machinery/power/apc/A in SSmachinery.processing)
-		if((!A.hacker || A.hacker != src) && !A.aidisabled && isStationLevel(A.z))
+		if((!A.hacker || A.hacker != src) && !A.aidisabled && is_station_level(A.z))
 			A.ai_hack(src)
 
 	log_ability_use(user, "system override (FINISHED)")

@@ -16,7 +16,7 @@
 /obj/machinery/computer/ship/targeting/terminal
 	name = "targeting systems terminal"
 	desc = "A targeting systems terminal using Zavodskoi software."
-	icon = 'icons/obj/machinery/modular_terminal.dmi'
+	icon = 'icons/obj/modular_computers/modular_terminal.dmi'
 	icon_screen = "hostile"
 	icon_keyboard = "red_key"
 	icon_keyboard_emis = "red_key_mask"
@@ -30,6 +30,7 @@
 	return INITIALIZE_HINT_LATELOAD
 
 /obj/machinery/computer/ship/targeting/LateInitialize()
+	. = ..()
 	if(SSatlas.current_map.use_overmap && !linked)
 		var/my_sector = GLOB.map_sectors["[z]"]
 		if(istype(my_sector, /obj/effect/overmap/visitable))
@@ -55,7 +56,7 @@
 	if(data["mobile_platform"])
 		data["platform_direction"] = platform_direction
 		data["platform_directions"] = list("NORTH", "NORTHEAST", "EAST", "SOUTHEAST", "SOUTH", "SOUTHWEST", "WEST", "NORTHWEST")
-	if(linked.targeting)
+	if(linked?.targeting)
 		for(var/obj/machinery/ship_weapon/SW in linked.ship_weapons)
 			if(!SW.special_firing_mechanism)
 				data["guns"] += list(get_gun_data(SW))

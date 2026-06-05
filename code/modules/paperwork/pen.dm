@@ -1,11 +1,11 @@
 /* Pens!
  * Contains:
- *		Pens
- *		PDA Pens
- *		Sleepy Pens
- *		Coloured Pens
- *		Parapens
- *		Fountain Pens
+ * * Pens
+ * * PDA Pens
+ * * Sleepy Pens
+ * * Coloured Pens
+ * * Parapens
+ * * Fountain Pens
  */
 
 
@@ -15,13 +15,13 @@
 /obj/item/pen
 	name = "pen"
 	desc = "An instrument for writing or drawing. This one is in black."
-	desc_info = {"This is an item for writing down your thoughts, on paper or elsewhere. The following special commands are available:
+	desc_extended = {"This is an item for writing down your thoughts, on paper or elsewhere. The following special commands are available:
 		<br>
 		Pen and crayon commands
 		\[br\] : Creates a linebreak.
 		\[center\] - \[/center\] : Centers the text.
 		\[h1\] - \[/h1\] : Makes the text a first level heading.
-		\[h2\] - \[/h2\] : Makes the text a second level headin.
+		\[h2\] - \[/h2\] : Makes the text a second level heading.
 		\[h3\] - \[/h3\] : Makes the text a third level heading.
 		\[b\] - \[/b\] : Makes the text bold.
 		\[i\] - \[/i\] : Makes the text italic.
@@ -30,8 +30,11 @@
 		\[redacted\] - \[/redacted\] : Covers the text in an unbreachable black box.
 		\[sign\] : Inserts a signature of your name in a foolproof way.
 		\[field\] : Inserts an invisible field which lets you start type from there. Useful for forms.
-		\[date\] : Inserts today's station date.
+		\[date\] : Inserts today's date.
 		\[time\] : Inserts the current station time.
+		\[cr\] : Inserts the credit symbol.
+		\[tajdate\] : Inserts the current date on Adhomai.
+		\[tajtime\] : Inserts the current time on Adhomai.
 		<br>
 		Pen Exclusive Commands
 		\[small\] - \[/small\] : Decreases the size of the text.
@@ -43,18 +46,22 @@
 	item_state = "pen"
 	slot_flags = SLOT_BELT | SLOT_EARS
 	throwforce = 0
-	w_class = ITEMSIZE_TINY
+	w_class = WEIGHT_CLASS_TINY
 	throw_speed = 7
 	throw_range = 15
 	matter = list(DEFAULT_WALL_MATERIAL = 10)
 	drop_sound = 'sound/items/drop/accessory.ogg'
 	pickup_sound = 'sound/items/pickup/accessory.ogg'
 
-	var/colour = "black" // Ink colour.
-	var/cursive = FALSE // Done here so other pen variants can access the cursive variable.
+	/// Ink colour.
+	var/colour = "black"
+	/// Done here so other pen variants can access the cursive variable.
+	var/cursive = FALSE
+	tool_behaviour = TOOL_PEN
 
-/obj/item/pen/ispen()
-	return TRUE
+/obj/item/pen/mechanics_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "Pens can be used on paper to write, or on a wide variety of objects, machinery, etc. to label or rename them."
 
 /*
  * PDA Pens
@@ -97,7 +104,7 @@
 	colour = "green"
 
 /obj/item/pen/invisible
-	desc = "An instrument for writing or drawing with ink. This one has invisible ink."
+	desc = "An instrument for writing or drawing with ink. This one has invisible (white) ink."
 	icon_state = "pen"
 	colour = "white"
 
@@ -106,6 +113,10 @@
 	icon_state = "pen_multi"
 	var/selectedColor = 1
 	var/colors = list("black", "blue", "red", "green", "yellow")
+
+/obj/item/pen/multi/mechanics_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "Use this on yourself to change the current pen color."
 
 /obj/item/pen/multi/attack_self(mob/user)
 	if(++selectedColor > 3)
@@ -133,6 +144,10 @@
 	icon_state = "pen_fountain"
 	throwforce = 1 //pointy
 	colour = "#1c1713" //dark ashy brownish
+
+/obj/item/pen/fountain/mechanics_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "Use this on yourself to toggle between normal and cursive script."
 
 /obj/item/pen/fountain/attack_self(var/mob/user)
 	playsound(loc, 'sound/items/penclick.ogg', 50, 1)
@@ -172,25 +187,29 @@
 	slot_flags = SLOT_BELT
 	origin_tech = list(TECH_MATERIAL = 2, TECH_ILLEGAL = 5)
 
+/obj/item/pen/reagent/antagonist_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "Use this on someone to inject them with its current reagents. They'll definitely notice."
+
 /obj/item/pen/reagent/Initialize()
 	. = ..()
 	create_reagents(30)
 
-/obj/item/pen/reagent/attack(mob/living/M, mob/user)
+/obj/item/pen/reagent/attack(mob/living/target_mob, mob/living/user, target_zone)
 	. = ..()
-	if(!ismob(M))
+	if(!ismob(target_mob))
 		return
-	if(M.can_inject(user, 1))
+	if(target_mob.can_inject(user, 1))
 		if(reagents.total_volume)
-			if(M.reagents)
+			if(target_mob.reagents)
 				var/contained_reagents = reagents.get_reagents()
-				var/trans = reagents.trans_to_mob(M, 30, CHEM_BLOOD)
-				to_chat(user, SPAN_ALERT("You stab \the [M] with \the [src], injecting all of its contents.")) // To the stabber.
-				to_chat(M, SPAN_WARNING("You feel a small <b>pinch</b>!")) // To the stabbed.
-				M.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has been stabbed with [name] by [user.name] ([user.ckey])</font>")
-				user.attack_log += text("\[[time_stamp()]\] <span class='warning'>Used the [name] to stab [M.name] ([M.ckey])</span>")
-				msg_admin_attack("[user.name] ([user.ckey]) Used the [name] to stab [M.name] ([M.ckey]) (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user),ckey_target=key_name(M))
-				admin_inject_log(user, M, src, contained_reagents, reagents.get_temperature(), trans) // Admin log.
+				var/trans = reagents.trans_to_mob(target_mob, 30, CHEM_BLOOD)
+				to_chat(user, SPAN_ALERT("You stab \the [target_mob] with \the [src], injecting all of its contents.")) // To the stabber.
+				to_chat(target_mob, SPAN_WARNING("You feel a small <b>pinch</b>!")) // To the stabbed.
+				target_mob.attack_log += "\[[time_stamp()]\] <font color='orange'>Has been stabbed with [name] by [user.name] ([user.ckey])</font>"
+				user.attack_log += "\[[time_stamp()]\] <span class='warning'>Used the [name] to stab [target_mob.name] ([target_mob.ckey])</span>"
+				msg_admin_attack("[user.name] ([user.ckey]) Used the [name] to stab [target_mob.name] ([target_mob.ckey]) (<A href='byond://?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user),ckey_target=key_name(target_mob))
+				admin_inject_log(user, target_mob, src, contained_reagents, reagents.get_temperature(), trans) // Admin log.
 
 /*
  * Sleepy Pens
@@ -203,11 +222,16 @@
 /*
  * Parapens
  */
+
 /obj/item/pen/reagent/paralysis
 	icon_state = "pen_red"
 	colour = "red"
 	origin_tech = list(TECH_MATERIAL = 2, TECH_ILLEGAL = 5)
 	reagents_to_add = list(/singleton/reagent/toxin/dextrotoxin = 10) // ~5 minutes worth of paralysis. Measured from falling over to getting up.
+
+/obj/item/pen/reagent/paralysis/antagonist_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "You recall this pen contains approximately five minutes' worth of paralyzing agents."
 
 /obj/item/pen/reagent/purge
 	icon_state = "pen_green"
@@ -215,11 +239,19 @@
 	origin_tech = list(TECH_MATERIAL = 2, TECH_ILLEGAL = 5)
 	reagents_to_add = list(/singleton/reagent/fluvectionem = 5)
 
+/obj/item/pen/reagent/purge/antagonist_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "You recall this pen contains a paralysis counteragent for removing the effect early if desired."
+
 /obj/item/pen/reagent/healing
 	icon_state = "pen_green"
 	colour = "green"
 	origin_tech = list(TECH_MATERIAL = 2, TECH_ILLEGAL = 5)
 	reagents_to_add = list(/singleton/reagent/tricordrazine = 10, /singleton/reagent/dermaline = 5, /singleton/reagent/bicaridine = 5)
+
+/obj/item/pen/reagent/healing/antagonist_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "You recall this pen contains a number of healing chemicals."
 
 /obj/item/pen/reagent/pacifier
 	icon_state = "pen_blue"
@@ -227,11 +259,19 @@
 	origin_tech = list(TECH_MATERIAL = 2, TECH_ILLEGAL = 5)
 	reagents_to_add = list(/singleton/reagent/wulumunusha = 2, /singleton/reagent/pacifier = 15, /singleton/reagent/drugs/cryptobiolin = 10)
 
+/obj/item/pen/reagent/pacifier/antagonist_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "You recall this pen contains a mixture of chemicals to pacify its victim."
+
 /obj/item/pen/reagent/hyperzine
 	icon_state = "pen_yellow"
 	colour = "yellow"
 	origin_tech = list(TECH_MATERIAL = 2, TECH_ILLEGAL = 5)
 	reagents_to_add = list(/singleton/reagent/hyperzine = 10)
+
+/obj/item/pen/reagent/hyperzine/antagonist_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "You recall this pen contains hyperzine."
 
 /obj/item/pen/reagent/poison
 	icon_state = "pen_red"
@@ -239,11 +279,20 @@
 	origin_tech = list(TECH_MATERIAL = 2, TECH_ILLEGAL = 5)
 	reagents_to_add = list(/singleton/reagent/toxin/cyanide = 1, /singleton/reagent/lexorin = 20)
 
+/obj/item/pen/reagent/poison/antagonist_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "You recall this pen contains deadly poison."
+
 /*
  * Chameleon pen
  */
 /obj/item/pen/chameleon
 	var/signature = ""
+
+/obj/item/pen/chameleon/antagonist_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "Use the Change Pen Colour verb to set the colour you want to use. Note that this pen can write in invisible (white) ink!"
+	. += "Use this on yourself to set the current signature you want to use. Perfect for forging names on otherwise foolproof signature fields."
 
 /obj/item/pen/chameleon/attack_self(mob/user)
 	signature = sanitize(input("Enter new signature. Leave blank for 'Anonymous'", "New Signature", signature))
@@ -262,7 +311,7 @@
 
 /obj/item/pen/chameleon/verb/set_colour()
 	set name = "Change Pen Colour"
-	set category = "Object"
+	set category = "Object.Held"
 	set src in usr
 
 	var/list/possible_colours = list ("Yellow", "Green", "Pink", "Blue", "Orange", "Cyan", "Red", "Invisible", "Black")
@@ -302,7 +351,7 @@
 	icon_state = "crayonred"
 	drop_sound = 'sound/items/drop/gloves.ogg'
 	pickup_sound = 'sound/items/pickup/gloves.ogg'
-	w_class = ITEMSIZE_TINY
+	w_class = WEIGHT_CLASS_TINY
 	attack_verb = list("attacked", "coloured")
 	colour = "#FF0000" //RGB
 	var/shadeColour = "#220000" //RGB
@@ -325,7 +374,11 @@
 	item_state = "combipen"
 	colour = "#1c1713" //dark ashy brownish
 	cursive = FALSE
-	w_class = ITEMSIZE_TINY
+	w_class = WEIGHT_CLASS_TINY
+
+/obj/item/pen/augment/mechanics_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "Use this on yourself to change the current pen color, or to toggle between normal and cursive script."
 
 /obj/item/pen/augment/attack_self(mob/user)
 	var/choice = input(user, "Would you like to change colour or writing style?", "Pen Selector") as null|anything in list("Colour", "Style")

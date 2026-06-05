@@ -1,14 +1,17 @@
-/obj/structure/table
-	icon = 'icons/obj/structure/tables/table.dmi'
-	var/table_mat
-	var/table_reinf
-	var/no_cargo
-	build_amt = 1
-	// note : material_alteration does not work here because it is constructed piece by piece and not spawned in one shot like chairs
+// note : material_alteration does not work here because it is constructed piece by piece and not spawned in one shot like chairs
 
 /obj/structure/table/standard
 	icon_state = "solid_preview"
 	table_mat = DEFAULT_TABLE_MATERIAL
+
+/obj/structure/table/standard/flipped
+	icon_state = "solid_flip0"
+	flipped = TRUE
+
+/obj/structure/table/standard/flipped/Initialize()
+	. = ..()
+	if(dir != NORTH)
+		layer = ABOVE_HUMAN_LAYER
 
 /obj/structure/table/steel
 	icon = 'icons/obj/structure/tables/steel_table.dmi'
@@ -23,7 +26,7 @@
 	table_mat = MATERIAL_MARBLE
 
 /obj/structure/table/reinforced
-	icon_state = "reinf_preview"
+	icon_state = "reinf_solid_preview"
 	table_mat = DEFAULT_TABLE_MATERIAL
 	table_reinf = DEFAULT_TABLE_REINF_MATERIAL
 

@@ -15,7 +15,7 @@
 	req_access = list(227)
 	},
 /obj/structure/table/steel,
-/obj/item/device/radio,
+/obj/item/radio,
 /obj/machinery/light{
 	dir = 8
 	},
@@ -80,7 +80,8 @@
 	cover_set = 1;
 	health = 120;
 	icon_state = "cover_1";
-	maxhealth = 120
+	maxhealth = 120;
+	req_one_access = list(227)
 	},
 /turf/simulated/floor/exoplanet/tiled{
 	temperature = 315.15
@@ -133,6 +134,18 @@
 /area/moghes_ozeuoi)
 "oJ" = (
 /obj/structure/closet/crate,
+/obj/item/clothing/accessory/poncho/unathimantle{
+	color = "#42330f"
+	},
+/obj/item/clothing/accessory/poncho/unathimantle{
+	color = "#42330f"
+	},
+/obj/item/clothing/suit/unathi/robe/kilt{
+	color = "#DBC684"
+	},
+/obj/item/clothing/suit/unathi/robe/kilt{
+	color = "#DBC684"
+	},
 /turf/simulated/floor/exoplanet/tiled{
 	temperature = 315.15
 	},
@@ -168,6 +181,14 @@
 	temperature = 315.15
 	},
 /area/moghes_ozeuoi)
+"ui" = (
+/obj/structure/closet/crate,
+/obj/item/clothing/accessory/poncho,
+/obj/item/clothing/accessory/poncho/green,
+/turf/simulated/floor/exoplanet/tiled{
+	temperature = 315.15
+	},
+/area/moghes_ozeuoi)
 "uE" = (
 /obj/structure/bed/stool/bar,
 /obj/machinery/light{
@@ -184,7 +205,7 @@
 /obj/machinery/turretid{
 	pixel_y = 30;
 	req_access = list(227);
-	control_area = "Clan Ozeui Outpost";
+	control_area = "Clan Ozeuoi Outpost";
 	check_arrest = 0;
 	check_records = 0
 	},
@@ -271,9 +292,9 @@
 /obj/item/weldingtool/largetank,
 /obj/item/crowbar/red,
 /obj/item/crowbar/red,
-/obj/item/device/multitool,
-/obj/item/device/multitool,
-/obj/item/device/multitool,
+/obj/item/multitool,
+/obj/item/multitool,
+/obj/item/multitool,
 /turf/simulated/floor/exoplanet/tiled{
 	temperature = 315.15
 	},
@@ -308,10 +329,10 @@
 /obj/item/clothing/gloves/yellow/specialu,
 /obj/item/clothing/gloves/yellow/specialu,
 /obj/item/clothing/gloves/yellow/specialu,
-/obj/item/device/geiger,
-/obj/item/device/geiger,
-/obj/item/device/geiger,
-/obj/item/device/geiger,
+/obj/item/geiger,
+/obj/item/geiger,
+/obj/item/geiger,
+/obj/item/geiger,
 /turf/simulated/floor/exoplanet/tiled{
 	temperature = 315.15
 	},
@@ -324,14 +345,15 @@
 	cover_set = 1;
 	health = 120;
 	icon_state = "cover_1";
-	maxhealth = 120
+	maxhealth = 120;
+	req_one_access = list(227)
 	},
 /turf/simulated/floor/exoplanet/tiled{
 	temperature = 315.15
 	},
 /area/moghes_ozeuoi)
 "Ga" = (
-/obj/machinery/autolathe,
+/obj/machinery/fabricator/autolathe,
 /obj/machinery/light{
 	dir = 1
 	},
@@ -424,7 +446,8 @@
 	cover_set = 1;
 	health = 120;
 	icon_state = "cover_1";
-	maxhealth = 120
+	maxhealth = 120;
+	req_one_access = list(227)
 	},
 /turf/simulated/floor/exoplanet/tiled{
 	temperature = 315.15
@@ -438,7 +461,8 @@
 	cover_set = 1;
 	health = 120;
 	icon_state = "cover_1";
-	maxhealth = 120
+	maxhealth = 120;
+	req_one_access = list(227)
 	},
 /turf/simulated/floor/exoplanet/tiled{
 	temperature = 315.15
@@ -481,7 +505,8 @@
 	cover_set = 1;
 	health = 120;
 	icon_state = "cover_1";
-	maxhealth = 120
+	maxhealth = 120;
+	req_one_access = list(227)
 	},
 /turf/simulated/floor/exoplanet/tiled{
 	temperature = 315.15
@@ -532,7 +557,8 @@
 	cover_set = 1;
 	health = 120;
 	icon_state = "cover_1";
-	maxhealth = 120
+	maxhealth = 120;
+	req_one_access = list(227)
 	},
 /turf/simulated/floor/exoplanet/tiled{
 	temperature = 315.15
@@ -1542,7 +1568,7 @@ xo
 xo
 ly
 xo
-oJ
+ui
 zx
 oJ
 xo
@@ -1726,7 +1752,7 @@ xo
 xo
 xo
 xo
-jW
+FN
 xo
 xo
 xo

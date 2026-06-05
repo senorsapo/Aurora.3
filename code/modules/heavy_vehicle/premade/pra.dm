@@ -1,10 +1,10 @@
 /mob/living/heavy_vehicle/premade/pra_egg
 	name = "\improper P'kus-3 exosuit"
 	desc = "An exosuit developed by the People's Republic of Adhomai for the Division Experimental Exosuit."
-	icon_state = "durand"
+	icon_state = "egg"
 
 	e_head = /obj/item/mech_component/sensors/pra_egg
-	e_body = /obj/item/mech_component/chassis/pra_egg
+	e_body = /obj/item/mech_component/chassis/pra_egg/nuclear
 	e_arms = /obj/item/mech_component/manipulators/pra_egg
 	e_legs = /obj/item/mech_component/propulsion/pra_egg
 	e_color = COLOR_STEEL
@@ -18,7 +18,7 @@
 	icon_state = "egg_arms"
 	melee_damage = 15
 	action_delay = 5
-	max_damage = 100
+	max_damage = 150
 	power_use = 2500
 	has_hardpoints = list(HARDPOINT_RIGHT_HAND, HARDPOINT_LEFT_HAND)
 
@@ -28,6 +28,7 @@
 	desc = "Strong legs adapted for the Adhomian rought terrain."
 	icon_state = "egg_legs"
 	move_delay = 3
+	damaged_delay = 3
 	turn_delay = 3
 	max_damage = 100
 	power_use = 2500
@@ -42,7 +43,7 @@
 	max_damage = 50
 	power_use = 50000
 	vision_flags = SEE_MOBS
-	see_invisible = SEE_INVISIBLE_NOLIGHTING
+	lighting_alpha = LIGHTING_PLANE_ALPHA_SOMEWHAT_INVISIBLE
 
 /obj/item/mech_component/sensors/pra_egg/prebuild()
 	..()
@@ -59,16 +60,19 @@
 	max_damage = 150
 	power_use = 250
 
+/obj/item/mech_component/chassis/pra_egg/nuclear
+	cell_type = /obj/item/cell/mecha/nuclear
+
 /obj/item/mech_component/chassis/pra_egg/prebuild()
 	. = ..()
 	mech_armor = new /obj/item/robot_parts/robot_component/armor/mech(src)
 
 /mob/living/heavy_vehicle/premade/pra_egg/armored
 	desc = "An exosuit developed by the People's Republic of Adhomai for the Division Experimental Exosuit. This one is a heavily armored version."
-	icon_state = "durand"
+	icon_state = "egg_heavy"
 
 	e_head = /obj/item/mech_component/sensors/pra_egg/armored
-	e_body = /obj/item/mech_component/chassis/pra_egg/armored
+	e_body = /obj/item/mech_component/chassis/pra_egg/armored/nuclear
 	e_arms = /obj/item/mech_component/manipulators/pra_egg/armored
 
 /obj/item/mech_component/manipulators/pra_egg/armored
@@ -77,7 +81,7 @@
 	desc = "Armored robotics arms designed to carry large weapons."
 	icon_state = "strong_egg_arms"
 	melee_damage = 20
-	max_damage = 120
+	max_damage = 180
 
 /obj/item/mech_component/sensors/pra_egg/armored
 	name = "armored P'kus-3 sensors"
@@ -86,13 +90,15 @@
 	icon_state = "strong_egg_head"
 	max_damage = 120
 
-/obj/item/mech_component/chassis/pra_egg/armored
+/obj/item/mech_component/chassis/pra_egg/armored/nuclear
 	name = "armored P'kus-3 chassis"
 	exosuit_desc_string = "an armored chassis"
 	desc = "A armored composite frame keeps the armor of this chassis respectable, but the interior spacious."
 	icon_state = "strong_egg_body"
 	max_damage = 150
 	power_use = 250
+
+	cell_type = /obj/item/cell/mecha/nuclear
 
 /obj/item/mech_component/chassis/pra_egg/armored/prebuild()
 	. = ..()

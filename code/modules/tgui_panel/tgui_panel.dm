@@ -51,7 +51,9 @@
 	window.send_asset(get_asset_datum(/datum/asset/simple/namespaced/tgfont))
 	window.send_asset(get_asset_datum(/datum/asset/spritesheet/chat))
 	// Other setup
+	request_telemetry()
 	addtimer(CALLBACK(src, PROC_REF(on_initialize_timed_out)), 5 SECONDS)
+	window.send_message("testTelemetryCommand")
 
 /**
  * private
@@ -60,7 +62,7 @@
  */
 /datum/tgui_panel/proc/on_initialize_timed_out()
 	// Currently does nothing but sending a message to old chat.
-	to_target(client, "<span class=\"userdanger\">Failed to load fancy chat, click <a href='?src=[REF(src)];reload_tguipanel=1'>HERE</a> to attempt to reload it.</span>")
+	to_target(client, "<span class=\"userdanger\">Failed to load fancy chat, click <a href='byond://?src=[REF(src)];reload_tguipanel=1'>HERE</a> to attempt to reload it.</span>")
 
 /**
  * private
@@ -86,6 +88,9 @@
 		return TRUE
 	if(type == "audio/setAdminMusicVolume")
 		client.admin_music_volume = payload["volume"]
+		return TRUE
+	if(type == "telemetry")
+		analyze_telemetry(payload)
 		return TRUE
 /**
  * public

@@ -1,11 +1,11 @@
 /obj/item/gun/projectile/cannon
-	name = "hand cannon"
+	name = "culverin"
 	desc = "An amalgamation of ancient and modern tajaran technology. This old naval cannon was turned into a portable firearm."
-	icon = 'icons/obj/guns/cannon.dmi'
+	icon = 'icons/obj/guns/faction/nka/cannon.dmi'
 	icon_state = "cannon"
 	item_state = "cannon"
 	caliber = "cannon"
-	w_class = ITEMSIZE_LARGE
+	w_class = WEIGHT_CLASS_BULKY
 	origin_tech = list(TECH_COMBAT = 3, TECH_MATERIAL = 3)
 	load_method = SINGLE_CASING
 	handle_casings = DELETE_CASINGS
@@ -29,13 +29,13 @@
 	return ..()
 
 /obj/item/gun/projectile/nuke
-	name = "nuclear launcher"
+	name = "\improper Mai'Dhaztha Model anti-material nuclear warhead launcher"
 	desc = "A launcher weapon designated to fire miniaturized nuclear warheads."
-	icon = 'icons/obj/guns/blockbuster.dmi' // hoh
+	icon = 'icons/obj/guns/faction/pra/maidhaztha.dmi'
 	icon_state = "blockbuster"
 	item_state = "blockbuster"
 	caliber = "nuke"
-	w_class = ITEMSIZE_LARGE
+	w_class = WEIGHT_CLASS_BULKY
 	origin_tech = list(TECH_COMBAT = 5, TECH_MATERIAL = 4)
 	load_method = MAGAZINE
 	handle_casings = DELETE_CASINGS
@@ -69,11 +69,11 @@
 /obj/item/gun/projectile/recoilless_rifle
 	name = "adhomian recoilless rifle"
 	desc = "An inexpensive, one use anti-tank weapon used extensively by the Tajaran armed forces."
-	icon = 'icons/obj/guns/recoilless_rifle.dmi'
+	icon = 'icons/obj/guns/faction/dpra/recoilless_rifle.dmi'
 	icon_state = "recoilless_rifle"
 	item_state = "recoilless_rifle"
 	caliber = "recoilless_rifle"
-	w_class = ITEMSIZE_LARGE
+	w_class = WEIGHT_CLASS_BULKY
 	origin_tech = list(TECH_COMBAT = 3, TECH_MATERIAL = 3)
 	slot_flags = null
 	fire_sound = 'sound/weapons/recoilless_rifle.ogg'
@@ -110,13 +110,13 @@
 	return FALSE
 
 /obj/item/gun/projectile/peac
-	name = "point entry anti-materiel cannon"
+	name = "\improper SCC-PEAC-1 anti-materiel cannon"
 	desc = "An SCC-designed, man-portable cannon meant to neutralize mechanized threats. The disgustingly large accelerator capacitors make room for only one shot, so make it count."
-	icon = 'icons/obj/guns/peac.dmi'
+	icon = 'icons/obj/guns/faction/stellar_corporate_conglomerate/peac.dmi'
 	icon_state = "peac"
 	item_state = "peac"
 	caliber = "peac"
-	w_class = ITEMSIZE_LARGE
+	w_class = WEIGHT_CLASS_BULKY
 	origin_tech = list(TECH_COMBAT = 5, TECH_MATERIAL = 5)
 	load_method = SINGLE_CASING
 	fire_sound = 'sound/weapons/gunshot/cannon.ogg'
@@ -134,6 +134,10 @@
 
 	max_shells = 1
 
+/obj/item/gun/projectile/peac/mechanics_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "The PEAC can only be fired when wielded. Loading it by yourself is delayed by 5 seconds. Someone else can load it for you by clicking on you with the ammo in their hand as you wield it, shortening the delay to half a second."
+
 /obj/item/gun/projectile/peac/update_icon()
 	..()
 	if(loaded.len)
@@ -148,3 +152,35 @@
 		to_chat(user, SPAN_WARNING("You can't fire without stabilizing \the [src]!"))
 		return 0
 	return ..()
+
+/obj/item/gun/projectile/peac/unloaded
+	ammo_type = null
+
+/obj/item/gun/projectile/peac/load_ammo(var/obj/item/A, mob/user, var/skip_delay = FALSE)
+	if(!istype(A, /obj/item/ammo_casing))
+		return ..()
+	var/obj/item/ammo_casing/C = A
+	if(caliber != C.caliber)
+		to_chat(user,SPAN_WARNING("\The [C] does not fit."))
+		return
+	if(loaded.len >= max_shells)
+		to_chat(user,SPAN_WARNING("[src] is full."))
+		return
+
+	if(!skip_delay)
+		user.visible_message("[user] starts loading \a [C] into [src].", SPAN_NOTICE("You start loading \a [C] into [src]..."))
+		if(!do_after(user, 5 SECONDS, target = src))
+			to_chat(user, SPAN_WARNING("You stop loading \the [src]."))
+			return
+
+	if(loaded.len >= max_shells)
+		to_chat(user,SPAN_WARNING("[src] is full."))
+		return
+	if(!istype(C) || C.loc != user)
+		to_chat(user, SPAN_WARNING("You no longer have \a [C] to load."))
+		return
+	if(caliber != C.caliber)
+		to_chat(user,SPAN_WARNING("\The [C] does not fit."))
+		return
+
+	. = ..()

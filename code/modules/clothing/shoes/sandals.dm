@@ -9,18 +9,13 @@
 	contained_sprite = TRUE
 	icon_auto_adapt = TRUE
 	icon_supported_species_tags = list("taj")
+	color = WOOD_COLOR_GENERIC
 
 /obj/item/clothing/shoes/sandals/geta
 	name = "geta"
 	desc = "A pair of rather plain Konyang-styled wooden sandals."
 	icon_state = "geta"
 	item_state = "geta"
-
-/obj/item/clothing/shoes/sandals/flipflop
-	name = "flip flops"
-	desc = "A pair of foam flip flops. For those not afraid to show a little ankle."
-	icon_state = "thongsandal"
-	item_state = "thongsandal"
 
 /obj/item/clothing/shoes/sandals/clogs
 	name = "rubber clogs"
@@ -44,7 +39,7 @@
 	item_state = "caligae"
 	force = 11
 	armor = list(
-			melee = ARMOR_MELEE_KNIVES
+			MELEE = ARMOR_MELEE_KNIVES
 			)
 	siemens_coefficient = 0.75
 	body_parts_covered = FEET|LEGS

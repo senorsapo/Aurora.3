@@ -25,14 +25,14 @@
 	status_flags = CANPUSH
 	pass_flags = PASSTABLE
 
-	maxHealth = 125
+	maxhealth = 125
 	health = 125
 	max_stamina = -1
 
 	melee_damage_lower = 12
 	melee_damage_upper = 16
 
-	see_invisible = SEE_INVISIBLE_NOLIGHTING
+	lighting_alpha = LIGHTING_PLANE_ALPHA_SOMEWHAT_INVISIBLE
 	stop_sight_update = TRUE
 
 	minbodytemp = 0
@@ -43,7 +43,7 @@
 
 	wander = FALSE
 
-	attacktext = "glomped"
+	attacktext = "glomps"
 	attack_sound = 'sound/effects/blobattack.ogg'
 	blood_overlay_icon = null
 
@@ -51,7 +51,7 @@
 	var/melee_damage_disguised = 0
 	var/eat_while_disguised = FALSE
 	var/atom/movable/form = null
-	var/static/list/blacklist_typecache = typecacheof(list(/obj/screen, /obj/singularity, /mob/living/simple_animal/hostile/morph, /obj/effect, /obj/structure/gore))
+	var/static/list/blacklist_typecache = typecacheof(list(/atom/movable/screen, /obj/singularity, /mob/living/simple_animal/hostile/morph, /obj/effect, /obj/structure/gore))
 
 /mob/living/simple_animal/hostile/morph/Initialize()
 	. = ..()
@@ -65,13 +65,13 @@
 	for(var/spell in morph_spells)
 		add_spell(new spell, "const_spell_ready")
 
-/mob/living/simple_animal/hostile/morph/Life()
+/mob/living/simple_animal/hostile/morph/Life(seconds_per_tick, times_fired)
 	. = ..()
 	if(stat == DEAD && healths)
 		healths.icon_state = "health6"
 	if(.)
 		if(healths)
-			switch(health / maxHealth * 100)
+			switch(health / maxhealth * 100)
 				if(100 to INFINITY)
 					healths.icon_state = "health0"
 				if(80 to 100)
@@ -88,21 +88,21 @@
 					healths.icon_state = "health6"
 
 		if((stat == UNCONSCIOUS || resting) && locate(/obj/structure/gore/tendrils) in loc)
-			health = min(maxHealth, health + 1)
+			health = min(maxhealth, health + 1)
 
 /mob/living/simple_animal/hostile/morph/verb/toggle_darkview()
 	set name = "Toggle Darkvision"
 	set desc = "Toggles whether you see light or not."
 	set category = "Abilities"
 
-	if(see_invisible == SEE_INVISIBLE_NOLIGHTING)
-		see_invisible = SEE_INVISIBLE_LIVING
+	if(lighting_alpha == LIGHTING_PLANE_ALPHA_MOSTLY_INVISIBLE)
+		lighting_alpha = LIGHTING_PLANE_ALPHA_MOSTLY_INVISIBLE
 	else
-		see_invisible = SEE_INVISIBLE_NOLIGHTING
+		lighting_alpha = LIGHTING_PLANE_ALPHA_VISIBLE
 
 /mob/living/simple_animal/hostile/morph/examine(mob/user, distance, is_adjacent, infix, suffix, show_extended)
 	if(morphed)
-		return form.examine(user)
+		return form.examine(arglist(args))
 	else
 		return ..()
 
@@ -212,12 +212,12 @@
 	if(morphed && user != src)
 		restore()
 
-/mob/living/simple_animal/hostile/morph/hitby(atom/movable/AM, speed)
+/mob/living/simple_animal/hostile/morph/hitby(atom/movable/hitting_atom, skipcatch, hitpush, blocked, datum/thrownthing/throwingdatum)
 	..()
 	if(morphed)
 		restore()
 
-/mob/living/simple_animal/hostile/morph/attack_generic(mob/user, damage, attack_message)
+/mob/living/simple_animal/hostile/morph/attack_generic(mob/user, damage, attack_message, environment_smash, armor_penetration, attack_flags, damage_type)
 	..()
 	if(morphed)
 		restore()
@@ -233,8 +233,8 @@
 		return
 	return ..()
 
-/mob/living/simple_animal/hostile/morph/add_spell(var/spell/spell_to_add, var/spell_base = "wiz_spell_ready", var/master_type = /obj/screen/movable/spell_master)
+/mob/living/simple_animal/hostile/morph/add_spell(var/spell/spell_to_add, var/spell_base = "wiz_spell_ready", var/master_type = /atom/movable/screen/movable/spell_master)
 	. = ..()
-	for(var/obj/screen/movable/spell_master/spell_master in spell_masters)
+	for(var/atom/movable/screen/movable/spell_master/spell_master in spell_masters)
 		spell_master.open_state = "morph_open"
 		spell_master.closed_state = "morph_closed"

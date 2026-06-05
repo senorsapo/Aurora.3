@@ -16,7 +16,7 @@
 	excavation_amount = 0.5
 	drill_sound = 'sound/weapons/thudswoosh.ogg'
 	drill_verb = "brushing"
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	can_wield = 0
 
 	action_button_name = null
@@ -35,7 +35,7 @@
 	excavation_amount = 1
 	drill_sound = 'sound/items/Screwdriver.ogg'
 	drill_verb = "delicately picking"
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	can_wield = 0
 
 	action_button_name = null
@@ -54,7 +54,7 @@
 	excavation_amount = 2
 	drill_sound = 'sound/items/Screwdriver.ogg'
 	drill_verb = "delicately picking"
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	can_wield = 0
 
 	action_button_name = null
@@ -73,7 +73,7 @@
 	excavation_amount = 3
 	drill_sound = 'sound/items/Screwdriver.ogg'
 	drill_verb = "delicately picking"
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	can_wield = 0
 
 	action_button_name = null
@@ -92,7 +92,7 @@
 	excavation_amount = 4
 	drill_sound = 'sound/items/Screwdriver.ogg'
 	drill_verb = "delicately picking"
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	can_wield = 0
 
 	action_button_name = null
@@ -111,7 +111,7 @@
 	excavation_amount = 5
 	drill_sound = 'sound/items/Screwdriver.ogg'
 	drill_verb = "delicately picking"
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	can_wield = 0
 
 	action_button_name = null
@@ -130,7 +130,7 @@
 	excavation_amount = 6
 	drill_sound = 'sound/items/Screwdriver.ogg'
 	drill_verb = "delicately picking"
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	can_wield = 0
 
 	action_button_name = null
@@ -146,9 +146,9 @@
 	force = 15
 	desc = "A smaller, more precise version of the pickaxe (30 centimetre excavation depth)."
 	excavation_amount = 15
-	drill_sound = /singleton/sound_category/pickaxe_sound
+	drill_sound = SFX_PICKAXE
 	drill_verb = "clearing"
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	can_wield = 0
 
 	action_button_name = null
@@ -156,15 +156,15 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Pack for holding pickaxes
 
-/obj/item/storage/box/excavation
+/obj/item/storage/box/unique/excavation
 	name = "excavation pick set"
 	icon = 'icons/obj/storage/boxes.dmi'
 	icon_state = "excavation"
 	desc = "A rugged metal case containing a set of standardized picks used in archaeological digs."
 	item_state = "box"
-	foldable = /obj/item/stack/material/cardboard //BubbleWrap
+	foldable = null
 	storage_slots = 7
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	can_hold = list(/obj/item/pickaxe/brush,\
 	/obj/item/pickaxe/one_pick,\
 	/obj/item/pickaxe/two_pick,\
@@ -172,11 +172,11 @@
 	/obj/item/pickaxe/four_pick,\
 	/obj/item/pickaxe/five_pick,\
 	/obj/item/pickaxe/six_pick)
-	max_storage_space = 18
-	max_w_class = ITEMSIZE_NORMAL
-	use_to_pickup = 1 // for picking up broken bulbs, not that most people will try
+	make_exact_fit = TRUE
+	max_w_class = WEIGHT_CLASS_NORMAL
+	use_to_pickup = TRUE // for picking up broken bulbs, not that most people will try
 
-/obj/item/storage/box/excavation/fill()
+/obj/item/storage/box/unique/excavation/fill()
 	..()
 	new /obj/item/pickaxe/brush(src)
 	new /obj/item/pickaxe/one_pick(src)

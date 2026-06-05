@@ -3,11 +3,12 @@
 	desc = "An unfinished concealed knife, it looks like the screws need to be tightened."
 	icon = 'icons/obj/weapons_build.dmi'
 	icon_state = "butterflystep1"
+	w_class = WEIGHT_CLASS_SMALL
 	force_divisor = 0.1
 	thrown_force_divisor = 0.1
 
 /obj/item/material/butterflyconstruction/attackby(obj/item/attacking_item, mob/user)
-	if(attacking_item.isscrewdriver())
+	if(attacking_item.tool_behaviour == TOOL_SCREWDRIVER)
 		to_chat(user, "You finish the concealed blade weapon.")
 		new /obj/item/material/knife/butterfly(user.loc, material.name)
 		qdel(src)
@@ -18,6 +19,7 @@
 	desc = "A knife blade. Unusable as a weapon without a grip."
 	icon = 'icons/obj/weapons_build.dmi'
 	icon_state = "butterfly2"
+	w_class = WEIGHT_CLASS_SMALL
 	force_divisor = 0.1
 	thrown_force_divisor = 0.1
 
@@ -26,6 +28,7 @@
 	desc = "A plasteel grip with screw fittings for a blade."
 	icon = 'icons/obj/weapons_build.dmi'
 	icon_state = "butterfly1"
+	w_class = WEIGHT_CLASS_SMALL
 	force_divisor = 0.1
 	thrown_force_divisor = 0.1
 
@@ -47,7 +50,7 @@
 	obj_flags = OBJ_FLAG_CONDUCTABLE
 	force = 18
 	throwforce = 10
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	attack_verb = list("hit", "bludgeoned", "whacked", "bonked")
 	force_divisor = 0.1
 	thrown_force_divisor = 0.1
@@ -71,7 +74,7 @@
 		var/obj/item/material/tmp_shard = attacking_item
 		finished = new /obj/item/material/twohanded/spear(get_turf(user), tmp_shard.material.name)
 		to_chat(user, SPAN_NOTICE("You fasten \the [attacking_item] to the top of the rod with the cable."))
-	else if(attacking_item.iswirecutter())
+	else if(attacking_item.tool_behaviour == TOOL_WIRECUTTER)
 		finished = new /obj/item/melee/baton/cattleprod(get_turf(user), forward_cable_color)
 		to_chat(user, SPAN_NOTICE("You fasten the wirecutters to the top of the rod with the cable, prongs outward."))
 	else if(istype(attacking_item, /obj/item/material/wirerod))
@@ -94,7 +97,7 @@
 	item_state = "rods"
 	force = 11
 	throwforce = 3
-	w_class = ITEMSIZE_LARGE
+	w_class = WEIGHT_CLASS_BULKY
 	attack_verb = list("hit", "bludgeoned", "whacked", "bonked")
 	force_divisor = 0.1
 	thrown_force_divisor = 0.1
@@ -123,7 +126,7 @@
 	icon_state = "spearhead"
 	force = 11
 	throwforce = 5
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	attack_verb = list("attacked", "poked")
 	force_divisor = 0.1
 	thrown_force_divisor = 0.1
@@ -169,7 +172,7 @@
 	icon = 'icons/obj/weapons_build.dmi'
 	icon_state = "woodcirclet"
 	item_state = "woodcirclet"
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 
 /obj/item/woodcirclet/attackby(obj/item/attacking_item, mob/user)
 	var/obj/item/complete = null

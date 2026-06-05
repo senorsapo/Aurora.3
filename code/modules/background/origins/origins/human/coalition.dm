@@ -61,17 +61,16 @@
 	possible_accents = list(ACCENT_GADPATHUR)
 	possible_citizenships = list(CITIZENSHIP_COALITION)
 	possible_religions = list(RELIGION_NONE, RELIGION_CHRISTIANITY, RELIGION_ISLAM, RELIGION_BUDDHISM, RELIGION_HINDU, RELIGION_TAOISM, RELIGION_JUDAISM, RELIGION_SIKHISM, RELIGION_OTHER)
-	origin_traits = list(TRAIT_ORIGIN_LIGHT_SENSITIVE)
-	origin_traits_descriptions = list("have a small resistance to radiation", "are more sensitive to bright lights")
+	origin_traits_descriptions = list("have a small resistance to radiation")
 
 /singleton/origin_item/origin/gadpathur/on_apply(var/mob/living/carbon/human/H)
 	. = ..()
-	H.AddComponent(/datum/component/armor, list(rad = ARMOR_RAD_MINOR))
+	H.AddComponent(/datum/component/armor, list(RAD = ARMOR_RAD_MINOR))
 
 /singleton/origin_item/origin/gadpathur/on_remove(mob/living/carbon/human/H)
 	. = ..()
 	var/datum/component/armor/armor_component = H.GetComponent(/datum/component/armor)
-	armor_component?.RemoveComponent()
+	qdel(armor_component)
 
 /singleton/origin_item/origin/gadpathur_exile
 	name = "Gadpathurian Exile"
@@ -79,17 +78,16 @@
 	possible_accents = list(ACCENT_GADPATHUR)
 	possible_citizenships = list(CITIZENSHIP_COALITION, CITIZENSHIP_BIESEL)
 	possible_religions = RELIGIONS_COALITION
-	origin_traits = list(TRAIT_ORIGIN_LIGHT_SENSITIVE)
-	origin_traits_descriptions = list("have a small resistance to radiation", "are more sensitive to bright lights")
+	origin_traits_descriptions = list("have a small resistance to radiation")
 
 /singleton/origin_item/origin/gadpathur_exile/on_apply(var/mob/living/carbon/human/H)
 	. = ..()
-	H.AddComponent(/datum/component/armor, list(rad = ARMOR_RAD_MINOR))
+	H.AddComponent(/datum/component/armor, list(RAD = ARMOR_RAD_MINOR))
 
 /singleton/origin_item/origin/gadpathur_exile/on_remove(mob/living/carbon/human/H)
 	. = ..()
 	var/datum/component/armor/armor_component = H.GetComponent(/datum/component/armor)
-	armor_component?.RemoveComponent()
+	qdel(armor_component)
 
 /singleton/origin_item/origin/assunzione
 	name = "Republic of Assunzione"
@@ -116,9 +114,8 @@
 	possible_religions = RELIGIONS_COALITION
 
 /singleton/origin_item/origin/orepit
-	name = "Orepit"
+	name = "Ecclesiarchy of Orepit"
 	desc = "The human population of Orepit includes the Native Orepitters, who descend from Hephaestus employees following the abandoned mining mission on the planet, as well as immigrants and pilgrims of the Trinary religion."
-	important_information = "All humans from Orepit are vetted Trinary faithful, and their behaviour should reflect that."
 	possible_accents = list(ACCENT_OREPIT, ACCENT_PROVIDENCE)
-	possible_citizenships = list(CITIZENSHIP_NONE, CITIZENSHIP_COALITION)
-	possible_religions =  list(RELIGION_TRINARY)
+	possible_citizenships = list(CITIZENSHIP_OREPIT, CITIZENSHIP_COALITION)
+	possible_religions =  RELIGIONS_COALITION

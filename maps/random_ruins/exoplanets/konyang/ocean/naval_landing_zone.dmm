@@ -20,7 +20,6 @@
 /obj/structure/tank_wall/carbon_dioxide{
 	density = 0;
 	icon_state = "co2-11";
-	layer = 10.1;
 	opacity = 0
 	},
 /turf/simulated/floor/reinforced/carbon_dioxide,
@@ -176,7 +175,7 @@
 	dir = 1
 	},
 /obj/item/pen,
-/obj/item/device/binoculars,
+/obj/item/binoculars,
 /turf/simulated/floor/wood,
 /area/konyang_landing_zone/command_center)
 "cb" = (
@@ -197,7 +196,7 @@
 "ch" = (
 /obj/structure/table/wood,
 /obj/structure/window/reinforced,
-/obj/item/device/flashlight/lamp/box{
+/obj/item/flashlight/lamp/box{
 	pixel_y = 5
 	},
 /turf/simulated/floor/carpet/magenta,
@@ -290,12 +289,6 @@
 "de" = (
 /turf/simulated/floor/wood,
 /area/konyang_landing_zone/command_center)
-"dg" = (
-/obj/structure/railing/mapped{
-	layer = 9.1
-	},
-/turf/simulated/floor/asphalt,
-/area/konyang_landing_zone)
 "di" = (
 /turf/simulated/wall,
 /area/konyang_landing_zone/command_center/living)
@@ -309,7 +302,6 @@
 /obj/structure/tank_wall/air{
 	density = 0;
 	icon_state = "air6";
-	layer = 10.1;
 	opacity = 0
 	},
 /turf/simulated/floor/reinforced/airmix,
@@ -447,7 +439,7 @@
 /obj/structure/railing/mapped{
 	dir = 8
 	},
-/obj/effect/floor_decal/industrial/outline/engineering,
+/obj/effect/floor_decal/industrial/outline/operations,
 /turf/simulated/floor/tiled,
 /area/konyang_landing_zone)
 "eU" = (
@@ -524,11 +516,11 @@
 /obj/effect/decal/road_marking/no_pass{
 	dir = 4
 	},
-/obj/item/device/gps/mining,
-/obj/item/device/gps/mining{
+/obj/item/gps/mining,
+/obj/item/gps/mining{
 	pixel_x = -7
 	},
-/obj/item/device/gps/mining{
+/obj/item/gps/mining{
 	pixel_x = 6
 	},
 /obj/structure/table/rack,
@@ -623,9 +615,7 @@
 /area/konyang_landing_zone)
 "gH" = (
 /obj/structure/ledge,
-/obj/structure/railing/mapped{
-	layer = 9.1
-	},
+/obj/structure/railing/mapped,
 /turf/simulated/floor/asphalt,
 /area/konyang_landing_zone)
 "gM" = (
@@ -843,7 +833,7 @@
 /obj/item/shovel/spade,
 /obj/item/shovel/spade,
 /obj/item/wrench,
-/obj/effect/floor_decal/industrial/outline/engineering,
+/obj/effect/floor_decal/industrial/outline/operations,
 /turf/simulated/floor/asphalt,
 /area/konyang_landing_zone)
 "kc" = (
@@ -933,8 +923,7 @@
 	dir = 4
 	},
 /obj/effect/decal/exterior_stairs/left{
-	dir = 4;
-	layer = 2.01
+	dir = 4
 	},
 /turf/simulated/floor/asphalt,
 /area/konyang_landing_zone)
@@ -957,7 +946,7 @@
 /turf/simulated/floor/tiled/white,
 /area/konyang_landing_zone/command_center)
 "lw" = (
-/obj/effect/floor_decal/industrial/outline/engineering,
+/obj/effect/floor_decal/industrial/outline/operations,
 /turf/simulated/floor/tiled,
 /area/konyang_landing_zone)
 "lA" = (
@@ -1021,7 +1010,7 @@
 /area/konyang_landing_zone)
 "mJ" = (
 /obj/effect/decal/road_marking/turn_right,
-/obj/effect/floor_decal/industrial/outline/engineering,
+/obj/effect/floor_decal/industrial/outline/operations,
 /turf/simulated/floor/tiled,
 /area/konyang_landing_zone)
 "mL" = (
@@ -1349,10 +1338,10 @@
 "rH" = (
 /obj/structure/table/stone/marble,
 /obj/effect/floor_decal/corner/pink/diagonal,
-/obj/item/storage/box/produce{
+/obj/item/storage/box/large/produce{
 	pixel_y = -10
 	},
-/obj/item/storage/box/produce{
+/obj/item/storage/box/large/produce{
 	pixel_y = -18
 	},
 /turf/simulated/floor/tiled/white,
@@ -1372,8 +1361,7 @@
 /area/konyang_landing_zone/command_center/landing_pads)
 "rQ" = (
 /obj/effect/decal/exterior_stairs/left{
-	dir = 4;
-	layer = 2.01
+	dir = 4
 	},
 /turf/simulated/floor/asphalt,
 /area/konyang_landing_zone)
@@ -1394,12 +1382,12 @@
 /turf/simulated/floor/reinforced,
 /area/konyang_landing_zone/command_center/garage)
 "sp" = (
-/obj/effect/floor_decal/industrial/outline/engineering,
+/obj/effect/floor_decal/industrial/outline/operations,
 /obj/structure/closet/crate/trashcart,
 /turf/simulated/floor/tiled,
 /area/konyang_landing_zone/command_center)
 "su" = (
-/obj/structure/shipping_container{
+/obj/structure/shipping_container_old{
 	icon_state = "red3"
 	},
 /obj/effect/overlay/container_logo{
@@ -1409,9 +1397,7 @@
 /area/konyang_landing_zone)
 "sK" = (
 /obj/machinery/atmospherics/pipe/simple/visible/black,
-/obj/effect/decal/exterior_stairs/half/left{
-	layer = 3
-	},
+/obj/effect/decal/exterior_stairs/half/left,
 /obj/structure/lattice/catwalk/indoor/urban,
 /obj/structure/railing/mapped{
 	dir = 8
@@ -1483,8 +1469,8 @@
 /obj/structure/table/wood,
 /obj/item/paper_bin,
 /obj/item/pen,
-/obj/item/device/camera,
-/obj/item/device/camera_film,
+/obj/item/camera,
+/obj/item/camera_film,
 /obj/item/tape_roll{
 	pixel_x = 14
 	},
@@ -1536,13 +1522,13 @@
 	dir = 8
 	},
 /obj/structure/window/reinforced,
-/obj/item/clothing/accessory/silversun/random,
-/obj/item/clothing/accessory/silversun/random,
+/obj/item/clothing/under/dressshirt/silversun/random,
+/obj/item/clothing/under/dressshirt/silversun/random,
 /obj/item/clothing/accessory/armband/scc,
 /obj/item/clothing/accessory/armband/scc,
 /obj/item/flag/scc,
 /obj/item/flag/scc,
-/obj/item/device/taperecorder,
+/obj/item/taperecorder,
 /turf/simulated/floor/carpet/purple,
 /area/konyang_landing_zone/command_center/living)
 "uy" = (
@@ -1569,7 +1555,7 @@
 /obj/item/clothing/gloves/yellow,
 /obj/item/storage/box/lights/bulbs,
 /obj/item/storage/box/lights,
-/obj/item/device/suit_cooling_unit,
+/obj/item/suit_cooling_unit,
 /turf/simulated/floor/reinforced,
 /area/konyang_landing_zone/command_center/garage)
 "vc" = (
@@ -1614,9 +1600,7 @@
 /obj/structure/ledge{
 	dir = 6
 	},
-/obj/structure/railing/mapped{
-	layer = 9.1
-	},
+/obj/structure/railing/mapped,
 /turf/simulated/floor/asphalt,
 /area/konyang_landing_zone)
 "vy" = (
@@ -1660,9 +1644,7 @@
 /obj/machinery/door/blast/regular{
 	id = "lz_vehiclebay"
 	},
-/obj/structure/plasticflaps/airtight{
-	layer = 2.5
-	},
+/obj/structure/plasticflaps/airtight,
 /turf/simulated/floor/reinforced,
 /area/konyang_landing_zone/command_center/garage)
 "wo" = (
@@ -1722,7 +1704,7 @@
 	},
 /obj/machinery/recharger,
 /obj/structure/table/wood,
-/obj/item/device/flashlight/flare{
+/obj/item/flashlight/flare{
 	pixel_x = 8
 	},
 /turf/simulated/floor/wood,
@@ -1851,7 +1833,6 @@
 /area/konyang_landing_zone/command_center/living)
 "yJ" = (
 /obj/machinery/atmospherics/unary/vent_pump/siphon/on/atmos{
-	frequency = 1441;
 	id_tag = "lz_co2_out";
 	dir = 1
 	},
@@ -1950,8 +1931,7 @@
 	},
 /obj/machinery/atmospherics/binary/pump/aux{
 	dir = 4;
-	name = "Air to Connector";
-	layer = 2.8
+	name = "Air to Connector"
 	},
 /turf/simulated/floor/tiled,
 /area/konyang_landing_zone/command_center/landing_pads)
@@ -1976,7 +1956,6 @@
 /obj/structure/tank_wall/air{
 	density = 0;
 	icon_state = "air5";
-	layer = 10.1;
 	opacity = 0
 	},
 /turf/simulated/floor/reinforced/airmix,
@@ -2009,7 +1988,6 @@
 /obj/structure/tank_wall/air{
 	density = 0;
 	icon_state = "air12";
-	layer = 10.1;
 	opacity = 0
 	},
 /turf/simulated/floor/reinforced/airmix,
@@ -2050,7 +2028,7 @@
 /area/konyang_landing_zone)
 "BR" = (
 /obj/structure/bed/stool/chair/sofa/left/red,
-/obj/item/device/laser_pointer,
+/obj/item/laser_pointer,
 /turf/simulated/floor/carpet/magenta,
 /area/konyang_landing_zone/command_center/living)
 "Ch" = (
@@ -2073,7 +2051,6 @@
 /obj/structure/tank_wall/carbon_dioxide{
 	density = 0;
 	icon_state = "co2-6";
-	layer = 10.1;
 	opacity = 0
 	},
 /turf/simulated/floor/reinforced/carbon_dioxide,
@@ -2131,16 +2108,6 @@
 /obj/structure/lattice/catwalk/indoor/urban,
 /turf/simulated/floor/plating,
 /area/konyang_landing_zone/command_center/landing_pads)
-"Dy" = (
-/obj/structure/railing/mapped{
-	dir = 8
-	},
-/obj/structure/railing/mapped{
-	layer = 9.1;
-	dir = 4
-	},
-/turf/simulated/floor/tiled,
-/area/konyang_landing_zone)
 "DB" = (
 /obj/structure/cable{
 	icon_state = "1-4"
@@ -2209,9 +2176,7 @@
 /obj/structure/ledge{
 	dir = 10
 	},
-/obj/structure/railing/mapped{
-	layer = 9.1
-	},
+/obj/structure/railing/mapped,
 /turf/simulated/floor/asphalt,
 /area/konyang_landing_zone)
 "Fe" = (
@@ -2259,7 +2224,6 @@
 /obj/structure/tank_wall/carbon_dioxide{
 	density = 0;
 	icon_state = "co2-12";
-	layer = 10.1;
 	opacity = 0
 	},
 /turf/simulated/floor/reinforced/carbon_dioxide,
@@ -2356,7 +2320,7 @@
 /obj/item/wrench,
 /obj/machinery/light/small,
 /obj/item/clothing/gloves/yellow,
-/obj/item/device/analyzer,
+/obj/item/analyzer,
 /obj/item/extinguisher,
 /turf/simulated/floor/tiled/full,
 /area/konyang_landing_zone/command_center/reactor)
@@ -2453,9 +2417,7 @@
 /obj/structure/utility_pole/street/on{
 	dir = 8
 	},
-/obj/structure/railing/mapped{
-	layer = 9.1
-	},
+/obj/structure/railing/mapped,
 /turf/simulated/floor/asphalt,
 /area/konyang_landing_zone)
 "Ht" = (
@@ -2489,7 +2451,7 @@
 /turf/simulated/floor/asphalt,
 /area/konyang_landing_zone)
 "IK" = (
-/obj/effect/floor_decal/industrial/outline/engineering,
+/obj/effect/floor_decal/industrial/outline/operations,
 /obj/structure/closet/crate/plastic,
 /turf/simulated/floor/tiled,
 /area/konyang_landing_zone/command_center)
@@ -2637,7 +2599,7 @@
 /turf/simulated/floor/asphalt,
 /area/konyang_landing_zone)
 "KU" = (
-/obj/structure/shipping_container{
+/obj/structure/shipping_container_old{
 	icon_state = "red1"
 	},
 /obj/effect/overlay/container_logo{
@@ -2973,14 +2935,13 @@
 "PO" = (
 /obj/machinery/atmospherics/unary/vent_pump/siphon/on/atmos{
 	dir = 1;
-	frequency = 1441;
 	id_tag = "lz_air_out"
 	},
 /turf/simulated/floor/reinforced/airmix,
 /area/konyang_landing_zone/command_center/landing_pads)
 "PX" = (
 /obj/machinery/shipsensors/weak,
-/obj/item/device/gps/stationary{
+/obj/item/gps/stationary{
 	pixel_x = -23;
 	name = "static GPS (Command Center)";
 	gpstag = "SCC-FOB"
@@ -3020,9 +2981,7 @@
 	dir = 1
 	},
 /obj/effect/decal/road_marking,
-/obj/structure/railing/mapped{
-	layer = 9.1
-	},
+/obj/structure/railing/mapped,
 /turf/simulated/floor/asphalt,
 /area/konyang_landing_zone)
 "QJ" = (
@@ -3056,9 +3015,7 @@
 	d2 = 8;
 	icon_state = "4-8"
 	},
-/obj/machinery/atmospherics/portables_connector/aux{
-	layer = 2.8
-	},
+/obj/machinery/atmospherics/portables_connector/aux,
 /obj/structure/lattice/catwalk/indoor/urban,
 /turf/simulated/floor/sidewalk/flat,
 /area/konyang_landing_zone/command_center/landing_pads)
@@ -3103,7 +3060,7 @@
 /turf/simulated/floor/plating,
 /area/konyang_landing_zone/command_center/landing_pads)
 "RD" = (
-/obj/machinery/autolathe,
+/obj/machinery/fabricator/autolathe,
 /obj/effect/floor_decal/spline/fancy/wood{
 	dir = 5
 	},
@@ -3133,26 +3090,26 @@
 /obj/item/stack/material/glass/full{
 	pixel_y = 9
 	},
-/obj/item/device/radio{
+/obj/item/radio{
 	pixel_x = 8;
 	pixel_y = 3
 	},
-/obj/item/device/radio{
+/obj/item/radio{
 	pixel_x = 8;
 	pixel_y = 3
 	},
 /obj/effect/floor_decal/spline/fancy/wood{
 	dir = 1
 	},
-/obj/item/device/ano_scanner{
+/obj/item/ano_scanner{
 	pixel_x = -5
 	},
-/obj/item/device/measuring_tape,
+/obj/item/measuring_tape,
 /turf/simulated/floor/wood,
 /area/konyang_landing_zone/command_center)
 "Ss" = (
 /obj/effect/decal/road_marking/turn_left,
-/obj/effect/floor_decal/industrial/outline/engineering,
+/obj/effect/floor_decal/industrial/outline/operations,
 /turf/simulated/floor/tiled,
 /area/konyang_landing_zone)
 "Sw" = (
@@ -3161,7 +3118,7 @@
 /obj/effect/floor_decal/spline/fancy/wood{
 	dir = 5
 	},
-/obj/item/device/paicard,
+/obj/item/paicard,
 /turf/simulated/floor/wood,
 /area/konyang_landing_zone/command_center/living)
 "Sx" = (
@@ -3325,8 +3282,7 @@
 /area/konyang_landing_zone/command_center/landing_pads)
 "Ua" = (
 /obj/effect/decal/curb{
-	dir = 1;
-	layer = 2.02
+	dir = 1
 	},
 /turf/simulated/floor/asphalt,
 /area/konyang_landing_zone)
@@ -3425,7 +3381,6 @@
 /obj/structure/tank_wall/air{
 	density = 0;
 	icon_state = "air11";
-	layer = 10.1;
 	opacity = 0
 	},
 /turf/simulated/floor/reinforced/airmix,
@@ -3559,7 +3514,6 @@
 /obj/structure/tank_wall/carbon_dioxide{
 	density = 0;
 	icon_state = "co2-5";
-	layer = 10.1;
 	opacity = 0
 	},
 /turf/simulated/floor/reinforced/carbon_dioxide,
@@ -3596,9 +3550,7 @@
 /obj/structure/utility_pole/street/on{
 	dir = 1
 	},
-/obj/structure/railing/mapped{
-	layer = 9.1
-	},
+/obj/structure/railing/mapped,
 /turf/simulated/floor/asphalt,
 /area/konyang_landing_zone)
 "Yd" = (
@@ -3683,7 +3635,7 @@
 /turf/simulated/floor/plating,
 /area/konyang_landing_zone/command_center/landing_pads)
 "Zy" = (
-/obj/structure/shipping_container{
+/obj/structure/shipping_container_old{
 	icon_state = "red2"
 	},
 /obj/effect/overlay/container_logo,
@@ -6150,7 +6102,7 @@ FU
 FU
 lb
 FU
-dg
+kx
 ae
 ae
 gF
@@ -6252,13 +6204,13 @@ ae
 Lr
 Lr
 Lr
-Dy
-Dy
-Dy
-Dy
-Dy
-Dy
-Dy
+MH
+MH
+MH
+MH
+MH
+MH
+MH
 eS
 eS
 eS

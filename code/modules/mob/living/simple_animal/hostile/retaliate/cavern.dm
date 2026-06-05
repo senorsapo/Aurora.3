@@ -19,14 +19,14 @@
 	mob_size = 12
 
 	health = 60
-	maxHealth = 60
+	maxhealth = 60
 	blood_type = "#006666"
 	melee_damage_lower = 10
 	melee_damage_upper = 10
-	attacktext = "chomped"
+	attacktext = "chomps"
 	attack_sound = 'sound/weapons/bite.ogg'
 	speed = 4
-	projectiletype = /obj/item/projectile/beam/cavern
+	projectiletype = /obj/projectile/beam/cavern
 	projectilesound = 'sound/magic/lightningbolt.ogg'
 	break_stuff_probability = 2
 
@@ -45,16 +45,16 @@
 	faction = "cavern"
 
 	flying = TRUE
-	see_invisible = SEE_INVISIBLE_NOLIGHTING
+	lighting_alpha = LIGHTING_PLANE_ALPHA_SOMEWHAT_INVISIBLE
 
 /mob/living/simple_animal/hostile/retaliate/cavern_dweller/Allow_Spacemove(var/check_drift = 0)
 	return 1
 
-/obj/item/projectile/beam/cavern
+/obj/projectile/beam/cavern
 	name = "electrical discharge"
 	icon_state = "stun"
 	damage_type = DAMAGE_BURN
-	check_armor = "energy"
+	check_armor = ENERGY
 	damage = 5
 
 	muzzle_type = /obj/effect/projectile/muzzle/stun
@@ -67,7 +67,9 @@
 	else
 		..()
 
-/obj/item/projectile/beam/cavern/on_hit(var/atom/target, var/blocked = 0)
+/obj/projectile/beam/cavern/on_hit(atom/target, blocked, def_zone)
+	. = ..()
+
 	if(ishuman(target))
 		var/mob/living/carbon/human/M = target
 		var/shock_damage = rand(10,20)
@@ -80,9 +82,9 @@
 	icon_state = "sadrone"
 	icon_living = "sadrone"
 	icon_dead = "sadrone_dead"
-	move_to_delay = 5
+	speed = 5
 	health = 60
-	maxHealth = 60
+	maxhealth = 60
 	harm_intent_damage = 5
 	ranged = 1
 	smart_ranged = TRUE
@@ -91,11 +93,11 @@
 	melee_damage_lower = 0
 	melee_damage_upper = 0
 	attacktext = "barrels into"
-	attack_sound = /singleton/sound_category/punch_sound
+	attack_sound = SFX_PUNCH
 	a_intent = I_HURT
 	speak_emote = list("chirps","buzzes","whirrs")
 	emote_hear = list("chirps cheerfully","buzzes","whirrs","hums placidly","chirps","hums")
-	projectiletype = /obj/item/projectile/beam/plasmacutter
+	projectiletype = /obj/projectile/beam/plasmacutter
 	projectilesound = 'sound/weapons/plasma_cutter.ogg'
 	destroy_surroundings = FALSE
 	min_oxy = 0
@@ -108,7 +110,6 @@
 	max_n2 = 0
 	minbodytemp = 0
 	light_range = 10
-	light_wedge = LIGHT_WIDE
 	psi_pingable = FALSE
 
 	faction = "sol"
@@ -136,7 +137,7 @@
 		O.forceMove(src.loc)
 	qdel(src)
 
-/mob/living/simple_animal/hostile/retaliate/minedrone/Life()
+/mob/living/simple_animal/hostile/retaliate/minedrone/Life(seconds_per_tick, times_fired)
 	..()
 	if(ore_count<20)
 		FindOre()
@@ -175,7 +176,7 @@
 			break
 
 	if(target_ore)
-		SSmove_manager.move_to(src, target_ore, 1, move_to_delay)
+		GLOB.move_manager.move_to(src, target_ore, 1, speed)
 	else if(found_turfs.len)
 		for(var/turf/simulated/mineral/M in found_turfs)
 			if(!QDELETED(M) || !M.mineral)

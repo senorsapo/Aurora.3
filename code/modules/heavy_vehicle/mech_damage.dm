@@ -9,10 +9,10 @@
 	if(!(effecttype in list(DAMAGE_PAIN, STUTTER, EYE_BLUR, DROWSY, STUN, WEAKEN)))
 		. = ..()
 
-/mob/living/heavy_vehicle/hitby(atom/movable/AM, speed)
+/mob/living/heavy_vehicle/hitby(atom/movable/hitting_atom, skipcatch, hitpush, blocked, datum/thrownthing/throwingdatum)
 	if(LAZYLEN(pilots) && (!hatch_closed || !prob(body.pilot_coverage)))
 		var/mob/living/pilot = pick(pilots)
-		return pilot.hitby(AM, speed)
+		return pilot.hitby(arglist(args))
 	. = ..()
 
 /mob/living/heavy_vehicle/get_armors_by_zone(def_zone, damage_type, damage_flags)
@@ -28,31 +28,31 @@
 				. += chassis_armor
 
 /mob/living/heavy_vehicle/updatehealth()
-	maxHealth = body.mech_health
-	health = maxHealth-(getFireLoss()+getBruteLoss())
+	maxhealth = body.mech_health
+	health = maxhealth-(getFireLoss()+getBruteLoss())
 
 /mob/living/heavy_vehicle/adjustFireLoss(var/amount, var/obj/item/mech_component/C)
 	if(C)
 		C.take_brute_damage(amount)
-		C.update_health()
+		C.update_component_damage()
 	else
 		var/list/components = list(body, arms, legs, head)
 		components = shuffle(components)
 		for(var/obj/item/mech_component/MC in components)
 			MC.take_burn_damage(amount)
-			MC.update_health()
+			MC.update_component_damage()
 			break
 
 /mob/living/heavy_vehicle/adjustBruteLoss(var/amount, var/obj/item/mech_component/C)
 	if(C)
 		C.take_brute_damage(amount)
-		C.update_health()
+		C.update_component_damage()
 	else
 		var/list/components = list(body, arms, legs, head)
 		components = shuffle(components)
 		for(var/obj/item/mech_component/MC in components)
 			MC.take_burn_damage(amount)
-			MC.update_health()
+			MC.update_component_damage()
 			break
 
 /mob/living/heavy_vehicle/proc/zoneToComponent(var/zone)
@@ -70,7 +70,7 @@
 		else
 			return body
 
-/mob/living/heavy_vehicle/apply_damage(damage = 0, damagetype = DAMAGE_BRUTE, def_zone, blocked, used_weapon, damage_flags = 0, armor_pen, silent = FALSE)
+/mob/living/heavy_vehicle/apply_damage(damage = 0, damagetype = DAMAGE_BRUTE, def_zone, used_weapon, damage_flags = 0, armor_pen, silent = FALSE)
 	if(!damage)
 		return 0
 

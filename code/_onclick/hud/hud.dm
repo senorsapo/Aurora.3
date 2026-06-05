@@ -2,27 +2,27 @@
 	The global hud:
 	Uses the same visual objects for all players.
 */
-var/datum/global_hud/global_hud	// Initialized in SSatoms.
-var/list/global_huds
+GLOBAL_DATUM_INIT(global_hud, /datum/global_hud, new)
+GLOBAL_LIST(global_huds)
 
-/datum/hud/var/obj/screen/grab_intent
-/datum/hud/var/obj/screen/hurt_intent
-/datum/hud/var/obj/screen/disarm_intent
-/datum/hud/var/obj/screen/help_intent
+/datum/hud/var/atom/movable/screen/grab_intent
+/datum/hud/var/atom/movable/screen/hurt_intent
+/datum/hud/var/atom/movable/screen/disarm_intent
+/datum/hud/var/atom/movable/screen/help_intent
 
 /datum/global_hud
-	var/obj/screen/vr_control
-	var/obj/screen/druggy
-	var/obj/screen/blurry
+	var/atom/movable/screen/vr_control
+	var/atom/movable/screen/druggy
+	var/atom/movable/screen/blurry
 	var/list/vimpaired
 	var/list/darkMask
-	var/obj/screen/nvg
-	var/obj/screen/thermal
-	var/obj/screen/meson
-	var/obj/screen/science
+	var/atom/movable/screen/nvg
+	var/atom/movable/screen/thermal
+	var/atom/movable/screen/meson
+	var/atom/movable/screen/science
 
 /datum/global_hud/proc/setup_overlay(var/icon_state, var/color)
-	var/obj/screen/screen = new /obj/screen()
+	var/atom/movable/screen/screen = new /atom/movable/screen()
 	screen.alpha = 25 // Adjust this if you want goggle overlays to be thinner or thicker.
 	screen.screen_loc = "SOUTHWEST to NORTHEAST" // Will tile up to the whole screen, scaling beyond 15x15 if needed.
 	screen.icon = 'icons/obj/hud_tiled.dmi'
@@ -34,7 +34,7 @@ var/list/global_huds
 
 /datum/global_hud/New()
 	//420erryday psychedellic colours screen overlay for when you are high
-	druggy = new /obj/screen()
+	druggy = new /atom/movable/screen()
 	druggy.screen_loc = ui_entire_screen
 	druggy.icon_state = "druggy"
 	druggy.layer = IMPAIRED_LAYER
@@ -43,14 +43,14 @@ var/list/global_huds
 	druggy.blend_mode = BLEND_MULTIPLY
 
 	//that white blurry effect you get when you eyes are damaged
-	blurry = new /obj/screen()
+	blurry = new /atom/movable/screen()
 	blurry.screen_loc = ui_entire_screen
 	blurry.icon_state = "blurry"
 	blurry.layer = IMPAIRED_LAYER
 	blurry.mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	blurry.alpha = 100
 
-	vr_control = new /obj/screen()
+	vr_control = new /atom/movable/screen()
 	vr_control.icon = 'icons/mob/screen/full.dmi'
 	vr_control.icon_state = "vr_control"
 	vr_control.screen_loc = "1,1"
@@ -62,10 +62,10 @@ var/list/global_huds
 	meson = setup_overlay("scanline", "#9fd800")
 	science = setup_overlay("scanline", "#d600d6")
 
-	var/obj/screen/O
+	var/atom/movable/screen/O
 	var/i
 	//that nasty looking dither you  get when you're short-sighted
-	vimpaired = newlist(/obj/screen,/obj/screen,/obj/screen,/obj/screen)
+	vimpaired = newlist(/atom/movable/screen,/atom/movable/screen,/atom/movable/screen,/atom/movable/screen)
 	O = vimpaired[1]
 	O.screen_loc = "1,1 to 5,15"
 	O = vimpaired[2]
@@ -76,7 +76,7 @@ var/list/global_huds
 	O.screen_loc = "11,1 to 15,15"
 
 	//welding mask overlay black/dither
-	darkMask = newlist(/obj/screen, /obj/screen, /obj/screen, /obj/screen, /obj/screen, /obj/screen, /obj/screen, /obj/screen)
+	darkMask = newlist(/atom/movable/screen, /atom/movable/screen, /atom/movable/screen, /atom/movable/screen, /atom/movable/screen, /atom/movable/screen, /atom/movable/screen, /atom/movable/screen)
 	O = darkMask[1]
 	O.screen_loc = "WEST+2,SOUTH+2 to WEST+4,NORTH-2"
 	O = darkMask[2]
@@ -136,21 +136,43 @@ var/list/global_huds
 	///Boolean, if the action buttons are hidden
 	var/action_buttons_hidden = FALSE
 
-	var/obj/screen/blobpwrdisplay
-	var/obj/screen/blobhealthdisplay
-	var/obj/screen/r_hand_hud_object
-	var/obj/screen/l_hand_hud_object
-	var/obj/screen/action_intent
-	var/obj/screen/movement_intent/move_intent
+	var/atom/movable/screen/blobpwrdisplay
+	var/atom/movable/screen/blobhealthdisplay
+	var/atom/movable/screen/r_hand_hud_object
+	var/atom/movable/screen/l_hand_hud_object
+	var/atom/movable/screen/action_intent
+	var/atom/movable/screen/movement_intent/move_intent
 
 	var/list/adding
 	var/list/other
-	var/list/obj/screen/hotkeybuttons
+	var/list/atom/movable/screen/hotkeybuttons
 
-	var/obj/screen/movable/action_button/hide_toggle/hide_actions_toggle
+	/// See "appearance_flags" in the ref, assoc list of "[plane]" = object
+	var/list/atom/movable/screen/plane_master/plane_masters = list()
+	///Assoc list of controller groups, associated with key string group name with value of the plane master controller ref
+	var/list/atom/movable/plane_master_controller/plane_master_controllers = list()
+
+	var/atom/movable/screen/movable/action_button/hide_toggle/hide_actions_toggle
 
 /datum/hud/New(mob/owner)
 	mymob = owner
+
+	for(var/mytype in subtypesof(/atom/movable/screen/plane_master) - /atom/movable/screen/plane_master/rendering_plate - /atom/movable/screen/plane_master/open_space)
+		var/atom/movable/screen/plane_master/instance = new mytype()
+		plane_masters["[instance.plane]"] = instance
+		if(owner.client)
+			instance.backdrop(mymob)
+
+	for(var/z_level in 0 to OPEN_SPACE_PLANE_END - OPEN_SPACE_PLANE_START) //aurora snowflake: our openspace system works bottom up, not top down like CM's
+		var/atom/movable/screen/plane_master/open_space/instance = new(null, z_level)
+		plane_masters["[instance.plane]"] = instance
+		if(owner.client)
+			instance.backdrop(mymob)
+
+	for(var/mytype in subtypesof(/atom/movable/plane_master_controller))
+		var/atom/movable/plane_master_controller/controller_instance = new mytype(null,src)
+		plane_master_controllers[controller_instance.name] = controller_instance
+
 	instantiate()
 	..()
 
@@ -170,6 +192,9 @@ var/list/global_huds
 	hotkeybuttons = null
 //	item_action_list = null // ?
 	mymob = null
+
+	QDEL_LIST_ASSOC_VAL(plane_masters)
+	QDEL_LIST_ASSOC_VAL(plane_master_controllers)
 
 	. = ..()
 
@@ -206,13 +231,16 @@ var/list/global_huds
 							H.w_uniform.screen_loc = hud_data["loc"]
 					if(slot_wear_suit)
 						if(H.wear_suit)
-							H.wear_suit.screen_loc =hud_data["loc"]
+							H.wear_suit.screen_loc = hud_data["loc"]
 					if(slot_wear_mask)
 						if(H.wear_mask)
-							H.wear_mask.screen_loc =hud_data["loc"]
+							H.wear_mask.screen_loc = hud_data["loc"]
 					if(slot_wrists)
 						if(H.wrists)
-							H.wrists.screen_loc =	hud_data["loc"]
+							H.wrists.screen_loc = hud_data["loc"]
+					if(slot_pants)
+						if(H.pants)
+							H.pants.screen_loc = hud_data["loc"]
 			else
 				switch(hud_data["slot"])
 					if(slot_head)
@@ -235,16 +263,20 @@ var/list/global_huds
 							H.glasses.screen_loc = null
 					if(slot_w_uniform)
 						if(H.w_uniform)
-							H.w_uniform.screen_loc =null
+							H.w_uniform.screen_loc = null
 					if(slot_wear_suit)
 						if(H.wear_suit)
 							H.wear_suit.screen_loc = null
 					if(slot_wear_mask)
 						if(H.wear_mask)
-							H.wear_mask.screen_loc =null
+							H.wear_mask.screen_loc = null
 					if(slot_wrists)
 						if(H.wrists)
-							H.wrists.screen_loc =	null
+							H.wrists.screen_loc = null
+					if(slot_pants)
+						if(H.pants)
+							H.pants.screen_loc = null
+
 
 /datum/hud/proc/persistant_inventory_update()
 	if(!mymob)
@@ -316,6 +348,15 @@ var/list/global_huds
 
 	mymob.instantiate_hud(src, ui_style, ui_color, ui_alpha)
 
+	plane_masters_update()
+
+/datum/hud/proc/plane_masters_update()
+	// Plane masters are always shown to OUR mob, never to observers
+	for(var/thing in plane_masters)
+		var/atom/movable/screen/plane_master/PM = plane_masters[thing]
+		PM.backdrop(mymob)
+		mymob.client.add_to_screen(PM)
+
 /mob/proc/instantiate_hud(datum/hud/HUD, ui_style, ui_color, ui_alpha)
 	SHOULD_NOT_SLEEP(TRUE)
 	SHOULD_CALL_PARENT(FALSE)
@@ -385,6 +426,7 @@ var/list/global_huds
 
 	hud_used.hidden_inventory_update()
 	hud_used.persistant_inventory_update()
+	hud_used.reorganize_alerts()
 	update_action_buttons()
 
 //Similar to button_pressed_F12() but keeps zone_sel, gun_setting_icon, and healths.
@@ -425,7 +467,7 @@ var/list/global_huds
 	update_action_buttons()
 
 /mob/proc/add_click_catcher()
-	client.screen |= click_catchers
+	client.screen |= GLOB.click_catchers
 
 /mob/abstract/new_player/add_click_catcher()
 	return

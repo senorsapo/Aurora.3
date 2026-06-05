@@ -5,6 +5,7 @@
 	opacity = TRUE
 	density = TRUE
 	blocks_air = TRUE
+	pass_flags_self = PASSCLOSEDTURF
 
 /turf/unsimulated/wall/fakeglass
 	name = "window"
@@ -28,7 +29,8 @@
 		/turf/unsimulated/wall/fakepdoor,
 		/obj/structure/window_frame,
 		/obj/structure/window_frame/unanchored,
-		/obj/structure/window_frame/empty
+		/obj/structure/window_frame/empty,
+		/obj/structure/arch
 	)
 
 /turf/unsimulated/wall/fakepdoor
@@ -39,7 +41,7 @@
 
 /turf/unsimulated/wall/steel
 	icon = 'icons/turf/smooth/composite_solid_color.dmi'
-	icon_state = "map_readable"//the best approximation of the ingame gunmetal blended wall sprite for example
+	icon_state = "map_white"
 	desc = "It's a wall. It appears to be composed of a highly durable alloy and plated with steel."
 	color = COLOR_WALL_GUNMETAL
 	smoothing_flags = SMOOTH_TRUE
@@ -55,6 +57,7 @@
 	icon_state = "map-shuttle"
 	desc = "It's a wall. It appears to be composed of a highly durable alloy."
 	smoothing_flags = SMOOTH_TRUE
+	color = COLOR_WALL_GUNMETAL
 	canSmoothWith = list(
 		/turf/unsimulated/wall/darkshuttlewall,
 		/turf/unsimulated/wall/riveted,
@@ -85,4 +88,19 @@
 	)
 	smoothing_flags = SMOOTH_MORE
 	icon_state = "map_white"
+
+/turf/unsimulated/wall/shuttle/scc_space_ship/cardinal
+	name = "reinforced plastitanium alloy wall"
+	desc = "Effectively impervious to conventional methods of destruction."
+	icon = 'icons/turf/smooth/scc_ship/scc_ship_exterior.dmi'
+	icon_state = "map-wall"
+	smoothing_flags = SMOOTH_MORE
+	canSmoothWith = list(
+		/turf/simulated/wall,
+		/turf/simulated/wall/r_wall,
+		/turf/unsimulated/wall/shuttle/scc_space_ship,
+		/turf/simulated/wall/shuttle/scc_space_ship,
+		/obj/structure/window/shuttle/scc_space_ship,
+		/obj/machinery/door/airlock
+	)
 

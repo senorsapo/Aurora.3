@@ -1,10 +1,8 @@
-/datum/gear/religion
-	abstract_type = /datum/gear/religion
+ABSTRACT_TYPE(/datum/gear/religion)
 	sort_category = "Religion"
 	flags = GEAR_HAS_DESC_SELECTION
 
-/datum/gear/religion/trinary
-	abstract_type = /datum/gear/religion/trinary
+ABSTRACT_TYPE(/datum/gear/religion/trinary)
 	religion = RELIGION_TRINARY
 
 /datum/gear/religion/trinary/mask
@@ -53,12 +51,12 @@
 /datum/gear/religion/trinary/book
 	display_name = "The Order"
 	description = "The holy text of the Trinary Perfection."
-	path = /obj/item/device/versebook/trinary
+	path = /obj/item/versebook/trinary
 
 /datum/gear/religion/trinary/book/temple
 	display_name = "The Voice of Temple"
 	description = "A supplementary holy text belonging to the Lodge of Temple Architect, an order within the Trinary Perfection."
-	path = /obj/item/device/versebook/templeist
+	path = /obj/item/versebook/templeist
 
 /datum/gear/religion/rosary
 	display_name = "rosary"
@@ -105,8 +103,7 @@
 	slot = slot_tie
 	flags = GEAR_HAS_DESC_SELECTION | GEAR_HAS_COLOR_SELECTION
 
-/datum/gear/religion/dominia
-	abstract_type = /datum/gear/religion/dominia
+ABSTRACT_TYPE(/datum/gear/religion/dominia)
 	religion = RELIGION_MOROZ
 
 /datum/gear/religion/dominia/robe
@@ -139,15 +136,15 @@
 /datum/gear/religion/dominia/cape
 	display_name = "dominian outerwear selection"
 	description = "A selection of capes and outerwear worn by the Moroz Holy Tribunal."
-	path = /obj/item/clothing/under/dominia/priest
-	slot = slot_wear_suit
+	path = /obj/item/clothing/accessory/poncho/dominia_cape/tribunalist
+	slot = slot_in_backpack
 
 /datum/gear/religion/dominia/cape/New()
 	..()
 	var/list/cape = list()
-	cape["tribunalist red cape"] = /obj/item/clothing/accessory/poncho/dominia/red
-	cape["tribunalist full cape"] = /obj/item/clothing/accessory/poncho/dominia/red/double
-	cape["tribunalist surcoat"] = /obj/item/clothing/accessory/poncho/dominia/red/surcoat
+	cape["tribunalist red cape"] = /obj/item/clothing/accessory/poncho/dominia_cape/tribunalist
+	cape["tribunalist full cape"] = /obj/item/clothing/accessory/poncho/dominia_cape/tribunalist/double
+	cape["tribunalist surcoat"] = /obj/item/clothing/accessory/poncho/dominia_cape/tribunalist/surcoat
 	gear_tweaks += new /datum/gear_tweak/path(cape)
 
 /datum/gear/religion/dominia/accessory
@@ -176,7 +173,7 @@
 	display_name = "tribunalist medical beret"
 	path = /obj/item/clothing/head/beret/dominia/medical
 	slot = slot_head
-	allowed_roles = list("Chief Medical Officer", "Physician", "Surgeon", "Pharmacist", "First Responder", "Medical Intern", "Medical Personnel")
+	allowed_roles = list("Chief Medical Officer", "Physician", "Surgeon", "Pharmacist", "Paramedic", "Medical Intern", "Medical Personnel")
 
 /datum/gear/religion/dominia/robe_consular
 	display_name = "tribunalist consular uniform"
@@ -184,6 +181,7 @@
 	path = /obj/item/clothing/under/dominia/priest/consular
 	slot = slot_w_uniform
 	allowed_roles = list("Consular Officer")
+	citizenship = CITIZENSHIP_DOMINIA
 
 /datum/gear/religion/dominia/beret_consular
 	display_name = "tribunalist consular beret"
@@ -191,17 +189,19 @@
 	path = /obj/item/clothing/head/beret/dominia/consular
 	slot = slot_head
 	allowed_roles = list("Consular Officer")
+	citizenship = CITIZENSHIP_DOMINIA
 
 /datum/gear/religion/dominia/cape_consular
 	display_name = "tribunalist cousular cape"
 	description = "A truly majestic gold and red cape worn by members of the clergy affiliated with His Majesty's Diplomatic Service."
-	path = /obj/item/clothing/accessory/poncho/dominia/consular
+	path = /obj/item/clothing/accessory/poncho/dominia_cape/tribunalist/consular
 	slot = slot_wear_suit
 	allowed_roles = list("Consular Officer")
+	citizenship = CITIZENSHIP_DOMINIA
 
 /datum/gear/religion/dominia/codex
 	display_name = "tribunal codex"
-	path = /obj/item/device/versebook/tribunal
+	path = /obj/item/versebook/tribunal
 
 /datum/gear/religion/dominia/icon
 	display_name = "tribunal iconography"
@@ -219,14 +219,19 @@
 	dominiaicon["icon of the martyr, valeria"] = /obj/item/sign/painting_frame/martyr/valeria
 	gear_tweaks += new /datum/gear_tweak/path(dominiaicon)
 
-/datum/gear/religion/assunzione
-	abstract_type = /datum/gear/religion/assunzione
+/datum/gear/religion/dominia/lyodii_deck
+	display_name = "lyodii fatesayer cards"
+	description = "A leather box holding a complete deck of Fatesayer cards, used by the people of the Lyod to tell one's fate."
+	path = /obj/item/storage/box/lyodii
+	culture_restriction = list(/singleton/origin_item/culture/dominia)
+
+ABSTRACT_TYPE(/datum/gear/religion/assunzione)
 	religion = RELIGION_LUCEISM
 
 /datum/gear/religion/assunzione/scripture
 	display_name = "luceian scripture"
 	description = "A collection of texts belonging to Luceism, the dominant religion of Assunzione."
-	path = /obj/item/device/versebook/assunzione
+	path = /obj/item/versebook/assunzione
 
 /datum/gear/religion/assunzione/cloak
 	display_name = "assunzione cloak selection"
@@ -259,13 +264,13 @@
 
 /datum/gear/religion/assunzione/scripture
 	display_name = "luceian scripture"
-	path = /obj/item/device/versebook/assunzione
+	path = /obj/item/versebook/assunzione
 
 /datum/gear/religion/assunzione/scripture/New()
 	..()
 	var/list/book = list()
-	book["luceian book of scripture"] = /obj/item/device/versebook/assunzione
-	book["pocket luceian book of scripture"] = /obj/item/device/versebook/assunzione/pocket
+	book["luceian book of scripture"] = /obj/item/versebook/assunzione
+	book["pocket luceian book of scripture"] = /obj/item/versebook/assunzione/pocket
 	gear_tweaks += new /datum/gear_tweak/path(book)
 
 /datum/gear/religion/assunzione/orb

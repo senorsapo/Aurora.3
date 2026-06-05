@@ -17,8 +17,14 @@
 
 	//Organ damage stats.
 	var/damage = 0 // amount of damage to the organ
-	var/surge_damage = 0 // EMP damage counter.
-	var/surge_time   = 0
+	/// Total amount of EMP damage a mechanical organ has taken. Effectively equal to "number of seconds the organ EMP effect will last".
+	var/surge_damage = 0.0
+	/**
+	 * The amount of EMP damage a mechanical organ will recover per second.
+	 * Fractional and floating points are allowed, but it shouldn't ever be negative.
+	 */
+	var/surge_recovery_per_second = 1.0
+
 	var/min_broken_damage = 30
 	var/min_bruised_damage = 10 // Damage before considered bruised
 	var/max_damage = 30
@@ -65,7 +71,7 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 			LOG_DEBUG("[src] at [loc] spawned without a proper DNA.")
 		var/mob/living/carbon/human/H = holder
 		if(istype(H))
-			if(internal)
+			if(internal && parent_organ)
 				var/obj/item/organ/external/E = H.get_organ(parent_organ)
 				if(E)
 					if(E.internal_organs == null)
@@ -82,6 +88,8 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 
 /obj/item/organ/Destroy()
 	STOP_PROCESSING(SSprocessing, src)
+	QDEL_NULL(dna)
+
 	if(!owner)
 		return ..()
 
@@ -90,14 +98,15 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 			owner.internal_organs -= src
 		if(istype(owner, /mob/living/carbon/human))
 			if(owner.internal_organs_by_name)
-				owner.internal_organs_by_name -= src
+				owner.internal_organs_by_name[organ_tag] = null
+				owner.internal_organs_by_name -= organ_tag
 			if(owner.organs)
 				owner.organs -= src
 			if(owner.organs_by_name)
-				owner.organs_by_name -= src
+				owner.organs_by_name[organ_tag] = null
+				owner.organs_by_name -= organ_tag
 
 	owner = null
-	QDEL_NULL(dna)
 
 	return ..()
 
@@ -107,7 +116,7 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 /obj/item/organ/attack_self(var/mob/user)
 	return (owner && loc == owner && owner == user)
 
-/obj/item/organ/proc/update_health()
+/obj/item/organ/proc/update_organ_health()
 	return
 
 /obj/item/organ/proc/set_dna(var/datum/dna/new_dna)
@@ -137,7 +146,7 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 /obj/item/organ/proc/can_recover()
 	return (max_damage > 0) && !(status & ORGAN_DEAD) || death_time >= world.time - ORGAN_RECOVERY_THRESHOLD
 
-/obj/item/organ/process()
+/obj/item/organ/process(seconds_per_tick)
 	if(loc != owner)
 		owner = null
 
@@ -150,57 +159,57 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 	if(status & ORGAN_DEAD)
 		return
 	// Don't process if we're in a freezer, an MMI or a stasis bag.or a freezer or something I dunno
-	if(istype(loc,/obj/item/device/mmi))
+	if(istype(loc,/obj/item/mmi))
 		return
-	if(istype(loc,/obj/structure/closet/body_bag/cryobag) || istype(loc,/obj/structure/closet/crate/freezer) || istype(loc,/obj/item/storage/box/freezer))
+	if(istype(loc,/obj/structure/closet/body_bag/cryobag) || istype(loc,/obj/structure/closet/crate/freezer) || istype(loc,/obj/item/storage/box/unique/freezer))
 		return
 	//Process infections
-	if ((status & ORGAN_ROBOT) || (owner && owner.species && (owner.species.flags & IS_PLANT)))
+	var/is_immune = ((status & ORGAN_ROBOT) || robotic >= ROBOTIC_MECHANICAL || (owner && owner.species && (owner.species.flags & IS_PLANT)))
+	if (is_immune)
 		germ_level = 0
-		return
 
-	if((status & ORGAN_ASSISTED) && surge_damage)
-		tick_surge_damage()
+	if((BP_IS_ROBOTIC(src) || robotic >= ROBOTIC_MECHANICAL) && surge_damage)
+		tick_surge_damage(seconds_per_tick)
 
 	if(!owner)
 		if (QDELETED(reagents))
 			LOG_DEBUG("Organ [DEBUG_REF(src)] had QDELETED reagents! Regenerating.")
 			create_reagents(5)
 
-		if(REAGENT_VOLUME(reagents, /singleton/reagent/blood) && !(status & ORGAN_ROBOT) && prob(40))
+		if(REAGENT_VOLUME(reagents, /singleton/reagent/blood) && !is_immune && prob(40))
 			reagents.remove_reagent(/singleton/reagent/blood,0.1)
 			if (isturf(loc))
 				blood_splatter(src,src,TRUE)
 		if(GLOB.config.organs_decay) damage += rand(1,3)
 		if(damage >= max_damage)
 			damage = max_damage
-		germ_level += rand(2,6)
-		if(germ_level >= INFECTION_LEVEL_TWO)
+		if(!is_immune)
 			germ_level += rand(2,6)
-		if(germ_level >= INFECTION_LEVEL_THREE)
-			die()
+			if(germ_level >= INFECTION_LEVEL_TWO)
+				germ_level += rand(2,6)
+			if(germ_level >= INFECTION_LEVEL_THREE)
+				die()
 
 
 	else if(owner.bodytemperature >= 170)	//cryo stops germs from moving and doing their bad stuffs
 		//** Handle antibiotics and curing infections
 		handle_antibiotics()
-		handle_immunosuppressants()
-		handle_rejection()
-		handle_germ_effects()
+		if(!is_immune)
+			handle_immunosuppressants()
+			handle_rejection()
+			handle_germ_effects()
 
 	//check if we've hit max_damage
 	if(damage >= max_damage)
 		die()
 
-/obj/item/organ/proc/tick_surge_damage()
-	if(surge_damage)
-		do_surge_effects()
-	if(surge_time + 1 SECOND < world.time)
-		surge_damage = max(0, surge_damage - 10)
-		surge_time = world.time
-		if(!surge_damage)
-			surge_time = 0
-			clear_surge_effects()
+/obj/item/organ/proc/tick_surge_damage(seconds_per_tick)
+	if(!surge_damage)
+		clear_surge_effects()
+		return
+
+	do_surge_effects()
+	surge_damage = max(0, surge_damage - (surge_recovery_per_second * seconds_per_tick))
 
 /obj/item/organ/proc/do_surge_effects()
 	return
@@ -229,10 +238,10 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 		if(antibiotics < 5 && prob(round(germ_level/7)))
 			germ_level++
 
-	if (germ_level >= INFECTION_LEVEL_TWO)
+	if (germ_level >= INFECTION_LEVEL_TWO && parent_organ)
 		var/obj/item/organ/external/parent = owner.get_organ(parent_organ)
 		//spread germs
-		if (antibiotics < 5 && parent.germ_level < germ_level && ( parent.germ_level < INFECTION_LEVEL_ONE*2 || prob(30) ))
+		if (parent && antibiotics < 5 && parent.germ_level < germ_level && ( parent.germ_level < INFECTION_LEVEL_ONE*2 || prob(30) ))
 			parent.germ_level++
 
 		if (prob(3))	//about once every 30 seconds
@@ -266,7 +275,7 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 
 /obj/item/organ/proc/heal_damage(amount)
 	if(can_recover())
-		damage = between(0, damage - round(amount, 0.1), max_damage)
+		damage = between(0, damage - amount, max_damage)
 
 /obj/item/organ/proc/is_broken()
 	return (damage >= min_broken_damage || (status & ORGAN_CUT_AWAY) || (status & ORGAN_BROKEN))
@@ -390,7 +399,7 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 		if(BP_EYES)
 			name = "retinal overlayed [initial(name)]"
 		if(BP_BRAIN)
-			name = "positronic-implanted [initial(name)]"
+			name = "pseudoneuron-assisted [initial(name)]"
 		else
 			name = "mechanically assisted [initial(name)]"
 	icon_state = initial(icon_state)
@@ -416,13 +425,19 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 
 #define MAXIMUM_SURGE_DAMAGE 100
 /obj/item/organ/proc/take_surge_damage(var/surge)
-	if(!(status & ORGAN_ASSISTED))
+	if(!BP_IS_ROBOTIC(src))
 		return //We check earlier, but just to make sure.
 
-	surge_damage = Clamp(0, surge + surge_damage, MAXIMUM_SURGE_DAMAGE) //We want X seconds at most of hampered movement or what have you.
-	surge_time = world.time
+	surge_damage = clamp(0, surge + surge_damage, MAXIMUM_SURGE_DAMAGE) //We want X seconds at most of hampered movement or what have you.
 
-/obj/item/organ/proc/removed(var/mob/living/carbon/human/target,var/mob/living/user)
+/**
+ *  Remove an organ
+ *
+ *  drop_organ - if true, organ will be dropped at the loc of its former owner
+ *  detach - if true, organ will be detached from parent. Keep false for organs
+ *           removed together with parent, as with an amputation.
+ */
+/obj/item/organ/proc/removed(mob/living/carbon/human/target, mob/living/user, drop_organ = TRUE, detach = TRUE)
 	if(!istype(owner))
 		return
 
@@ -433,10 +448,13 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 	owner.internal_organs_by_name -= null
 	owner.internal_organs -= src
 
-	var/obj/item/organ/external/affected = owner.get_organ(parent_organ)
-	if(affected) affected.internal_organs -= src
+	if(detach && parent_organ)
+		var/obj/item/organ/external/affected = owner.get_organ(parent_organ)
+		if(affected)
+			affected.internal_organs -= src
 
-	loc = get_turf(owner)
+	if(drop_organ)
+		dropInto(owner.loc)
 	START_PROCESSING(SSprocessing, src)
 	rejecting = null
 	if (!reagents)
@@ -450,12 +468,13 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 		if(user)
 			user.attack_log += "\[[time_stamp()]\]<span class='warning'> removed a vital organ ([src]) from [owner.name] ([owner.ckey]) [user ? "(INTENT: [uppertext(user.a_intent)])" : ""]</span>"
 			owner.attack_log += "\[[time_stamp()]\]<font color='orange'> had a vital organ ([src]) removed by [user.name] ([user.ckey]) (INTENT: [uppertext(user.a_intent)])</font>"
-			msg_admin_attack("[user.name] ([user.ckey]) removed a vital organ ([src]) from [owner.name] ([owner.ckey]) (INTENT: [uppertext(user.a_intent)]) (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user),ckey_target=key_name(owner))
+			msg_admin_attack("[user.name] ([user.ckey]) removed a vital organ ([src]) from [owner.name] ([owner.ckey]) (INTENT: [uppertext(user.a_intent)]) (<A href='byond://?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user),ckey_target=key_name(owner))
 		owner.death()
 
 	owner.update_action_buttons()
 	owner = null
 
+/// Sets the organ's owner to the proc's target, and ensures its forceMoved into that target.
 /obj/item/organ/proc/replaced(var/mob/living/carbon/human/target, var/obj/item/organ/external/affected)
 	owner = target
 	action_button_name = initial(action_button_name)
@@ -474,9 +493,9 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 		target.update_eyes()
 	..()
 
-/obj/item/organ/attack(var/mob/target, var/mob/user)
+/obj/item/organ/attack(mob/living/target_mob, mob/living/user, target_zone)
 
-	if(robotic || !istype(target) || !istype(user) || (user != target && user.a_intent == I_HELP))
+	if(robotic || !istype(target_mob) || !istype(user) || (user != target_mob && user.a_intent == I_HELP))
 		return ..()
 
 	if(alert("Do you really want to use this organ as food? It will be useless for anything else afterwards.",,"No.","Yes.") == "No.")
@@ -496,7 +515,7 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 		O.fingerprintslast = fingerprintslast
 	user.put_in_active_hand(O)
 	qdel(src)
-	target.attackby(O, user)
+	target_mob.attackby(O, user)
 
 //used by stethoscope
 /obj/item/organ/proc/listen()

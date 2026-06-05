@@ -49,7 +49,7 @@
 
 	feedback_add_details("admin_verb", "WARN-DB")
 	if (C)
-		to_chat(C, SPAN_WARNING("<BIG><B>You have been warned by an administrator.</B></BIG><br>Click <a href='byond://?src=\ref[src];warnview=1'>here</a> to review and acknowledge them!"))
+		to_chat(C, SPAN_WARNING("<BIG><B>You have been warned by an administrator.</B></BIG><br>Click <a href='byond://?src=[REF(src)];warnview=1'>here</a> to review and acknowledge them!"))
 
 	message_admins("[key_name_admin(src)] has warned [warned_ckey] for: [warning_reason].")
 
@@ -68,7 +68,7 @@
 	var/datum/preferences/D
 	var/client/C = GLOB.directory[warned_ckey]
 	if(C)	D = C.prefs
-	else	D = preferences_datums[warned_ckey]
+	else	D = GLOB.preferences_datums[warned_ckey]
 
 	if(!D)
 		to_chat(src, SPAN_WARNING("Error: warn_legacy(): No such ckey found."))
@@ -144,7 +144,7 @@
 		dat += "<tr bgcolor='90ee90' align='center'>"
 		dat += "<td>[notification_query.item[3]]</td>"
 		dat += "<td>[notification_query.item[2]]</td>"
-		dat += "<td><b>(<a href='byond://?src=\ref[src];notifacknowledge=[notification_query.item[1]]'>Acknowledge Notification</a>)</b></td>"
+		dat += "<td><b>(<a href='byond://?src=[REF(src)];notifacknowledge=[notification_query.item[1]]'>Acknowledge Notification</a>)</b></td>"
 		dat += "</tr>"
 
 	if(notification_header)
@@ -190,7 +190,7 @@
 		dat += "</tr>"
 
 		if (!ackn)
-			dat += "<tr><td align='center' colspan='3'><b>(<a href='byond://?src=\ref[src];warnacknowledge=[id]'>Acknowledge Warning</a>)</b></td></tr>"
+			dat += "<tr><td align='center' colspan='3'><b>(<a href='byond://?src=[REF(src)];warnacknowledge=[id]'>Acknowledge Warning</a>)</b></td></tr>"
 		else if (expired)
 			dat += "<tr><td align='center' colspan='3'><b>Warning expired and no longer active!</b></td></tr>"
 		else
@@ -201,7 +201,7 @@
 		dat += "</tr>"
 
 	dat += "</table>"
-	show_browser(usr, dat, "window=mywarnings;size=900x500")
+	show_browser(usr, HTML_SKELETON(dat), "window=mywarnings;size=900x500")
 
 /*
  * A proc for acknowledging a warning
@@ -243,34 +243,47 @@
  * Called by /datum/preferences/proc/gather_notifications() in preferences.dm
  */
 /client/proc/warnings_gather()
-	var/count = 0
-	var/count_expire = 0
-
-	if (!establish_db_connection(GLOB.dbcon))
+	if (!SSdbcore.Connect())
 		return
 
 	var/list/client_details = list("ckey" = ckey, "computer_id" = computer_id, "address" = address)
 
-	var/DBQuery/expire_query = GLOB.dbcon.NewQuery("SELECT id FROM ss13_warnings WHERE (acknowledged = 1 AND expired = 0 AND DATE_SUB(CURDATE(),INTERVAL 3 MONTH) > time) AND (ckey = :ckey: OR computerid = :computer_id: OR ip = :address:)")
-	expire_query.Execute(client_details)
-	while (expire_query.NextRow())
-		var/warning_id = text2num(expire_query.item[1])
-		var/DBQuery/update_query = GLOB.dbcon.NewQuery("UPDATE ss13_warnings SET expired = 1 WHERE id = :warning_id:")
-		update_query.Execute(list("warning_id" = warning_id))
-		count_expire++
+	var/datum/db_query/expire_query = SSdbcore.NewQuery(
+		"SELECT id FROM ss13_warnings WHERE (acknowledged = 1 AND expired = 0 AND DATE_SUB(CURDATE(),INTERVAL 3 MONTH) > time) AND (ckey = :ckey OR computerid = :computer_id OR ip = :address)",
+		client_details)
+	expire_query.SetSuccessCallback(CALLBACK(src, PROC_REF(_warnings_expire_cb)))
+	expire_query.SetFailCallback(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(qdel)))
+	expire_query.ExecuteNoSleep(TRUE)
 
-	var/DBQuery/query = GLOB.dbcon.NewQuery("SELECT id FROM ss13_warnings WHERE (visible = 1 AND acknowledged = 0 AND expired = 0) AND (ckey = :ckey: OR computerid = :computer_id: OR ip = :address:)")
-	query.Execute(client_details)
+	var/datum/db_query/count_query = SSdbcore.NewQuery(
+		"SELECT id FROM ss13_warnings WHERE (visible = 1 AND acknowledged = 0 AND expired = 0) AND (ckey = :ckey OR computerid = :computer_id OR ip = :address)",
+		client_details)
+	count_query.SetSuccessCallback(CALLBACK(src, PROC_REF(_warnings_count_cb)))
+	count_query.SetFailCallback(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(qdel)))
+	count_query.ExecuteNoSleep(TRUE)
+
+/client/proc/_warnings_expire_cb(datum/db_query/query)
+	var/count_expire = 0
+	while (query.NextRow())
+		var/warning_id = text2num(query.item[1])
+		var/datum/db_query/update_query = SSdbcore.NewQuery(
+			"UPDATE ss13_warnings SET expired = 1 WHERE id = :warning_id",
+			list("warning_id" = warning_id))
+		update_query.SetSuccessCallback(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(qdel)))
+		update_query.SetFailCallback(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(qdel)))
+		update_query.ExecuteNoSleep(TRUE)
+		count_expire++
+	qdel(query)
+	if (count_expire)
+		prefs?.new_notification("info", "[count_expire] of your warnings have expired.")
+
+/client/proc/_warnings_count_cb(datum/db_query/query)
+	var/count = 0
 	while (query.NextRow())
 		count++
-
-	var/list/data = list("unread" = "", "expired" = "")
+	qdel(query)
 	if (count)
-		data["unread"] = "You have <b>[count] unread warning\s!</b> Click <a href='?JSlink=warnings;notification=:src_ref'>here</a> to review and acknowledge them!"
-	if (count_expire)
-		data["expired"] = "[count_expire] of your warnings have expired."
-
-	return data
+		prefs?.new_notification("danger", "You have <b>[count] unread warning\s!</b> Click <a href='byond://?JSlink=warnings;notification=:src_ref'>here</a> to review and acknowledge them!", 1)
 
 /**
  * A proc used to gather if someone has Unacknowledged Warnings
@@ -327,8 +340,8 @@
 
 	//Totally not stealing code from the DB_ban_panel
 
-	dat += "<form method='GET' action='?src=\ref[src]'><b>Search:</b> "
-	dat += "<input type='hidden' name='src' value='\ref[src]'>"
+	dat += "<form method='GET' action='?src=[REF(src)]'><b>Search:</b> "
+	dat += "<input type='hidden' name='src' value='[REF(src)]'>"
 	dat += "<b>Ckey:</b> <input type='text' name='warnsearchckey' value='[playerckey]'>"
 	dat += "<b>Admin ckey:</b> <input type='text' name='warnsearchadmin' value='[adminckey]'>"
 	dat += "<input type='submit' value='search'>"
@@ -396,9 +409,9 @@
 			dat += "<tr>"
 			dat += "<td align='center' colspan='5'><b>Options:</b> "
 			if(check_rights(R_ADMIN) || a_ckey == sanitizeSQL(ckey))
-				dat += "<a href=\"byond://?src=\ref[src];dbwarningedit=editReason;dbwarningid=[id]\">Edit Reason</a> "
-				dat += "<a href=\"byond://?src=\ref[src];dbwarningedit=editNotes;dbwarningid=[id]\">Edit Note</a> "
-				dat += "<a href=\"byond://?src=\ref[src];dbwarningedit=delete;dbwarningid=[id]\">Delete Warning</a>"
+				dat += "<a href=\"byond://?src=[REF(src)];dbwarningedit=editReason;dbwarningid=[id]\">Edit Reason</a> "
+				dat += "<a href=\"byond://?src=[REF(src)];dbwarningedit=editNotes;dbwarningid=[id]\">Edit Note</a> "
+				dat += "<a href=\"byond://?src=[REF(src)];dbwarningedit=delete;dbwarningid=[id]\">Delete Warning</a>"
 			else
 				dat += "You can only edit or delete notes that you have issued."
 			dat += "</td>"
@@ -410,7 +423,7 @@
 
 		dat +="</table>"
 
-	show_browser(usr, dat, "window=lookupwarns;size=900x500")
+	show_browser(usr, HTML_SKELETON(dat), "window=lookupwarns;size=900x500")
 	feedback_add_details("admin_verb","WARN-LKUP")
 
 //Admin Proc to add a new User Notification
@@ -500,7 +513,7 @@
 				deleteQuery.Execute(query_details)
 
 				message_admins(SPAN_NOTICE("[key_name_admin(usr)] deleted one of [ckey]'s warnings."))
-				log_admin("[key_name(usr)] deleted one of [ckey]'s warnings.", admin_key=key_name(usr), ckey=ckey)
+				log_admin("[key_name(usr)] deleted one of [ckey]'s warnings.")
 			else
 				to_chat(usr, "Cancelled")
 				return
@@ -516,7 +529,7 @@
 			reason_query.Execute(query_details)
 
 			message_admins(SPAN_NOTICE("[key_name_admin(usr)] edited one of [ckey]'s warning reasons."))
-			log_admin("[key_name(usr)] edited one of [ckey]'s warning reasons.", admin_key=key_name(usr), ckey=ckey)
+			log_admin("[key_name(usr)] edited one of [ckey]'s warning reasons.")
 
 		if("editNotes")
 			query_details["new_notes"] = input("Edit this warning's notes.", "New Notes", notes, null) as null|text
@@ -529,4 +542,4 @@
 			notes_query.Execute(query_details)
 
 			message_admins(SPAN_NOTICE("[key_name_admin(usr)] edited one of [ckey]'s warning notes."))
-			log_admin("[key_name(usr)] edited one of [ckey]'s warning notes.", admin_key=key_name(usr), ckey=ckey)
+			log_admin("[key_name(usr)] edited one of [ckey]'s warning notes.")

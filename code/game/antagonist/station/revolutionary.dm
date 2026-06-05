@@ -1,4 +1,4 @@
-var/datum/antagonist/revolutionary/revs
+GLOBAL_DATUM(revs, /datum/antagonist/revolutionary)
 
 /datum/antagonist/revolutionary
 	id = MODE_REVOLUTIONARY
@@ -22,21 +22,22 @@ var/datum/antagonist/revolutionary/revs
 	// Inround revs.
 	faction_role_text = "Revolutionary"
 	faction_descriptor = "Revolutionaries"
-	faction_verb = /mob/living/proc/convert_to_rev
+	faction_verbs = list(/mob/living/proc/convert_to_rev)
 	faction_indicator = "contender"
 	faction_invisible = FALSE
 
 	restricted_jobs = list("AI", "Cyborg", "Merchant")
-	protected_jobs = list("Lab Assistant", "Medical Intern", "Engineering Apprentice", "Assistant", "Security Cadet", "Captain", "Head of Security")
+	protected_jobs = list("Research Intern", "Medical Intern", "Engineering Apprentice", "Assistant", "Security Cadet", "Captain", "Head of Security")
 	required_age = 31
 
 /datum/antagonist/revolutionary/New()
 	..()
-	revs = src
+	GLOB.revs = src
 
 /datum/antagonist/revolutionary/create_antagonist()
 	faction_welcome = "You joined a subversive organization in the crew of the [SSatlas.current_map.station_name]. United under a forward-thinking leader, you must achieve their goals."
 	welcome_text = "You are a subversive seeking to demolish the current order on the [SSatlas.current_map.station_type] by whatever means possible. Recruit friends and strangers alike to bring [SSatlas.current_map.company_short]'s tyranny to an end! Or whatever your objective is."
+	..()
 
 /datum/antagonist/revolutionary/create_global_objectives()
 	if(!..())
@@ -65,8 +66,8 @@ var/datum/antagonist/revolutionary/revs
 
 	if(!player.back)
 		player.equip_to_slot_or_del(new /obj/item/storage/backpack/satchel(player), slot_back) // if they have no backpack, spawn one
-	player.equip_to_slot_or_del(new /obj/item/device/announcer(player), slot_in_backpack)
-	player.equip_to_slot_or_del(new /obj/item/device/special_uplink/rev(player, player.mind), slot_in_backpack)
+	player.equip_to_slot_or_del(new /obj/item/announcer(player), slot_in_backpack)
+	player.equip_to_slot_or_del(new /obj/item/special_uplink/rev(player, player.mind), slot_in_backpack)
 
 	give_codewords(player)
 	INVOKE_ASYNC(src, PROC_REF(alert_revolutionary_status), player)

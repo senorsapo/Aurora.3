@@ -9,7 +9,7 @@
 	item_state = "implantcase"
 	throw_speed = 1
 	throw_range = 5
-	w_class = ITEMSIZE_TINY
+	w_class = WEIGHT_CLASS_TINY
 	///The implant within the case
 	var/obj/item/implant/imp = null
 
@@ -37,7 +37,7 @@
 		AddOverlays(overlay_implant_icon)
 
 /obj/item/implantcase/attackby(obj/item/attacking_item, mob/user)
-	if (attacking_item.ispen())
+	if (attacking_item.tool_behaviour == TOOL_PEN)
 		var/t = tgui_input_text(user, "What would you like the label to be?", name, name, MAX_NAME_LEN)
 		if (user.get_active_hand() != attacking_item)
 			return

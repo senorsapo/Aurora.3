@@ -4,36 +4,44 @@
 	icon = 'icons/obj/machinery/cell_charger.dmi'
 	icon_state = "cell"
 	item_state = "cell"
+	contained_sprite = TRUE
 	origin_tech = list(TECH_POWER = 1)
 	force = 11
 	throwforce = 5.0
 	throw_speed = 3
 	throw_range = 5
-	w_class = ITEMSIZE_NORMAL
-	var/charge = 0	// note %age conveted to actual charge in New
-	var/maxcharge = 1000
-	var/rigged = 0		// true if rigged to explode
-	var/minor_fault = 0 //If not 100% reliable, it will build up faults.
+	w_class = WEIGHT_CLASS_NORMAL
 	matter = list(DEFAULT_WALL_MATERIAL = 700, MATERIAL_GLASS = 50)
 	recyclable = TRUE
+
+	/// Note %age converted to actual charge in New()
+	var/charge = 0
+	/// Maximum cell charge.
+	var/maxcharge = 1000
+	/// True if rigged to explode
+	var/rigged = FALSE
+	/// If not 100% reliable, it will build up faults.
+	var/minor_fault = 0
+	/// Percentage of maxcharge to recharge per minute, though it will trickle charge every process tick (every ~2 seconds), leave null for no self-recharge
+	var/self_charge_percentage
 
 /// Smaller variant, used by energy guns and similar small devices
 /obj/item/cell/device
 	name = "device power cell"
 	desc = "A small power cell designed to power handheld devices."
 	icon_state = "device"
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	force = 0
 	throw_speed = 5
 	throw_range = 7
-	maxcharge = 100
+	maxcharge = 250
 	matter = list(MATERIAL_STEEL = 70, MATERIAL_GLASS = 5)
 
 /obj/item/cell/device/high
 	name = "advanced power cell"
 	desc = "A small, advanced power cell designed to power more energy demanding handheld devices."
 	icon_state = "hdevice"
-	maxcharge = 250
+	maxcharge = 500
 	matter = list(MATERIAL_STEEL = 150, MATERIAL_GLASS = 10)
 
 /obj/item/cell/device/variable/New(newloc, charge_amount)
@@ -44,9 +52,16 @@
 /obj/item/cell/crap
 	name = "old power cell"
 	desc = "A cheap, old power cell. It's probably been in use for quite some time now."
+	icon_state = "ocell"
 	origin_tech = list(TECH_POWER = 0)
-	maxcharge = 500
+	maxcharge = 900
 	matter = list(DEFAULT_WALL_MATERIAL = 700, MATERIAL_GLASS = 40)
+
+/obj/item/cell/crap/Initialize()
+	. = ..()
+	// 5% chance to make the cell rigged.
+	if(prob(5))
+		rigged = TRUE
 
 /obj/item/cell/crap/empty/Initialize()
 	. = ..()
@@ -71,23 +86,18 @@
 
 /obj/item/cell/apc
 	name = "heavy-duty power cell"
+	desc = "A rechargeable electrochemical power cell. This variant is rated for use in APCs and other high-draw electronics in industrial environments. Environments like, say, a space ship."
 	origin_tech = list(TECH_POWER = 1)
-	maxcharge = 5000
+	icon_state = "hcell"
+	maxcharge = 15000
 	matter = list(DEFAULT_WALL_MATERIAL = 700, MATERIAL_GLASS = 50)
 
 /obj/item/cell/high
 	name = "high-capacity power cell"
 	origin_tech = list(TECH_POWER = 2)
-	icon_state = "hcell"
-	maxcharge = 10000
+	icon_state = "h+cell"
+	maxcharge = 30000
 	matter = list(DEFAULT_WALL_MATERIAL = 700, MATERIAL_GLASS = 60)
-
-/obj/item/cell/mecha
-	name = "exosuit-grade power cell"
-	origin_tech = list(TECH_POWER = 3)
-	icon_state = "hcell"
-	maxcharge = 15000
-	matter = list(DEFAULT_WALL_MATERIAL = 700, MATERIAL_GLASS = 70)
 
 /obj/item/cell/high/empty/Initialize()
 	. = ..()
@@ -98,7 +108,7 @@
 	name = "super-capacity power cell"
 	origin_tech = list(TECH_POWER = 5)
 	icon_state = "scell"
-	maxcharge = 20000
+	maxcharge = 60000
 	matter = list(DEFAULT_WALL_MATERIAL = 700, MATERIAL_GLASS = 70)
 
 /obj/item/cell/super/empty/Initialize()
@@ -110,7 +120,7 @@
 	name = "hyper-capacity power cell"
 	origin_tech = list(TECH_POWER = 6)
 	icon_state = "hpcell"
-	maxcharge = 30000
+	maxcharge = 90000
 	matter = list(DEFAULT_WALL_MATERIAL = 200, MATERIAL_GOLD = 50, MATERIAL_SILVER = 50, MATERIAL_GLASS = 40)
 
 /obj/item/cell/hyper/empty/Initialize()
@@ -122,14 +132,14 @@
 	name = "infinite-capacity power cell!"
 	icon_state = "icell"
 	origin_tech =  null
-	maxcharge = 30000 //determines how badly mobs get shocked
+	maxcharge = 180000 //determines how badly mobs get shocked
 	matter = list(DEFAULT_WALL_MATERIAL = 700, MATERIAL_GLASS = 80)
 
 /obj/item/cell/infinite/check_charge()
-		return 1
+	return 1
 
 /obj/item/cell/infinite/use()
-		return 1
+	return 1
 
 /obj/item/cell/potato
 	name = "potato battery"
@@ -139,60 +149,44 @@
 	icon_state = "potato_cell" //"potato_battery"
 	charge = 100
 	maxcharge = 300
-	minor_fault = 1
-
 
 /obj/item/cell/slime
 	name = "charged slime core"
 	desc = "A yellow slime core infused with phoron, it crackles with power."
-	desc_info = "This slime core is energized with powerful bluespace energies, allowing it to regenerate ten percent of its charge every minute."
 	origin_tech = list(TECH_POWER = 2, TECH_BIO = 4)
 	icon = 'icons/mob/npc/slimes.dmi'
 	icon_state = "yellow slime extract"
-	maxcharge = 15000
+	maxcharge = 45000
 	matter = null
-	var/next_recharge
 
-/obj/item/cell/slime/Initialize()
-	. = ..()
-	START_PROCESSING(SSprocessing, src)
+	/// Slime cores recharges 10% every one minute.
+	self_charge_percentage = 10
 
-/obj/item/cell/slime/Destroy()
-	STOP_PROCESSING(SSprocessing, src)
-	return ..()
+/obj/item/cell/slime/mechanics_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "This slime core is energized with powerful bluespace energies, allowing it to regenerate ten percent of its charge every minute."
 
-/obj/item/cell/slime/process()
-	if(next_recharge < world.time)
-		charge = min(charge + (maxcharge / 10), maxcharge)
-		next_recharge = world.time + 1 MINUTE
+/obj/item/cell/slime/antagonist_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "Auto-charges, so maybe be fucking careful if you try rigging this one."
 
 /obj/item/cell/nuclear
-	name = "miniaturized nuclear power core"
-	desc = "A small self-charging thorium core that can store an immense amount of charge."
+	name = "miniaturized nuclear power cell"
+	desc = "A small self-charging cell with a thorium core that can store an immense amount of charge."
 	origin_tech = list(TECH_POWER = 8, TECH_ILLEGAL = 4)
 	icon_state = "icell"
 	maxcharge = 50000
 	matter = null
-	var/next_recharge
 
-/obj/item/cell/nuclear/Initialize()
-	. = ..()
-	START_PROCESSING(SSprocessing, src)
-
-/obj/item/cell/nuclear/Destroy()
-	STOP_PROCESSING(SSprocessing, src)
-	return ..()
-
-/obj/item/cell/nuclear/process()
-	if(next_recharge < world.time)
-		charge = min(charge + (maxcharge / 10), maxcharge)
-		next_recharge = world.time + 30 SECONDS
+	/// Nuclear cells recharge 20% every one minute.
+	self_charge_percentage = 10
 
 /obj/item/cell/device/emergency_light
 	name = "miniature power cell"
 	desc = "A small power cell intended for use with emergency lighting."
-	maxcharge = 120	//Emergency lights use 0.2 W per tick, meaning ~10 minutes of emergency power from a cell
-	w_class = ITEMSIZE_TINY
+	/// Emergency lights use 0.2 W per tick, meaning ~10 minutes of emergency power from a cell
+	maxcharge = 500
+	w_class = WEIGHT_CLASS_TINY
 	matter = list(MATERIAL_GLASS = 20)
 
 /obj/item/cell/device/emergency_light/empty/Initialize()
@@ -216,9 +210,49 @@
 	name = "hydrogen blaster canister"
 	desc = "An industrial-grade hydrogen power cell, used in various blaster weapons- or blaster-adjacent power tools- in place of expensive phoron."
 	icon_state = "hycell"
-	maxcharge = 10000 // hydrogen is actually used today in electric cars
+	/// Hydrogen is actually used today in electric cars
+	maxcharge = 10000
 	matter = list(DEFAULT_WALL_MATERIAL = 700, MATERIAL_GLASS = 70)
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	drop_sound = 'sound/items/drop/gascan.ogg'
 	pickup_sound = 'sound/items/pickup/gascan.ogg'
 	origin_tech = list(TECH_POWER = 4)
+
+/obj/item/cell/mecha
+	name = "power core"
+	origin_tech = list(TECH_POWER = 2)
+	icon_state = "core"
+	w_class = WEIGHT_CLASS_BULKY
+	maxcharge = 20000
+	matter = list(DEFAULT_WALL_MATERIAL = 20000, MATERIAL_GLASS = 10000)
+
+/obj/item/cell/mecha/nuclear
+	name = "nuclear power core"
+	origin_tech = list(TECH_POWER = 3, TECH_MATERIAL = 3)
+	icon_state = "nuclear_core"
+	maxcharge = 30000
+	matter = list(DEFAULT_WALL_MATERIAL = 20000, MATERIAL_GLASS = 10000, MATERIAL_URANIUM = 10000)
+
+	/// Nuclear mecha cores recharges 5% every one minute
+	self_charge_percentage = 5
+
+/obj/item/cell/mecha/phoron
+	name = "phoron power core"
+	origin_tech = list(TECH_POWER = 5, TECH_MATERIAL = 5)
+	icon_state = "phoron_core"
+	maxcharge = 50000
+	matter = list(DEFAULT_WALL_MATERIAL = 20000, MATERIAL_GLASS = 10000, MATERIAL_PHORON = 5000)
+
+	/// Phoron mecha cores recharges 10% every one minute
+	self_charge_percentage = 10
+
+/obj/item/cell/mecha/phoron/alien
+	name = "anomalous power core"
+	origin_tech = list(TECH_POWER = 9, TECH_MATERIAL = 9)
+	icon_state = "alien_power_cell"
+	desc = "A mercurial gem gleaming with anomalous white light. Pale, cold flames dance along its surface, which crackle with static charge upon touching any object."
+
+/obj/item/cell/mecha/phoron/alien/Initialize()
+	. = ..()
+	maxcharge *= rand(0.75, 1.25)
+	self_charge_percentage *= rand(0.75, 1.25)

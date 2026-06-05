@@ -19,20 +19,23 @@
 	icon = 'icons/obj/item/reagent_containers/food/drinks/soda.dmi'
 	drop_sound = 'sound/items/drop/soda.ogg'
 	pickup_sound = 'sound/items/pickup/soda.ogg'
-	desc_info = "Click it in your hand to open it.\
-					If it's carbonated and closed, you can shake it by clicking on it with harm intent. \
-					If it's empty, you can crush it on your forehead by selecting your head and clicking on yourself with harm intent. \
-					You can also crush cans on other people's foreheads as well."
 
-/obj/item/reagent_containers/food/drinks/cans/attack(mob/living/M, mob/user, var/target_zone)
-	if(iscarbon(M) && !reagents.total_volume && user.a_intent == I_HURT && target_zone == BP_HEAD)
-		if(M == user)
+/obj/item/reagent_containers/food/drinks/cans/mechanics_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "Click it in your hand to open it."
+	. += "If it's carbonated and closed, you can shake it by clicking on it with harm intent."
+	. += "If it's empty, you can crush it on your forehead by selecting your head and clicking on yourself with harm intent."
+	. += "You can also crush cans on other people's foreheads as well."
+
+/obj/item/reagent_containers/food/drinks/cans/attack(mob/living/target_mob, mob/living/user, target_zone)
+	if(iscarbon(target_mob) && !reagents.total_volume && user.a_intent == I_HURT && target_zone == BP_HEAD)
+		if(target_mob == user)
 			user.visible_message(SPAN_WARNING("[user] crushes the can of [src.name] on [user.get_pronoun("his")] forehead!"), SPAN_NOTICE("You crush the can of [src.name] on your forehead."))
 		else
-			user.visible_message(SPAN_WARNING("[user] crushes the can of [src.name] on [M]'s forehead!"), SPAN_NOTICE("You crush the can of [src.name] on [M]'s forehead."))
-		M.apply_damage(2,DAMAGE_BRUTE,BP_HEAD) // ouch.
-		playsound(M,'sound/items/soda_crush.ogg', rand(10,50), TRUE)
-		var/obj/item/trash/can/crushed_can = new /obj/item/trash/can(M.loc)
+			user.visible_message(SPAN_WARNING("[user] crushes the can of [src.name] on [target_mob]'s forehead!"), SPAN_NOTICE("You crush the can of [src.name] on [target_mob]'s forehead."))
+		target_mob.apply_damage(2,DAMAGE_BRUTE,BP_HEAD) // ouch.
+		playsound(target_mob,'sound/items/soda_crush.ogg', rand(10,50), TRUE)
+		var/obj/item/trash/can/crushed_can = new /obj/item/trash/can(target_mob.loc)
 		crushed_can.icon_state = icon_state
 		qdel(src)
 		user.put_in_hands(crushed_can)
@@ -69,7 +72,7 @@
 			qdel(grenade_casing)
 			update_icon()
 
-	if(attacking_item.isscrewdriver() && bombcasing > BOMBCASING_EMPTY)
+	if(attacking_item.tool_behaviour == TOOL_SCREWDRIVER && bombcasing > BOMBCASING_EMPTY)
 		if(bombcasing == BOMBCASING_LOOSE)
 			bombcasing = BOMBCASING_SECURE
 			shrapnelcount = 14
@@ -104,7 +107,7 @@
 		else
 			to_chat(user, SPAN_WARNING("There is no opening on \the [name] for the steel wool!"))
 
-	else if(attacking_item.iswirecutter() && fuselength)
+	else if(attacking_item.tool_behaviour == TOOL_WIRECUTTER && fuselength)
 		switch(fuselength)
 			if(1 to FUSELENGTH_MIN) // you can't increase the fuse with wirecutters and you can't trim it down below 3, so just remove it outright.
 				user.visible_message("<b>[user]</b> removes the steel wool from \the [name].",
@@ -149,7 +152,7 @@
 		update_icon()
 		set_light(2, 2, LIGHT_COLOR_LAVA)
 		if(REAGENT_VOLUME(reagents, /singleton/reagent/fuel) >= LETHAL_FUEL_CAPACITY && user)
-			msg_admin_attack("[user] ([user.ckey]) lit the fuse on an improvised [name] grenade. (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user))
+			msg_admin_attack("[user] ([user.ckey]) lit the fuse on an improvised [name] grenade. (<A href='byond://?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user))
 			if(fuselength >= FUSELENGTH_MIN && fuselength <= FUSELENGTH_SHORT)
 				user.visible_message(SPAN_DANGER("<b>[user]</b> accidentally takes \the [W] too close to \the [name]'s opening!"))
 				detonate(TRUE) // it'd be a bit dull if the toy-levels of fuel had a chance to insta-pop, it's mostly just a way to keep the grenade balance in check
@@ -208,13 +211,16 @@
 		else
 			desc = initial(desc)
 
-/obj/item/reagent_containers/food/drinks/cans/bullet_act(obj/item/projectile/P)
-	if(P.firer && REAGENT_VOLUME(reagents, /singleton/reagent/fuel) >= LETHAL_FUEL_CAPACITY)
-		visible_message(SPAN_DANGER("\The [name] is hit by the [P]!"))
-		log_and_message_admins("shot an improvised [name] explosive", P.firer)
-		log_game("[key_name(P.firer)] shot improvised grenade at [loc.loc.name] ([loc.x],[loc.y],[loc.z]).",ckey=key_name(P.firer))
-	detonate(TRUE)
+/obj/item/reagent_containers/food/drinks/cans/bullet_act(obj/projectile/hitting_projectile, def_zone, piercing_hit)
 	. = ..()
+	if(. != BULLET_ACT_HIT)
+		return .
+
+	if(hitting_projectile.firer && REAGENT_VOLUME(reagents, /singleton/reagent/fuel) >= LETHAL_FUEL_CAPACITY)
+		visible_message(SPAN_DANGER("\The [name] is hit by the [hitting_projectile]!"))
+		log_and_message_admins("shot an improvised [name] explosive", hitting_projectile.firer)
+		log_game("[key_name(hitting_projectile.firer)] shot improvised grenade at [loc.loc.name] ([loc.x],[loc.y],[loc.z]).")
+	detonate(TRUE)
 
 /obj/item/reagent_containers/food/drinks/cans/ex_act(severity)
 	detonate(TRUE)
@@ -308,13 +314,22 @@
 	reagents_to_add = list(/singleton/reagent/drink/icetea = 30)
 
 /obj/item/reagent_containers/food/drinks/cans/grape_juice
-	name = "\improper Grapel juice"
-	desc = "500 pages of rules of how to appropriately enter into a combat with this juice!"
+	name = "\improper Drosiá Grape soda"
+	desc = "Wine's cheaper, bubblier none alcoholic cousin. Drosiá is popular on Assunzione, but makes only a fraction compared to wine on the export market."
 	icon_state = "grapesoda"
 	item_state = "grapesoda"
 	center_of_mass = list("x"=16, "y"=10)
 
 	reagents_to_add = list(/singleton/reagent/drink/grapejuice = 30)
+
+/obj/item/reagent_containers/food/drinks/cans/cherry_juice
+	name = "\improper Drosiá Cherry soda"
+	desc = "Fruity and overbearingly sweet. Drosiá is popular on Assunzione, but makes only a fraction compared to wine on the export market."
+	icon_state = "cherrysoda"
+	item_state = "cherrysoda"
+	center_of_mass = list("x"=16, "y"=10)
+
+	reagents_to_add = list(/singleton/reagent/drink/cherrysoda = 30)
 
 /obj/item/reagent_containers/food/drinks/cans/tonic
 	name = "\improper T-Borg's tonic water"
@@ -468,6 +483,16 @@
 
 	reagents_to_add = list(/singleton/reagent/drink/milk/adhomai/fermented = 30)
 
+/obj/item/reagent_containers/food/drinks/cans/earthen_juice
+	name = "earthen-root juice"
+	desc = "A can of earthen-root juice, imported from Adhomai."
+	icon_state = "earthen_can"
+	item_state = "earthen_can"
+	center_of_mass = list("x"=16, "y"=10)
+	desc_extended = "The Earthen-Root, or Binajr-nab'at, is a herbaceous plant native to the region of the Northern Harr'masir, and is popular in the New Kingdom of Adhomai due to it's resilience in harsh environments. Common uses for the Earth-Root, besides being used in dishes, include distillation to brew alcoholic beverages, extraction of the blue pigment for the fabrication of dyes, and the production of sugar."
+
+	reagents_to_add = list(/singleton/reagent/drink/earthenrootjuice = 30)
+
 /obj/item/reagent_containers/food/drinks/cans/beetle_milk
 	name = "\improper Hakhma Milk"
 	desc = "A can of Hakhma beetle milk, sourced from Scarab and Drifter communities."
@@ -593,13 +618,13 @@
 	pickup_sound = 'sound/items/pickup/shoes.ogg'
 	reagents_to_add = list(/singleton/reagent/drink/bochbrew = 30)
 
-/obj/item/reagent_containers/food/drinks/cans/boch/attack(mob/living/M, mob/user, var/target_zone) // modified can reaction; have you ever seen someone crush a plastic bottle on their head?
-	if(iscarbon(M) && !reagents.total_volume && user.a_intent == I_HURT && target_zone == BP_HEAD)
-		if(M == user)
+/obj/item/reagent_containers/food/drinks/cans/boch/attack(mob/living/target_mob, mob/living/user, target_zone) // modified can reaction; have you ever seen someone crush a plastic bottle on their head?
+	if(iscarbon(target_mob) && !reagents.total_volume && user.a_intent == I_HURT && target_zone == BP_HEAD)
+		if(target_mob == user)
 			user.visible_message(SPAN_WARNING("[user] smacks the bottle of [src.name] against [user.get_pronoun("his")] forehead!"), SPAN_NOTICE("You smack the bottle of [src.name] on your forehead."))
 		else
-			user.visible_message(SPAN_WARNING("[user] smacks the bottle of [src.name] against [M]'s forehead!"), SPAN_NOTICE("You whack the bottle of [src.name] on [M]'s forehead."))
-		M.apply_damage(2,DAMAGE_BRUTE,BP_HEAD) // quoth the copy-paste code, 'ouch.'
+			user.visible_message(SPAN_WARNING("[user] smacks the bottle of [src.name] against [target_mob]'s forehead!"), SPAN_NOTICE("You whack the bottle of [src.name] on [target_mob]'s forehead."))
+		target_mob.apply_damage(2,DAMAGE_BRUTE,BP_HEAD) // quoth the copy-paste code, 'ouch.'
 		return TRUE
 	. = ..()
 

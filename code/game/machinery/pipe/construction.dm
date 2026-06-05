@@ -10,12 +10,12 @@
 	icon_state = "simple"
 	item_state = "buildpipe"
 	randpixel = 5
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	level = 2
 	obj_flags = OBJ_FLAG_ROTATABLE
 
-/obj/item/pipe/get_examine_text(mob/user, distance, is_adjacent, infix, suffix)
-	. = ..()
+/obj/item/pipe/feedback_hints(mob/user, distance, is_adjacent)
+	. += ..()
 	var/pipe_color_check = color || PIPE_COLOR_GREY
 	var/found_color_name = "Unknown"
 	for(var/color_name in GLOB.pipe_colors)
@@ -168,6 +168,8 @@
 			src.pipe_type = PIPE_OMNI_MIXER
 		else if(istype(make_from, /obj/machinery/atmospherics/omni/filter))
 			src.pipe_type = PIPE_OMNI_FILTER
+		else if(istype(make_from, /obj/machinery/atmospherics/pipe/vent_passive))
+			src.pipe_type = PIPE_PVENT
 ///// Z-Level stuff
 		else if(istype(make_from, /obj/machinery/atmospherics/pipe/zpipe/up/supply))
 			src.pipe_type = PIPE_SUPPLY_UP
@@ -229,6 +231,9 @@
 			connect_types = CONNECT_TYPE_REGULAR|CONNECT_TYPE_SUPPLY|CONNECT_TYPE_SCRUBBER|CONNECT_TYPE_FUEL|CONNECT_TYPE_AUX
 	//src.pipe_dir = get_pipe_dir()
 	update()
+
+/obj/item/pipe/Initialize(mapload)
+	. = ..()
 	randpixel_xy()
 
 //update the name and icon of the pipe item depending on the type
@@ -303,7 +308,8 @@
 		"auxiliary gas pump",
 		"fuel connector",
 		"auxiliary connector",
-		"auxiliary unary vent"
+		"auxiliary unary vent",
+		"passive vent"
 	)
 	name = nlist[pipe_type+1] + " fitting"
 	var/list/islist = list(
@@ -375,7 +381,8 @@
 		"pump",
 		"connector",
 		"connector",
-		"uvent"
+		"uvent",
+		"pvent"
 	)
 	icon_state = islist[pipe_type + 1]
 
@@ -403,9 +410,9 @@
 		set_dir(2)
 
 /obj/item/pipe/Move()
-	..()
+	. = ..()
 	if ((pipe_type in list (PIPE_SIMPLE_BENT, PIPE_SUPPLY_BENT, PIPE_SCRUBBERS_BENT, PIPE_FUEL_BENT, PIPE_AUX_BENT, PIPE_HE_BENT)) \
-		&& (src.dir in GLOB.cardinal))
+		&& (src.dir in GLOB.cardinals))
 		src.set_dir(src.dir|turn(src.dir, 90))
 	else if (pipe_type in list (PIPE_SIMPLE_STRAIGHT, PIPE_SUPPLY_STRAIGHT, PIPE_SCRUBBERS_STRAIGHT, PIPE_FUEL_STRAIGHT, PIPE_AUX_STRAIGHT, PIPE_UNIVERSAL, PIPE_HE_STRAIGHT, PIPE_MVALVE))
 		if(dir==2)
@@ -446,7 +453,7 @@
 			return dir|flip
 		if(PIPE_SIMPLE_BENT, PIPE_HE_BENT, PIPE_SUPPLY_BENT, PIPE_SCRUBBERS_BENT, PIPE_FUEL_BENT, PIPE_AUX_BENT)
 			return dir //dir|acw
-		if(PIPE_CONNECTOR,PIPE_CONNECTOR_FUEL,PIPE_CONNECTOR_AUX,PIPE_UVENT,PIPE_AUX_UVENT,PIPE_SCRUBBER,PIPE_HEAT_EXCHANGE)
+		if(PIPE_CONNECTOR,PIPE_CONNECTOR_FUEL,PIPE_CONNECTOR_AUX,PIPE_UVENT,PIPE_AUX_UVENT,PIPE_SCRUBBER,PIPE_HEAT_EXCHANGE,PIPE_PVENT)
 			return dir
 		if(PIPE_MANIFOLD4W, PIPE_SUPPLY_MANIFOLD4W, PIPE_SCRUBBERS_MANIFOLD4W, PIPE_FUEL_MANIFOLD4W, PIPE_AUX_MANIFOLD4W, PIPE_OMNI_MIXER, PIPE_OMNI_FILTER)
 			return dir|flip|cw|acw
@@ -504,7 +511,7 @@
 /obj/item/pipe/attackby(obj/item/attacking_item, mob/user)
 	..()
 	//*
-	if (!attacking_item.iswrench() && !istype(attacking_item, /obj/item/pipewrench))
+	if (attacking_item.tool_behaviour != TOOL_WRENCH && !istype(attacking_item, /obj/item/pipewrench))
 		return ..()
 	if(istype(attacking_item, /obj/item/pipewrench))
 		var/action = tgui_input_list(user, "Change pipe?", "Change pipe", list("Yes", "No"), "No")
@@ -1072,6 +1079,20 @@
 				V.node2.atmos_init()
 				V.node2.build_network()
 
+		if(PIPE_PVENT) //passive vent
+			var/obj/machinery/atmospherics/pipe/vent_passive/V = new (src.loc)
+			V.set_dir(dir)
+			V.initialize_directions = pipe_dir
+			if(pipename)
+				V.name = pipename
+			var/turf/T = V.loc
+			V.level = !T.is_plating() ? 2 : 1
+			V.build_network()
+			V.atmos_init()
+			if (V.node1)
+				V.node1.atmos_init()
+				V.node1.build_network()
+
 		if(PIPE_PUMP)		//gas pump
 			var/obj/machinery/atmospherics/binary/pump/P = new(src.loc)
 			P.set_dir(dir)
@@ -1537,10 +1558,10 @@
 	icon = 'icons/obj/pipe-item.dmi'
 	icon_state = "meter"
 	item_state = "buildpipe"
-	w_class = ITEMSIZE_LARGE
+	w_class = WEIGHT_CLASS_BULKY
 
 /obj/item/pipe_meter/attackby(obj/item/attacking_item, mob/user)
-	if (attacking_item.iswrench())
+	if (attacking_item.tool_behaviour == TOOL_WRENCH)
 		if(!locate(/obj/machinery/atmospherics/pipe, src.loc))
 			to_chat(user, SPAN_WARNING("You need to fasten it to a pipe"))
 			return 1

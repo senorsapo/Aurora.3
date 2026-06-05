@@ -4,8 +4,8 @@
 	storage_slots = 5
 	icon = 'icons/obj/bureaucracy.dmi'
 	icon_state = "holder"
-	w_class = ITEMSIZE_TINY
-	max_w_class = ITEMSIZE_TINY
+	w_class = WEIGHT_CLASS_TINY
+	max_w_class = WEIGHT_CLASS_TINY
 	can_hold = list(/obj/item/paper/business_card)
 
 /obj/item/storage/business_card_holder/update_icon()
@@ -66,7 +66,7 @@
 
 /obj/item/paper/business_card/show_content(mob/user, forceshow)
 	var/datum/browser/paper_win = new(user, name, null, 525, 300, null, TRUE)
-	paper_win.set_content(get_content(user, can_read(user, forceshow)))
+	paper_win.set_content(get_content(user, can_read(user, forceshow), forceshow))
 	paper_win.add_stylesheet("paper_languages", 'html/browser/paper_languages.css')
 	paper_win.open()
 

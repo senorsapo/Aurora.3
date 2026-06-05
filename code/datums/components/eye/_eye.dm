@@ -17,7 +17,7 @@
 	QDEL_LIST(actions)
 	. = ..()
 
-/datum/component/eye/proc/look(var/mob/new_looker, var/list/eye_args)
+/datum/component/eye/proc/look(mob/new_looker, list/eye_args)
 	if(new_looker.eyeobj || current_looker)
 		return FALSE
 	LAZYINSERT(eye_args, get_turf(current_looker), 1) //Make sure that a loc is provided to the eye
@@ -46,7 +46,7 @@
 	RegisterSignal(component_eye, COMSIG_QDELETING, PROC_REF(unlook))
 
 	RegisterSignal(current_looker, COMSIG_MOB_LOGOUT, PROC_REF(unlook))
-	RegisterSignal(current_looker, COMSIG_GLOB_MOB_DEATH, PROC_REF(unlook))
+	RegisterSignal(SSdcs, COMSIG_GLOB_MOB_DEATH, PROC_REF(unlook))
 
 	return TRUE
 
@@ -63,7 +63,7 @@
 		UnregisterSignal(current_looker, COMSIG_MOVABLE_MOVED)
 		UnregisterSignal(current_looker, COMSIG_QDELETING)
 		UnregisterSignal(current_looker, COMSIG_MOB_LOGOUT)
-		UnregisterSignal(current_looker, COMSIG_GLOB_MOB_DEATH)
+		UnregisterSignal(SSdcs, COMSIG_GLOB_MOB_DEATH)
 		if(current_looker.client)
 			current_looker.client.eye = current_looker
 		current_looker.eyeobj = null

@@ -131,9 +131,14 @@
 /area/template_noop)
 "Q" = (
 /obj/structure/table/wood,
-/obj/item/device/flashlight/lantern,
+/obj/item/flashlight/lantern,
 /obj/item/material/hatchet/unathiknife,
 /obj/item/reagent_containers/food/drinks/flask/vacuumflask,
+/obj/item/storage/box/fancy/med_pouch/trauma,
+/obj/item/storage/box/fancy/med_pouch/burn,
+/obj/item/stack/medical/splint/makeshift{
+	amount = 5
+	},
 /turf/simulated/floor/exoplanet/wood,
 /area/template_noop)
 "S" = (

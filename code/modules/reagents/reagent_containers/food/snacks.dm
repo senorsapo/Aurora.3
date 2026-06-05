@@ -4,7 +4,7 @@
 	desc = "Yummy!"
 	icon_state = null
 	center_of_mass = list("x"=16, "y"=16)
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	is_liquid = FALSE
 	var/slice_path
 	var/slices_num
@@ -22,6 +22,22 @@
 
 	//Placeholder for effect that trigger on eating that aren't tied to reagents.
 	var/flavor = null // set_flavor()
+
+/obj/item/reagent_containers/food/snacks/feedback_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	if(distance > 1)
+		return
+	if (coating)
+		var/singleton/reagent/coating_reagent = GET_SINGLETON(coating)
+		. += SPAN_NOTICE("It's coated in [coating_reagent.name]!")
+	if (!bitecount)
+		return
+	else if (bitecount==1)
+		. += SPAN_NOTICE("\The [src] was bitten by someone!")
+	else if (bitecount<=3)
+		. += SPAN_NOTICE("\The [src] was bitten [bitecount] time\s!")
+	else
+		. += SPAN_NOTICE("\The [src] was bitten multiple times!")
 
 /obj/item/reagent_containers/food/snacks/proc/on_dry(var/newloc)
 	if(dried_type == type)
@@ -70,6 +86,8 @@
 
 		if (amount_eaten)
 			bitecount++
+			shake_animation()
+			playsound(loc, pick('sound/effects/creatures/nibble1.ogg','sound/effects/creatures/nibble2.ogg'), 30, 1)
 			if (amount_eaten >= m_bitesize)
 				user.visible_message(SPAN_NOTICE("\The [user] feeds \the [target] \the [src]."))
 				if (!istype(target.loc, /turf))//held mobs don't see visible messages
@@ -92,7 +110,7 @@
 
 		if(ishuman(user))
 			var/mob/living/carbon/human/H = user
-			if (H.species && H.species.bypass_food_fullness())
+			if (H.species && H.species.bypass_food_fullness(H))
 				is_full = FALSE
 
 		if(user == target)
@@ -130,9 +148,9 @@
 			other_feed_message_finish(user,target)
 
 			var/contained = reagentlist()
-			target.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has been fed [name] by [key_name(user)] Reagents: [contained]</font>")
-			user.attack_log += text("\[[time_stamp()]\] <span class='warning'>Fed [name] to [key_name(target)] Reagents: [contained]</span>")
-			msg_admin_attack("[key_name_admin(user)] fed [key_name_admin(target)] with [name] Reagents: [contained] (INTENT: [uppertext(user.a_intent)]) (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user),ckey_target=key_name(target))
+			target.attack_log += "\[[time_stamp()]\] <font color='orange'>Has been fed [name] by [key_name(user)] Reagents: [contained]</font>"
+			user.attack_log += "\[[time_stamp()]\] <span class='warning'>Fed [name] to [key_name(target)] Reagents: [contained]</span>"
+			msg_admin_attack("[key_name_admin(user)] fed [key_name_admin(target)] with [name] Reagents: [contained] (INTENT: [uppertext(user.a_intent)]) (<A href='byond://?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user),ckey_target=key_name(target))
 			reagents.trans_to_mob(target, min(reagents.total_volume,bitesize), CHEM_INGEST)
 
 	feed_sound(target)
@@ -140,22 +158,6 @@
 	on_consume(user, target)
 
 	return 1
-
-/obj/item/reagent_containers/food/snacks/get_examine_text(mob/user, distance, is_adjacent, infix, suffix)
-	. = ..()
-	if(distance > 1)
-		return
-	if (coating)
-		var/singleton/reagent/coating_reagent = GET_SINGLETON(coating)
-		. += SPAN_NOTICE("It's coated in [coating_reagent.name]!")
-	if (!bitecount)
-		return
-	else if (bitecount==1)
-		. += SPAN_NOTICE("\The [src] was bitten by someone!")
-	else if (bitecount<=3)
-		. += SPAN_NOTICE("\The [src] was bitten [bitecount] time\s!")
-	else
-		. += SPAN_NOTICE("\The [src] was bitten multiple times!")
 
 /obj/item/reagent_containers/food/snacks/attackby(obj/item/attacking_item, mob/user)
 
@@ -185,7 +187,7 @@
 		var/obj/item/material/kitchen/utensil/U = attacking_item
 		if(istype(attacking_item, /obj/item/material/kitchen/utensil/fork) && (is_liquid))
 			to_chat(user, SPAN_NOTICE("You uselessly pass \the [U] through \the [src]."))
-			playsound(user.loc, /singleton/sound_category/generic_pour_sound, 10, 1)
+			playsound(user.loc, SFX_POUR, 10, 1)
 			return
 		else
 			if(U.scoop_food)
@@ -378,7 +380,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// FOOD END
 ////////////////////////////////////////////////////////////////////////////////
-/obj/item/reagent_containers/food/snacks/attack_generic(var/mob/living/user)
+/obj/item/reagent_containers/food/snacks/attack_generic(mob/user, damage, attack_message, environment_smash, armor_penetration, attack_flags, damage_type)
 	if(!isanimal(user) && !isalien(user))
 		return
 

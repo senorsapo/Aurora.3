@@ -14,12 +14,12 @@
 	response_harm = "hits"
 	speed = 4
 	stop_automated_movement_when_pulled = 0
-	maxHealth = 100
+	maxhealth = 100
 	health = 100
 	harm_intent_damage = 5
 	melee_damage_lower = 10
 	melee_damage_upper = 10
-	attacktext = "punched"
+	attacktext = "punches"
 	a_intent = I_HURT
 	var/corpse = /obj/effect/landmark/mobcorpse/syndicatesoldier
 	var/weapon1
@@ -59,7 +59,7 @@
 	icon_living = "syndicatemelee"
 	weapon1 = /obj/item/melee/energy/sword/red
 	weapon2 = /obj/item/shield/energy
-	attacktext = "slashed"
+	attacktext = "slashes"
 	status_flags = 0
 
 /mob/living/simple_animal/hostile/syndicate/melee/attackby(obj/item/attacking_item, mob/user)
@@ -78,13 +78,16 @@
 		visible_message(SPAN_WARNING("[user] gently taps [src] with the [attacking_item]."))
 
 
-/mob/living/simple_animal/hostile/syndicate/melee/bullet_act(var/obj/item/projectile/Proj)
-	if(!Proj)	return
-	if(prob(65))
-		src.health -= Proj.damage
-	else
-		visible_message(SPAN_DANGER("[src] blocks [Proj] with its shield!"))
-	return 0
+/mob/living/simple_animal/hostile/syndicate/melee/bullet_act(obj/projectile/hitting_projectile, def_zone, piercing_hit)
+	if(prob(35))
+		visible_message(SPAN_DANGER("[src] blocks [hitting_projectile] with its shield!"))
+		return BULLET_ACT_BLOCK
+
+	. = ..()
+	if(. != BULLET_ACT_HIT)
+		return .
+
+	src.health -= hitting_projectile.damage
 
 
 /mob/living/simple_animal/hostile/syndicate/melee/space
@@ -114,7 +117,7 @@
 	icon_living = "syndicateranged"
 	casingtype = /obj/item/ammo_casing/c10mm
 	projectilesound = 'sound/weapons/gunshot/gunshot_light.ogg'
-	projectiletype = /obj/item/projectile/bullet/pistol/medium
+	projectiletype = /obj/projectile/bullet/pistol/medium
 
 	weapon1 = /obj/item/gun/projectile/automatic/c20r
 

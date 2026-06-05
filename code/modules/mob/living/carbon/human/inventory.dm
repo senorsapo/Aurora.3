@@ -7,6 +7,11 @@ This saves us from having to call add_fingerprint() any time something is put in
 	set name = "quick-equip"
 	set hidden = 1
 
+	var/cancelled = FALSE
+	SEND_SIGNAL(src, COMSIG_INPUT_KEY_QUICK_EQUIP, &cancelled)
+	if (cancelled)
+		return
+
 	if(ishuman(src))
 		var/mob/living/carbon/human/H = src
 		var/obj/item/I = H.get_active_hand()
@@ -93,6 +98,8 @@ This saves us from having to call add_fingerprint() any time something is put in
 			return 1
 		if(slot_wrists)
 			return has_organ(BP_L_ARM) || has_organ(BP_R_ARM)
+		if(slot_pants)
+			return has_organ(BP_GROIN) || has_organ(BP_L_LEG) || has_organ(BP_R_LEG)
 
 /mob/living/carbon/human/u_equip(obj/W as obj)
 	if(!W)	return 0
@@ -137,6 +144,9 @@ This saves us from having to call add_fingerprint() any time something is put in
 	else if (W == wrists)
 		wrists = null
 		update_inv_wrists()
+	else if (W == pants)
+		pants = null
+		update_inv_pants()
 	else if (W == glasses)
 		glasses = null
 		update_inv_glasses()
@@ -205,12 +215,10 @@ This saves us from having to call add_fingerprint() any time something is put in
 		update_inv_back()
 	else if (W == handcuffed)
 		handcuffed = null
-		if(buckled_to && buckled_to.buckle_require_restraints)
-			buckled_to.unbuckle()
-		update_inv_handcuffed()
+		handcuff_update()
 	else if (W == legcuffed)
 		legcuffed = null
-		update_inv_legcuffed()
+		legcuff_update()
 	else if (W == r_hand)
 		r_hand = null
 		update_inv_r_hand()
@@ -255,11 +263,11 @@ This saves us from having to call add_fingerprint() any time something is put in
 			update_inv_wear_mask(redraw_mob)
 		if(slot_handcuffed)
 			src.handcuffed = W
-			update_inv_handcuffed(redraw_mob)
+			handcuff_update()
 		if(slot_legcuffed)
 			src.legcuffed = W
 			W.on_equipped(src, slot, assisted_equip)
-			update_inv_legcuffed(redraw_mob)
+			legcuff_update()
 		if(slot_l_hand)
 			src.l_hand = W
 			W.on_equipped(src, slot, assisted_equip)
@@ -314,6 +322,10 @@ This saves us from having to call add_fingerprint() any time something is put in
 			src.wrists = W
 			W.on_equipped(src, slot, assisted_equip)
 			update_inv_wrists(redraw_mob)
+		if(slot_pants)
+			src.pants = W
+			W.on_equipped(src, slot, assisted_equip)
+			update_inv_pants(redraw_mob)
 		if(slot_head)
 			src.head = W
 			if(head.flags_inv & (BLOCKHAIR|BLOCKHEADHAIR|HIDEMASK))
@@ -431,33 +443,56 @@ This saves us from having to call add_fingerprint() any time something is put in
 		if(slot_l_ear)      return l_ear
 		if(slot_r_ear)      return r_ear
 		if(slot_wrists)		return wrists
+		if(slot_pants)		return pants
 	return ..()
 
-/mob/living/carbon/human/get_equipped_items(var/include_carried = 0)
+/mob/living/carbon/human/get_equipped_items(include_flags = NONE)
 	var/list/items = new/list()
 
-	if(back) items += back
-	if(belt) items += belt
-	if(l_ear) items += l_ear
-	if(r_ear) items += r_ear
-	if(glasses) items += glasses
-	if(gloves) items += gloves
-	if(head) items += head
-	if(shoes) items += shoes
-	if(wear_id) items += wear_id
-	if(wear_mask) items += wear_mask
-	if(wear_suit) items += wear_suit
-	if(w_uniform) items += w_uniform
-	if(wrists) items += wrists
+	if(back)
+		items += back
+	if(belt)
+		items += belt
+	if(l_ear)
+		items += l_ear
+	if(r_ear)
+		items += r_ear
+	if(glasses)
+		items += glasses
+	if(gloves)
+		items += gloves
+	if(head)
+		items += head
+	if(shoes)
+		items += shoes
+	if(wear_id)
+		items += wear_id
+	if(wear_mask)
+		items += wear_mask
+	if(wear_suit)
+		items += wear_suit
+	if(w_uniform)
+		items += w_uniform
+	if(wrists)
+		items += wrists
+	if(pants)
+		items += pants
+	if(legcuffed)
+		items += legcuffed
+	if(handcuffed)
+		items += handcuffed
 
-	if(include_carried)
-		if(l_hand)     items += l_hand
-		if(r_hand)     items += r_hand
+	if(include_flags & INCLUDE_HELD)
+		if(l_hand)
+			items += l_hand
+		if(r_hand)
+			items += r_hand
+		if(s_store)
+			items += s_store
+
+	if(include_flags & INCLUDE_POCKETS)
 		if(l_store)    items += l_store
 		if(r_store)    items += r_store
-		if(legcuffed)  items += legcuffed
-		if(handcuffed) items += handcuffed
-		if(s_store)    items += s_store
 
 	return items
 
@@ -486,7 +521,9 @@ This saves us from having to call add_fingerprint() any time something is put in
 	if (lying || !shoes || !istype(shoes, /obj/item/clothing/shoes))
 		return
 
-	if (shoes:silent)
+	var/obj/item/clothing/shoes/clothing_shoes = shoes
+
+	if (clothing_shoes.silent)
 		return
 
 	is_noisy = TRUE

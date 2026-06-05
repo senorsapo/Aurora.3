@@ -7,7 +7,7 @@
 	sectors = list(SECTOR_SRANDMARR)
 
 	prefix = "adhomai/"
-	suffixes = list("north_pole_nka_expedition.dmm")
+	suffix = "north_pole_nka_expedition.dmm"
 
 	unit_test_groups = list(2)
 
@@ -48,7 +48,7 @@
 
 	id = /obj/item/card/id
 	r_pocket = /obj/item/storage/wallet/random
-	l_pocket = /obj/item/device/radio
+	l_pocket = /obj/item/radio
 
 /obj/outfit/admin/nka_polar_explorer/get_id_access()
 	return list(ACCESS_NKA)
@@ -85,7 +85,7 @@
 
 	id = /obj/item/card/id
 	r_pocket = /obj/item/storage/wallet/random
-	l_pocket = /obj/item/device/radio
+	l_pocket = /obj/item/radio
 
 /obj/outfit/admin/nka_polar_sailor/get_id_access()
 	return list(ACCESS_NKA)

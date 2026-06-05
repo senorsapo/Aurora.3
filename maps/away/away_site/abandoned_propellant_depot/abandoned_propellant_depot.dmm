@@ -443,7 +443,7 @@
 /area/abandoned_propellant_depot/docks_north_east)
 "bo" = (
 /obj/structure/table/steel,
-/obj/item/device/flashlight/lamp/off{
+/obj/item/flashlight/lamp/off{
 	pixel_y = 4;
 	pixel_x = -5
 	},
@@ -487,7 +487,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-6";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/portables_connector,
@@ -556,7 +555,7 @@
 /area/abandoned_propellant_depot/atmos_propellant)
 "bH" = (
 /obj/structure/table/steel,
-/obj/item/device/flashlight/flare/glowstick/random{
+/obj/item/flashlight/flare/glowstick/random{
 	pixel_y = -10;
 	pixel_x = -2
 	},
@@ -661,7 +660,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-11";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/portables_connector{
@@ -882,8 +880,7 @@
 	pixel_y = -3
 	},
 /obj/item/pipe{
-	pixel_x = -5;
-	pixel_y = 0
+	pixel_x = -5
 	},
 /obj/item/pipe{
 	pixel_x = 10;
@@ -898,7 +895,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-12";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/portables_connector{
@@ -1109,9 +1105,7 @@
 	dir = 4
 	},
 /obj/effect/floor_decal/industrial/hatch/red,
-/obj/effect/floor_decal/industrial/warning/cee{
-	dir = 2
-	},
+/obj/effect/floor_decal/industrial/warning/cee,
 /obj/machinery/access_button{
 	pixel_x = -12;
 	pixel_y = -28;
@@ -1379,7 +1373,7 @@
 /obj/random/tool,
 /obj/random/tool,
 /obj/random/tool,
-/obj/item/device/flashlight/flare/glowstick/random,
+/obj/item/flashlight/flare/glowstick/random,
 /obj/random/dirt_75,
 /obj/item/stack/cable_coil/random,
 /turf/simulated/floor/plating,
@@ -1720,8 +1714,7 @@
 /area/abandoned_propellant_depot/atmos_propellant)
 "fh" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/machinery/portable_atmospherics/canister/helium,
 /obj/effect/floor_decal/industrial/outline/grey,
@@ -1782,7 +1775,7 @@
 /turf/simulated/floor/plating,
 /area/abandoned_propellant_depot/docks_north_east)
 "fs" = (
-/obj/item/device/analyzer{
+/obj/item/analyzer{
 	pixel_y = 7;
 	pixel_x = 11
 	},
@@ -1868,7 +1861,7 @@
 /obj/item/clothing/shoes/jackboots/cavalry{
 	pixel_y = -3
 	},
-/obj/item/clothing/suit/storage/toggle/highvis_alt,
+/obj/item/clothing/suit/storage/toggle/highvis/alt,
 /turf/simulated/floor/tiled,
 /area/abandoned_propellant_depot/security)
 "fK" = (
@@ -2141,7 +2134,7 @@
 /obj/item/storage/box/lights/mixed,
 /obj/item/reagent_containers/glass/bucket,
 /obj/item/clothing/gloves/janitor,
-/obj/item/device/flashlight/maglight,
+/obj/item/flashlight/maglight,
 /obj/random/dirt_75,
 /obj/random/dirt_75,
 /turf/simulated/floor/tiled,
@@ -2203,7 +2196,7 @@
 	pixel_x = 3;
 	pixel_y = 5
 	},
-/obj/item/device/flashlight/heavy{
+/obj/item/flashlight/heavy{
 	pixel_x = -3;
 	pixel_y = 7
 	},
@@ -2403,8 +2396,7 @@
 	dir = 4
 	},
 /obj/machinery/access_button{
-	pixel_x = 28;
-	dir = 2
+	pixel_x = 28
 	},
 /obj/effect/shuttle_landmark/abandoned_propellant_depot/dock/south_west,
 /obj/effect/map_effect/marker_helper/airlock/exterior,
@@ -2583,9 +2575,7 @@
 	dir = 4
 	},
 /obj/effect/floor_decal/industrial/hatch/red,
-/obj/effect/floor_decal/industrial/warning/cee{
-	dir = 2
-	},
+/obj/effect/floor_decal/industrial/warning/cee,
 /obj/effect/map_effect/marker_helper/airlock/interior,
 /obj/effect/map_effect/marker/airlock/docking{
 	name = "airlock_abandoned_propellant_depot_dock_north_east";
@@ -2674,8 +2664,7 @@
 "iu" = (
 /obj/structure/bed/padded,
 /obj/item/towel_flat{
-	pixel_x = -2;
-	pixel_y = 0
+	pixel_x = -2
 	},
 /turf/simulated/floor/tiled,
 /area/abandoned_propellant_depot/crew_quarters)
@@ -2894,7 +2883,6 @@
 /area/abandoned_propellant_depot/docks_south_west)
 "jb" = (
 /obj/item/reagent_containers/food/drinks/waterbottle{
-	pixel_y = 0;
 	pixel_x = -9
 	},
 /obj/random/dirt_75,
@@ -2904,7 +2892,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-11";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/portables_connector{
@@ -3050,7 +3037,6 @@
 	pixel_x = -3
 	},
 /obj/structure/barricade/metal{
-	pixel_y = 0;
 	dir = 8
 	},
 /obj/item/ammo_casing/a762/spent{
@@ -3080,8 +3066,7 @@
 	dir = 8
 	},
 /obj/effect/floor_decal/industrial/warning{
-	dir = 8;
-	layer = 2.71
+	dir = 8
 	},
 /obj/random/dirt_75,
 /obj/random/dirt_75,
@@ -3726,7 +3711,7 @@
 /obj/structure/table/glass{
 	table_reinf = "glass"
 	},
-/obj/item/device/flashlight/lamp/off{
+/obj/item/flashlight/lamp/off{
 	pixel_x = -3;
 	pixel_y = 4
 	},
@@ -3986,8 +3971,7 @@
 	dir = 4
 	},
 /obj/machinery/access_button{
-	pixel_x = 28;
-	dir = 2
+	pixel_x = 28
 	},
 /obj/effect/shuttle_landmark/abandoned_propellant_depot/dock/south_mid,
 /obj/effect/map_effect/marker_helper/airlock/exterior,
@@ -4033,7 +4017,7 @@
 /area/abandoned_propellant_depot/atmos_air)
 "nn" = (
 /obj/structure/table/wood,
-/obj/item/device/flashlight/lamp/green{
+/obj/item/flashlight/lamp/green{
 	pixel_x = -5;
 	pixel_y = 3;
 	on = 0
@@ -4421,15 +4405,14 @@
 /area/abandoned_propellant_depot/hallways_south)
 "oD" = (
 /obj/item/clothing/shoes/workboots{
-	pixel_x = 13;
-	pixel_y = 0
+	pixel_x = 13
 	},
 /obj/random/dirt_75,
 /turf/simulated/floor/tiled,
 /area/abandoned_propellant_depot/crew_quarters)
 "oE" = (
 /obj/structure/table/steel,
-/obj/item/device/analyzer{
+/obj/item/analyzer{
 	pixel_y = 7
 	},
 /obj/random/dirt_75,
@@ -4462,8 +4445,7 @@
 /area/abandoned_propellant_depot/docks_north_west)
 "oL" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/machinery/portable_atmospherics/canister/air/airlock,
 /obj/effect/floor_decal/industrial/outline/yellow,
@@ -4500,7 +4482,7 @@
 /obj/structure/closet,
 /obj/random/tool,
 /obj/random/tool,
-/obj/item/device/flashlight/flare/glowstick/random,
+/obj/item/flashlight/flare/glowstick/random,
 /obj/random/tool,
 /obj/random/dirt_75,
 /obj/random/dirt_75,
@@ -4622,7 +4604,7 @@
 /area/abandoned_propellant_depot/eva)
 "pl" = (
 /obj/structure/table/steel,
-/obj/item/device/flashlight/lamp/off{
+/obj/item/flashlight/lamp/off{
 	pixel_x = -5;
 	pixel_y = 4
 	},
@@ -4870,7 +4852,7 @@
 	pixel_x = -4;
 	pixel_y = -8
 	},
-/obj/item/device/flashlight/lamp/off{
+/obj/item/flashlight/lamp/off{
 	pixel_x = -5;
 	pixel_y = 4
 	},
@@ -5043,7 +5025,7 @@
 /area/abandoned_propellant_depot/maint)
 "qJ" = (
 /obj/structure/table/steel,
-/obj/item/device/flashlight/heavy{
+/obj/item/flashlight/heavy{
 	pixel_x = -2;
 	pixel_y = 4
 	},
@@ -5059,7 +5041,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-12";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/portables_connector{
@@ -5279,6 +5260,7 @@
 /obj/machinery/light/broken{
 	dir = 4
 	},
+/obj/item/eftpos,
 /turf/simulated/floor/tiled,
 /area/abandoned_propellant_depot/bridge)
 "rG" = (
@@ -5320,7 +5302,7 @@
 /turf/simulated/floor/tiled,
 /area/abandoned_propellant_depot/atmos_air)
 "rN" = (
-/obj/item/device/analyzer{
+/obj/item/analyzer{
 	pixel_y = 7;
 	pixel_x = 11
 	},
@@ -5336,8 +5318,7 @@
 /area/abandoned_propellant_depot/atmos_propellant)
 "rP" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/machinery/portable_atmospherics/canister/air/airlock,
 /obj/effect/floor_decal/industrial/outline,
@@ -5471,9 +5452,7 @@
 /turf/simulated/floor/plating,
 /area/abandoned_propellant_depot/atmos_propellant)
 "sn" = (
-/obj/machinery/atmospherics/unary/vent_pump/high_volume{
-	dir = 2
-	},
+/obj/machinery/atmospherics/unary/vent_pump/high_volume,
 /obj/random/dirt_75,
 /obj/machinery/embedded_controller/radio/airlock/airlock_controller{
 	dir = 8;
@@ -5511,7 +5490,6 @@
 /obj/random/dirt_75,
 /obj/machinery/embedded_controller/radio/airlock/docking_port{
 	dir = 8;
-	pixel_y = 0;
 	pixel_x = 20
 	},
 /obj/effect/map_effect/marker/airlock/docking{
@@ -5528,8 +5506,7 @@
 	dir = 4
 	},
 /obj/machinery/access_button{
-	pixel_x = 28;
-	dir = 2
+	pixel_x = 28
 	},
 /obj/effect/shuttle_landmark/abandoned_propellant_depot/dock/south_east,
 /obj/effect/map_effect/marker_helper/airlock/exterior,
@@ -5671,9 +5648,7 @@
 /turf/simulated/floor/tiled,
 /area/abandoned_propellant_depot/hallways_east)
 "sR" = (
-/obj/machinery/atmospherics/unary/vent_pump/high_volume{
-	dir = 2
-	},
+/obj/machinery/atmospherics/unary/vent_pump/high_volume,
 /obj/random/dirt_75,
 /obj/effect/map_effect/marker/airlock/docking{
 	name = "airlock_abandoned_propellant_depot_dock_north_east";
@@ -5841,8 +5816,7 @@
 	pixel_x = 8
 	},
 /obj/effect/floor_decal/industrial/warning{
-	dir = 8;
-	layer = 2.71
+	dir = 8
 	},
 /obj/random/dirt_75,
 /turf/simulated/floor/plating,
@@ -5961,8 +5935,7 @@
 /area/abandoned_propellant_depot/propellant_tanks)
 "tN" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/machinery/portable_atmospherics/canister/air/airlock,
 /obj/effect/floor_decal/industrial/outline,
@@ -6099,8 +6072,7 @@
 /obj/effect/floor_decal/industrial/hatch/red,
 /obj/effect/floor_decal/industrial/warning/full,
 /obj/machinery/access_button{
-	pixel_x = 28;
-	dir = 2
+	pixel_x = 28
 	},
 /obj/effect/map_effect/marker_helper/airlock/interior,
 /obj/effect/map_effect/marker/airlock{
@@ -6126,8 +6098,7 @@
 	dir = 8
 	},
 /obj/machinery/access_button{
-	pixel_x = -28;
-	dir = 2
+	pixel_x = -28
 	},
 /obj/effect/map_effect/marker_helper/airlock/exterior,
 /obj/effect/map_effect/marker/airlock/docking{
@@ -6419,8 +6390,7 @@
 	},
 /obj/machinery/access_button{
 	pixel_x = 28;
-	pixel_y = 32;
-	dir = 2
+	pixel_y = 32
 	},
 /obj/effect/map_effect/marker_helper/airlock/interior,
 /obj/effect/map_effect/marker/airlock/docking{
@@ -6440,8 +6410,7 @@
 /area/abandoned_propellant_depot/atmos_propellant)
 "vw" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/machinery/portable_atmospherics/canister/empty/carbon_dioxide,
 /obj/effect/floor_decal/industrial/outline/yellow,
@@ -6596,8 +6565,8 @@
 /area/abandoned_propellant_depot/engineering)
 "vQ" = (
 /obj/structure/closet/crate,
-/obj/item/device/flashlight,
-/obj/item/device/flashlight/flare/glowstick,
+/obj/item/flashlight,
+/obj/item/flashlight/flare/glowstick,
 /obj/random/dirt_75,
 /obj/machinery/light/colored/dying{
 	dir = 8
@@ -6915,7 +6884,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-12";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/portables_connector{
@@ -7020,7 +6988,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-6";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/pipe/tank/carbon_dioxide,
@@ -7647,7 +7614,7 @@
 /obj/structure/closet/crate,
 /obj/random/tool,
 /obj/random/tool,
-/obj/item/device/flashlight/flare,
+/obj/item/flashlight/flare,
 /obj/random/tech_supply,
 /obj/random/tech_supply,
 /obj/random/tool,
@@ -7777,7 +7744,7 @@
 /obj/machinery/atmospherics/pipe/simple/visible{
 	dir = 9
 	},
-/obj/item/device/flashlight/flare{
+/obj/item/flashlight/flare{
 	pixel_x = 8
 	},
 /obj/structure/lattice/catwalk/indoor/grate,
@@ -7818,7 +7785,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-6";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/portables_connector,
@@ -7830,7 +7796,6 @@
 	pixel_y = -6
 	},
 /obj/structure/barricade/metal{
-	pixel_y = 0;
 	dir = 8
 	},
 /obj/item/ammo_casing/a762/spent{
@@ -7884,9 +7849,7 @@
 	dir = 4
 	},
 /obj/effect/floor_decal/industrial/hatch/red,
-/obj/effect/floor_decal/industrial/warning/cee{
-	dir = 2
-	},
+/obj/effect/floor_decal/industrial/warning/cee,
 /obj/effect/map_effect/marker_helper/airlock/interior,
 /obj/effect/map_effect/marker/airlock/docking{
 	name = "airlock_abandoned_propellant_depot_dock_west";
@@ -7951,7 +7914,7 @@
 /area/abandoned_propellant_depot/hallways_west)
 "Ai" = (
 /obj/structure/table/steel,
-/obj/item/device/radio/phone{
+/obj/item/radio/phone{
 	frequency = 1280;
 	pixel_y = 11
 	},
@@ -8008,7 +7971,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-5";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/portables_connector,
@@ -8097,8 +8059,7 @@
 /area/abandoned_propellant_depot/docks_south_east)
 "AF" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/machinery/portable_atmospherics/canister/air/airlock,
 /obj/effect/floor_decal/industrial/outline,
@@ -8256,7 +8217,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-11";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/pipe/simple/visible/yellow{
@@ -8373,8 +8333,7 @@
 /area/abandoned_propellant_depot/gym)
 "BF" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/effect/floor_decal/industrial/outline/grey,
 /obj/random/dirt_75,
@@ -8601,8 +8560,7 @@
 	dir = 8
 	},
 /obj/machinery/access_button{
-	pixel_x = -28;
-	dir = 2
+	pixel_x = -28
 	},
 /obj/effect/map_effect/marker_helper/airlock/exterior,
 /obj/effect/map_effect/marker/airlock/docking{
@@ -8835,11 +8793,9 @@
 	pixel_y = 5
 	},
 /obj/item/reagent_containers/food/drinks/waterbottle{
-	pixel_y = 0;
 	pixel_x = 2
 	},
 /obj/item/reagent_containers/food/drinks/waterbottle{
-	pixel_y = 0;
 	pixel_x = -9
 	},
 /obj/item/reagent_containers/food/drinks/waterbottle{
@@ -8866,7 +8822,7 @@
 /area/abandoned_propellant_depot/hallways_south)
 "Di" = (
 /obj/structure/table/steel,
-/obj/item/device/flashlight/lamp/off{
+/obj/item/flashlight/lamp/off{
 	pixel_y = 4
 	},
 /obj/machinery/alarm/east,
@@ -8876,12 +8832,10 @@
 /obj/effect/floor_decal/industrial/outline/grey,
 /obj/structure/closet/crate,
 /obj/item/cell/super{
-	pixel_x = -6;
-	pixel_y = 0
+	pixel_x = -6
 	},
 /obj/item/cell/super{
-	pixel_x = -6;
-	pixel_y = 0
+	pixel_x = -6
 	},
 /obj/item/cell/high{
 	pixel_x = 6
@@ -8916,7 +8870,6 @@
 	},
 /obj/random/dirt_75,
 /obj/machinery/airlock_sensor{
-	dir = 2;
 	pixel_y = 28;
 	pixel_x = -6
 	},
@@ -9208,7 +9161,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-6";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/pipe/simple/visible/yellow{
@@ -9805,8 +9757,7 @@
 /area/abandoned_propellant_depot/security)
 "Gc" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/machinery/portable_atmospherics/canister/air,
 /obj/effect/floor_decal/industrial/outline/yellow,
@@ -10010,7 +9961,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-5";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/portables_connector,
@@ -10123,8 +10073,7 @@
 	dir = 8
 	},
 /obj/machinery/access_button{
-	pixel_x = -28;
-	dir = 2
+	pixel_x = -28
 	},
 /obj/effect/map_effect/marker_helper/airlock/exterior,
 /obj/effect/map_effect/marker/airlock/docking{
@@ -10545,8 +10494,7 @@
 	pixel_y = 1
 	},
 /obj/item/pipe_meter{
-	pixel_x = 11;
-	pixel_y = 0
+	pixel_x = 11
 	},
 /obj/item/pipe_meter{
 	pixel_x = 2;
@@ -10785,7 +10733,7 @@
 /turf/simulated/floor/plating,
 /area/abandoned_propellant_depot/docks_south_west)
 "Jq" = (
-/obj/item/device/flashlight/flare{
+/obj/item/flashlight/flare{
 	pixel_x = 8
 	},
 /obj/machinery/portable_atmospherics/powered/pump,
@@ -10825,7 +10773,7 @@
 /turf/simulated/floor/tiled,
 /area/abandoned_propellant_depot/engineering)
 "Jw" = (
-/obj/item/device/flashlight/flare{
+/obj/item/flashlight/flare{
 	pixel_x = 8
 	},
 /turf/simulated/floor/tiled/full,
@@ -10980,7 +10928,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-12";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/portables_connector{
@@ -11032,8 +10979,7 @@
 /area/abandoned_propellant_depot/docks_north_east)
 "Kh" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/machinery/portable_atmospherics/canister/empty/carbon_dioxide,
 /obj/effect/floor_decal/industrial/outline/yellow,
@@ -11074,8 +11020,7 @@
 /obj/effect/floor_decal/industrial/hatch/red,
 /obj/effect/floor_decal/industrial/warning/full,
 /obj/machinery/access_button{
-	pixel_x = -28;
-	dir = 2
+	pixel_x = -28
 	},
 /obj/effect/map_effect/marker_helper/airlock/exterior,
 /obj/effect/map_effect/marker/airlock{
@@ -11152,8 +11097,7 @@
 	icon_state = "1-2"
 	},
 /obj/machinery/access_button{
-	pixel_x = -28;
-	dir = 2
+	pixel_x = -28
 	},
 /obj/effect/map_effect/marker_helper/airlock/exterior,
 /obj/effect/map_effect/marker/airlock{
@@ -11197,8 +11141,7 @@
 /area/abandoned_propellant_depot/hallways_north)
 "KL" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/effect/floor_decal/industrial/outline/yellow,
 /obj/random/dirt_75,
@@ -11350,11 +11293,11 @@
 /area/abandoned_propellant_depot/docks_north_east)
 "Lg" = (
 /obj/structure/closet,
-/obj/item/device/flashlight/maglight{
+/obj/item/flashlight/maglight{
 	pixel_y = -8
 	},
-/obj/item/device/flashlight/maglight,
-/obj/item/device/flashlight/maglight{
+/obj/item/flashlight/maglight,
+/obj/item/flashlight/maglight{
 	pixel_y = 8
 	},
 /obj/random/dirt_75,
@@ -11505,7 +11448,6 @@
 	},
 /obj/random/dirt_75,
 /obj/machinery/embedded_controller/radio/airlock/docking_port{
-	dir = 2;
 	pixel_y = 28;
 	pixel_x = 6
 	},
@@ -12005,8 +11947,7 @@
 /area/abandoned_propellant_depot/gym)
 "Nk" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/machinery/portable_atmospherics/canister/air,
 /obj/effect/floor_decal/industrial/outline/yellow,
@@ -12027,8 +11968,7 @@
 /area/abandoned_propellant_depot/docks_north_west)
 "Np" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/effect/floor_decal/industrial/outline,
 /obj/machinery/light/broken{
@@ -12103,8 +12043,7 @@
 	dir = 4
 	},
 /obj/effect/floor_decal/industrial/warning{
-	dir = 8;
-	layer = 2.71
+	dir = 8
 	},
 /obj/random/dirt_75,
 /turf/simulated/floor/plating,
@@ -12178,9 +12117,7 @@
 /turf/simulated/floor/plating,
 /area/abandoned_propellant_depot/maint_storage)
 "NK" = (
-/obj/structure/bed/stool/chair/folding{
-	dir = 2
-	},
+/obj/structure/bed/stool/chair/folding,
 /obj/random/dirt_75,
 /obj/random/dirt_75,
 /turf/simulated/floor/wood,
@@ -12271,14 +12208,14 @@
 /obj/item/clothing/gloves/latex,
 /obj/item/clothing/head/nursehat,
 /obj/item/clothing/suit/storage/toggle/labcoat,
-/obj/item/device/healthanalyzer,
-/obj/item/device/breath_analyzer,
+/obj/item/healthanalyzer,
+/obj/item/breath_analyzer,
 /obj/random/dirt_75,
 /turf/simulated/floor/tiled/white,
 /area/abandoned_propellant_depot/medbay)
 "Oh" = (
 /obj/structure/table/steel,
-/obj/item/device/flashlight/maglight{
+/obj/item/flashlight/maglight{
 	pixel_x = -8;
 	pixel_y = 1
 	},
@@ -12378,8 +12315,7 @@
 /area/abandoned_propellant_depot/kitchen)
 "OA" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/machinery/portable_atmospherics/canister/empty,
 /obj/effect/floor_decal/industrial/outline/yellow,
@@ -12439,8 +12375,7 @@
 /area/abandoned_propellant_depot/hallways_south)
 "OL" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/machinery/portable_atmospherics/canister/air/airlock,
 /obj/effect/floor_decal/industrial/outline,
@@ -12706,7 +12641,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-6";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/portables_connector,
@@ -13014,7 +12948,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-5";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/portables_connector,
@@ -13049,7 +12982,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-5";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/pipe/tank/air,
@@ -13174,8 +13106,7 @@
 /area/abandoned_propellant_depot/propellant_tanks)
 "QT" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/machinery/portable_atmospherics/canister/carbon_dioxide,
 /obj/effect/floor_decal/industrial/outline/grey,
@@ -13238,7 +13169,6 @@
 	pixel_y = 5
 	},
 /obj/item/material/knife{
-	layer = 2.99;
 	pixel_x = 8;
 	pixel_y = -5
 	},
@@ -13392,7 +13322,7 @@
 /turf/simulated/floor/tiled/white,
 /area/abandoned_propellant_depot/kitchen)
 "RH" = (
-/obj/item/device/flashlight/flare{
+/obj/item/flashlight/flare{
 	pixel_x = 8
 	},
 /obj/random/dirt_75,
@@ -13465,8 +13395,7 @@
 /area/abandoned_propellant_depot/security)
 "RT" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/machinery/portable_atmospherics/canister/air,
 /obj/effect/floor_decal/industrial/outline/yellow,
@@ -13596,7 +13525,7 @@
 /turf/simulated/floor/plating,
 /area/abandoned_propellant_depot/atmos_air_aux_fill)
 "SE" = (
-/obj/item/device/flashlight/flare{
+/obj/item/flashlight/flare{
 	pixel_x = 8
 	},
 /obj/random/dirt_75,
@@ -13782,8 +13711,7 @@
 "Th" = (
 /obj/machinery/atmospherics/pipe/simple/visible,
 /obj/effect/floor_decal/industrial/warning{
-	dir = 8;
-	layer = 2.71
+	dir = 8
 	},
 /obj/random/dirt_75,
 /turf/simulated/floor/plating,
@@ -13924,7 +13852,7 @@
 /turf/simulated/floor/tiled,
 /area/abandoned_propellant_depot/security)
 "Tz" = (
-/obj/item/device/flashlight/survival{
+/obj/item/flashlight/survival{
 	pixel_x = 10;
 	pixel_y = 6
 	},
@@ -14295,8 +14223,7 @@
 /area/abandoned_propellant_depot/maint_storage)
 "UC" = (
 /obj/machinery/atmospherics/portables_connector{
-	dir = 4;
-	layer = 2.8
+	dir = 4
 	},
 /obj/machinery/portable_atmospherics/canister/empty,
 /obj/effect/floor_decal/industrial/outline/grey,
@@ -14497,7 +14424,7 @@
 /area/abandoned_propellant_depot/hallways_west)
 "Vo" = (
 /obj/structure/lattice/catwalk,
-/obj/item/device/analyzer{
+/obj/item/analyzer{
 	pixel_y = 7;
 	pixel_x = -4
 	},
@@ -14723,7 +14650,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-6";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/pipe/tank/air,
@@ -15157,7 +15083,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-5";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/pipe/tank/carbon_dioxide,
@@ -15219,8 +15144,7 @@
 	dir = 6
 	},
 /obj/effect/floor_decal/industrial/warning{
-	dir = 8;
-	layer = 2.71
+	dir = 8
 	},
 /obj/machinery/alarm/north,
 /obj/random/dirt_75,
@@ -15619,9 +15543,7 @@
 	dir = 4
 	},
 /obj/effect/floor_decal/industrial/hatch/red,
-/obj/effect/floor_decal/industrial/warning/cee{
-	dir = 2
-	},
+/obj/effect/floor_decal/industrial/warning/cee,
 /obj/machinery/access_button{
 	pixel_x = 28;
 	pixel_y = -20;
@@ -15708,7 +15630,7 @@
 /obj/machinery/atmospherics/pipe/manifold/visible{
 	dir = 4
 	},
-/obj/item/device/flashlight/flare{
+/obj/item/flashlight/flare{
 	pixel_x = 8
 	},
 /obj/effect/floor_decal/industrial/warning,
@@ -15933,7 +15855,6 @@
 /obj/structure/tank_wall{
 	density = 0;
 	icon_state = "m-12";
-	layer = 10.1;
 	opacity = 0
 	},
 /obj/machinery/atmospherics/portables_connector{

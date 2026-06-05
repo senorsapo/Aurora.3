@@ -1,7 +1,6 @@
 /obj/item/melee/cultblade
 	name = "eldritch blade"
 	desc = "A sword humming with unholy energy. It glows with a dim red light and looks deadly sharp."
-	desc_antag = "This sword is a powerful weapon, capable of severing limbs easily, if they are targeted.  Non-believers are unable to use this weapon."
 	icon = 'icons/obj/sword_64.dmi'
 	icon_state = "cultblade"
 	item_state = "cultblade"
@@ -10,24 +9,29 @@
 	worn_y_dimension = 64
 	force = 31
 	armor_penetration = 50 // Narsie's blessing is strong. Also needed so the cult isn't obliterated by the average voidsuit with melee resistance.
-	w_class = ITEMSIZE_LARGE
+	w_class = WEIGHT_CLASS_BULKY
 	throwforce = 10
 	slot_flags = SLOT_BELT
 	edge = TRUE
 	sharp = TRUE
 	hitsound = 'sound/weapons/bladeslice.ogg'
 	drop_sound = 'sound/items/drop/sword.ogg'
-	pickup_sound = /singleton/sound_category/sword_pickup_sound
-	equip_sound = /singleton/sound_category/sword_equip_sound
+	pickup_sound = SFX_PICKUP_SWORD
+	equip_sound = SFX_EQUIP_SWORD
 	var/does_cult_check = TRUE
 
 	attack_verb = list("attacked", "slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
 	can_embed = FALSE //can't get stuck anymore, because blood magic
 
+/obj/item/melee/cultblade/antagonist_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "This sword is a powerful weapon, capable of severing limbs easily if they are targeted."
+	. += "Non-believers are unable to use this weapon."
+
 /obj/item/melee/cultblade/cultify()
 	return
 
-/obj/item/melee/cultblade/attack(mob/living/M, mob/living/user, var/target_zone)
+/obj/item/melee/cultblade/attack(mob/living/target_mob, mob/living/user, target_zone)
 	if(iscultist(user) || !does_cult_check)
 		return ..()
 

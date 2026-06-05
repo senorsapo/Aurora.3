@@ -9,7 +9,7 @@
 	sectors = list(SECTOR_SRANDMARR)
 
 	prefix = "adhomai/"
-	suffixes = list( "adhomai_archeology.dmm")
+	suffix =  "adhomai_archeology.dmm"
 
 	unit_test_groups = list(1)
 
@@ -17,7 +17,6 @@
 	name = "Adhomian Archeology Camp"
 	icon_state = "bluenew"
 	requires_power = FALSE
-	dynamic_lighting = TRUE
 	no_light_control = FALSE
 	base_turf = /turf/simulated/floor/exoplanet/mineral/adhomai
 	area_flags = AREA_FLAG_RAD_SHIELDED

@@ -7,7 +7,7 @@
 	sectors = list(SECTOR_TAU_CETI)
 
 	prefix = "new_gibson/"
-	suffixes = list("gibson_resupply.dmm")
+	suffix = "gibson_resupply.dmm"
 
 	unit_test_groups = list(2)
 
@@ -15,6 +15,5 @@
 	name = "New Gibson Supply Outpost"
 	icon_state = "bluenew"
 	requires_power = FALSE
-	dynamic_lighting = TRUE
 	no_light_control = FALSE
 	base_turf = /turf/simulated/floor/exoplanet/snow

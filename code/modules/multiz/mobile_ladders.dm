@@ -1,19 +1,25 @@
 /obj/item/ladder_mobile
 	name = "mobile ladder"
-	desc = "A lightweight deployable ladder, which you can use to move up or down. Or alternatively, you can bash some faces in."
+	desc = "A lightweight deployable ladder, which you can use to move up or down. Alternatively, you can bash some faces in; it'll hurt, a lot."
 	icon_state = "mobile_ladder"
 	item_state = "mobile_ladder"
 	icon = 'icons/obj/multiz_items.dmi'
 	contained_sprite = TRUE
 	throw_range = 3
-	force = 15
-	w_class = ITEMSIZE_LARGE
+	force = 18
+	w_class = WEIGHT_CLASS_BULKY
 	slot_flags = SLOT_BACK
+
+/obj/item/ladder_mobile/mechanics_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "Use this on a solid floor (with open space above it) to place the ladder going up."
+	. += "Use this on an open space turf (with solid floor beneath it) to place the ladder going down."
 
 /obj/item/ladder_mobile/proc/place_ladder(atom/A, mob/user)
 
 	if (isopenturf(A))         //Place into open space
-		var/turf/below_loc = GetBelow(A)
+		var/turf/T = get_turf(A)
+		var/turf/below_loc = GET_TURF_BELOW(T)
 		if (!below_loc || (istype(/turf/space, below_loc)))
 			to_chat(user, SPAN_NOTICE("Why would you do that?! There is only infinite space there..."))
 			return
@@ -32,7 +38,8 @@
 		qdel(src)
 
 	else if (istype(A, /turf/simulated/floor) || istype(A, /turf/unsimulated/floor))	//Place onto Floor
-		var/turf/upper_loc = GetAbove(A)
+		var/turf/T = get_turf(A)
+		var/turf/upper_loc = GET_TURF_ABOVE(T)
 		if (!upper_loc || !isopenturf(upper_loc))
 			to_chat(user, SPAN_NOTICE("There is something above. You can't deploy!"))
 			return

@@ -1,4 +1,4 @@
-var/datum/announcement/minor/captain_announcement = new(do_newscast = 1)
+GLOBAL_DATUM_INIT(captain_announcement, /datum/announcement/minor, new(do_newscast = TRUE))
 
 /datum/job/captain
 	title = "Captain"
@@ -11,8 +11,7 @@ var/datum/announcement/minor/captain_announcement = new(do_newscast = 1)
 	intro_prefix = "the"
 	supervisors = "company officials and Corporate Regulations"
 	selection_color = "#114dc1"
-	access = list() 			//See get_access()
-	minimal_access = list() 	//See get_access()
+	job_access = list() 	//See get_access()
 	minimal_player_age = 14
 	economic_modifier = 20
 
@@ -24,7 +23,11 @@ var/datum/announcement/minor/captain_announcement = new(do_newscast = 1)
 
 	outfit = /obj/outfit/job/captain
 
-	blacklisted_species = list(SPECIES_TAJARA, SPECIES_TAJARA_MSAI, SPECIES_TAJARA_ZHAN, SPECIES_UNATHI, SPECIES_DIONA, SPECIES_IPC, SPECIES_IPC_G1, SPECIES_IPC_G2, SPECIES_IPC_XION, SPECIES_IPC_ZENGHU, SPECIES_IPC_BISHOP, SPECIES_IPC_SHELL, SPECIES_VAURCA_WORKER, SPECIES_VAURCA_WARRIOR, SPECIES_VAURCA_BULWARK, SPECIES_VAURCA_BREEDER, SPECIES_DIONA, SPECIES_DIONA_COEUS)
+	blacklisted_species = list(SPECIES_TAJARA, SPECIES_TAJARA_MSAI, SPECIES_TAJARA_ZHAN, SPECIES_UNATHI, SPECIES_DIONA, SPECIES_IPC, SPECIES_IPC_G1, SPECIES_IPC_G2, SPECIES_IPC_XION, SPECIES_IPC_ZENGHU, SPECIES_IPC_BISHOP, SPECIES_IPC_SHELL, SPECIES_VAURCA_WORKER, SPECIES_VAURCA_WARRIOR, SPECIES_VAURCA_ATTENDANT, SPECIES_VAURCA_BULWARK, SPECIES_VAURCA_BREEDER, SPECIES_DIONA, SPECIES_DIONA_COEUS)
+
+	skill_requirements = alist(
+		/singleton/skill/pilot_spacecraft = SKILL_LEVEL_FAMILIAR
+	)
 
 /obj/outfit/job/captain
 	name = "Captain"
@@ -34,13 +37,13 @@ var/datum/announcement/minor/captain_announcement = new(do_newscast = 1)
 	shoes = /obj/item/clothing/shoes/laceup/brown
 	head = /obj/item/clothing/head/caphat/scc
 	glasses = /obj/item/clothing/glasses/sunglasses
-	id = /obj/item/card/id/gold
+	id = /obj/item/card/id/scc/gold/captain
 
-	headset = /obj/item/device/radio/headset/heads/captain
-	bowman = /obj/item/device/radio/headset/heads/captain/alt
-	double_headset = /obj/item/device/radio/headset/alt/double/captain
-	wrist_radio = /obj/item/device/radio/headset/wrist/captain
-	clipon_radio = /obj/item/device/radio/headset/wrist/clip/captain
+	headset = /obj/item/radio/headset/heads/captain
+	bowman = /obj/item/radio/headset/heads/captain/alt
+	double_headset = /obj/item/radio/headset/alt/double/captain
+	wrist_radio = /obj/item/radio/headset/wrist/captain
+	clipon_radio = /obj/item/radio/headset/wrist/clip/captain
 
 	tab_pda = /obj/item/modular_computer/handheld/pda/command/captain
 	wristbound = /obj/item/modular_computer/handheld/wristbound/preset/pda/command/captain
@@ -73,7 +76,7 @@ var/datum/announcement/minor/captain_announcement = new(do_newscast = 1)
 
 /datum/job/captain/announce(mob/living/carbon/human/H)
 	. = ..()
-	captain_announcement.Announce("All hands, Captain [H.real_name] on deck!")
+	GLOB.captain_announcement.Announce("All hands, Captain [H.real_name] on deck!")
 	callHook("captain_spawned", list(H))
 
 /datum/job/xo
@@ -98,17 +101,18 @@ var/datum/announcement/minor/captain_announcement = new(do_newscast = 1)
 
 	outfit = /obj/outfit/job/xo
 
-	access = list(ACCESS_SEC_DOORS, ACCESS_MEDICAL, ACCESS_ENGINE, ACCESS_SHIP_WEAPONS, ACCESS_CHANGE_IDS, ACCESS_EVA, ACCESS_HEADS,
-					ACCESS_ALL_PERSONAL_LOCKERS, ACCESS_MAINT_TUNNELS, ACCESS_BAR, ACCESS_JANITOR, ACCESS_CONSTRUCTION,
-					ACCESS_CREMATORIUM, ACCESS_KITCHEN, ACCESS_HYDROPONICS,ACCESS_CHAPEL_OFFICE, ACCESS_LIBRARY, ACCESS_RESEARCH, ACCESS_MINING, ACCESS_MAILSORTING,
-					ACCESS_JANITOR, ACCESS_HOP, ACCESS_RC_ANNOUNCE, ACCESS_KEYCARD_AUTH, ACCESS_GATEWAY, ACCESS_WEAPONS, ACCESS_JOURNALIST, ACCESS_BRIDGE_CREW, ACCESS_INTREPID, ACCESS_TELEPORTER)
+	job_access = list(
+		ACCESS_SEC_DOORS, ACCESS_MEDICAL, ACCESS_SHIP_WEAPONS, ACCESS_ENGINE, ACCESS_CHANGE_IDS, ACCESS_EVA, ACCESS_HEADS, ACCESS_ALL_PERSONAL_LOCKERS,
+		ACCESS_MAINT_TUNNELS, ACCESS_BAR, ACCESS_JANITOR, ACCESS_CONSTRUCTION, ACCESS_CREMATORIUM, ACCESS_GALLEY, ACCESS_HYDROPONICS, ACCESS_CHAPEL_OFFICE,
+		ACCESS_LIBRARY, ACCESS_RESEARCH, ACCESS_MINING, ACCESS_MAILSORTING, ACCESS_JANITOR, ACCESS_HOP, ACCESS_RC_ANNOUNCE, ACCESS_KEYCARD_AUTH, ACCESS_GATEWAY,
+		ACCESS_WEAPONS, ACCESS_JOURNALIST, ACCESS_BRIDGE_CREW, ACCESS_INTREPID, ACCESS_SPARK, ACCESS_QUARK, ACCESS_CANARY, ACCESS_TELEPORTER
+	)
 
-	minimal_access = list(ACCESS_SEC_DOORS, ACCESS_MEDICAL, ACCESS_SHIP_WEAPONS, ACCESS_ENGINE, ACCESS_CHANGE_IDS, ACCESS_EVA, ACCESS_HEADS,
-							ACCESS_ALL_PERSONAL_LOCKERS, ACCESS_MAINT_TUNNELS, ACCESS_BAR, ACCESS_JANITOR, ACCESS_CONSTRUCTION,
-							ACCESS_CREMATORIUM, ACCESS_KITCHEN, ACCESS_HYDROPONICS, ACCESS_CHAPEL_OFFICE, ACCESS_LIBRARY, ACCESS_RESEARCH, ACCESS_MINING, ACCESS_MAILSORTING,
-							ACCESS_JANITOR,   ACCESS_HOP, ACCESS_RC_ANNOUNCE, ACCESS_KEYCARD_AUTH, ACCESS_GATEWAY, ACCESS_WEAPONS, ACCESS_JOURNALIST, ACCESS_BRIDGE_CREW, ACCESS_INTREPID, ACCESS_TELEPORTER)
+	blacklisted_species = list(SPECIES_TAJARA_ZHAN, SPECIES_VAURCA_WORKER, SPECIES_VAURCA_WARRIOR, SPECIES_VAURCA_ATTENDANT, SPECIES_VAURCA_BULWARK, SPECIES_VAURCA_BREEDER)
 
-	blacklisted_species = list(SPECIES_TAJARA_MSAI, SPECIES_TAJARA_ZHAN, SPECIES_VAURCA_WORKER, SPECIES_VAURCA_WARRIOR, SPECIES_VAURCA_BULWARK, SPECIES_VAURCA_BREEDER)
+	skill_requirements = alist(
+		/singleton/skill/pilot_spacecraft = SKILL_LEVEL_FAMILIAR
+	)
 
 /obj/outfit/job/xo
 	name = "Executive Officer"
@@ -117,13 +121,13 @@ var/datum/announcement/minor/captain_announcement = new(do_newscast = 1)
 	head = /obj/item/clothing/head/caphat/xo
 	uniform = /obj/item/clothing/under/rank/xo
 	shoes = /obj/item/clothing/shoes/laceup/brown
-	id = /obj/item/card/id/navy
+	id = /obj/item/card/id/scc/silver
 
-	headset = /obj/item/device/radio/headset/heads/xo
-	bowman = /obj/item/device/radio/headset/heads/xo/alt
-	double_headset = /obj/item/device/radio/headset/alt/double/xo
-	wrist_radio = /obj/item/device/radio/headset/wrist/xo
-	clipon_radio = /obj/item/device/radio/headset/wrist/clip/xo
+	headset = /obj/item/radio/headset/heads/xo
+	bowman = /obj/item/radio/headset/heads/xo/alt
+	double_headset = /obj/item/radio/headset/alt/double/xo
+	wrist_radio = /obj/item/radio/headset/wrist/xo
+	clipon_radio = /obj/item/radio/headset/wrist/clip/xo
 
 	tab_pda = /obj/item/modular_computer/handheld/pda/command/xo
 	wristbound = /obj/item/modular_computer/handheld/wristbound/preset/pda/command/xo
@@ -157,10 +161,16 @@ var/datum/announcement/minor/captain_announcement = new(do_newscast = 1)
 
 	outfit = /obj/outfit/job/bridge_crew
 
-	access = list(ACCESS_EVA, ACCESS_HEADS, ACCESS_MAINT_TUNNELS, ACCESS_WEAPONS, ACCESS_BRIDGE_CREW, ACCESS_INTREPID, ACCESS_TELEPORTER, ACCESS_EXTERNAL_AIRLOCKS)
-	minimal_access = list(ACCESS_HEADS, ACCESS_EVA, ACCESS_GATEWAY, ACCESS_WEAPONS, ACCESS_BRIDGE_CREW, ACCESS_INTREPID, ACCESS_TELEPORTER, ACCESS_EXTERNAL_AIRLOCKS)
+	job_access = list(
+		ACCESS_HEADS, ACCESS_EVA, ACCESS_GATEWAY, ACCESS_WEAPONS, ACCESS_BRIDGE_CREW, ACCESS_INTREPID, ACCESS_INTREPID, ACCESS_SPARK, ACCESS_QUARK, ACCESS_CANARY,
+		ACCESS_TELEPORTER, ACCESS_EXTERNAL_AIRLOCKS
+	)
 
-	blacklisted_species = list(SPECIES_TAJARA_MSAI, SPECIES_TAJARA_ZHAN, SPECIES_VAURCA_WORKER, SPECIES_VAURCA_WARRIOR, SPECIES_VAURCA_BULWARK, SPECIES_VAURCA_BREEDER)
+	blacklisted_species = list(SPECIES_TAJARA_ZHAN, SPECIES_VAURCA_WORKER, SPECIES_VAURCA_WARRIOR, SPECIES_VAURCA_ATTENDANT, SPECIES_VAURCA_BULWARK, SPECIES_VAURCA_BREEDER)
+
+	skill_requirements = alist(
+		/singleton/skill/pilot_spacecraft = SKILL_LEVEL_FAMILIAR
+	)
 
 /obj/outfit/job/bridge_crew
 	name = "Bridge Crew"
@@ -169,10 +179,21 @@ var/datum/announcement/minor/captain_announcement = new(do_newscast = 1)
 	head = /obj/item/clothing/head/caphat/bridge_crew
 	uniform = /obj/item/clothing/under/rank/bridge_crew
 	shoes = /obj/item/clothing/shoes/laceup
+	id = /obj/item/card/id/scc/bridge
 
-	headset = /obj/item/device/radio/headset/headset_com
-	bowman = /obj/item/device/radio/headset/headset_com/alt
-	double_headset = /obj/item/device/radio/headset/alt/double/command
-	wrist_radio = /obj/item/device/radio/headset/wrist/command
-	clipon_radio = /obj/item/device/radio/headset/wrist/clip/command
+	headset = /obj/item/radio/headset/headset_com
+	bowman = /obj/item/radio/headset/headset_com/alt
+	double_headset = /obj/item/radio/headset/alt/double/command
+	wrist_radio = /obj/item/radio/headset/wrist/command
+	clipon_radio = /obj/item/radio/headset/wrist/clip/command
 	messengerbag = /obj/item/storage/backpack/messenger/com
+
+	tab_pda = /obj/item/modular_computer/handheld/pda/bridge
+	wristbound = /obj/item/modular_computer/handheld/wristbound/preset/pda/bridge
+	tablet = /obj/item/modular_computer/handheld/preset/bridge
+
+	species_shoes = list(
+		SPECIES_UNATHI = /obj/item/clothing/shoes/winter/toeless,
+		SPECIES_TAJARA = /obj/item/clothing/shoes/laceup/tajara,
+		SPECIES_TAJARA_MSAI = /obj/item/clothing/shoes/laceup/tajara
+	)

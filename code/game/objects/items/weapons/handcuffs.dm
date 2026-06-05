@@ -10,7 +10,7 @@
 	obj_flags = OBJ_FLAG_CONDUCTABLE
 	slot_flags = SLOT_BELT
 	throwforce = 5
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	throw_speed = 2
 	throw_range = 5
 	origin_tech = list(TECH_MATERIAL = 1)
@@ -25,7 +25,11 @@
 	drop_sound = 'sound/items/drop/accessory.ogg'
 	pickup_sound = 'sound/items/pickup/accessory.ogg'
 
-/obj/item/handcuffs/attack(var/mob/living/carbon/C, var/mob/living/user)
+/obj/item/handcuffs/attack(mob/living/target_mob, mob/living/user, target_zone)
+	var/mob/living/carbon/C = target_mob
+	if(!istype(C))
+		return
+
 	if(!user.IsAdvancedToolUser())
 		return
 
@@ -83,19 +87,15 @@
 			return
 
 	if(user)
-		H.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has been handcuffed (attempt) by [user.name] ([user.ckey])</font>")
-		user.attack_log += text("\[[time_stamp()]\] <span class='warning'>Attempted to handcuff [H.name] ([H.ckey])</span>")
-		msg_admin_attack("[key_name_admin(user)] attempted to handcuff [key_name_admin(H)] (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user),ckey_target=key_name(H))
+		H.attack_log += "\[[time_stamp()]\] <font color='orange'>Has been handcuffed (attempt) by [user.name] ([user.ckey])</font>"
+		user.attack_log += "\[[time_stamp()]\] <span class='warning'>Attempted to handcuff [H.name] ([H.ckey])</span>"
+		msg_admin_attack("[key_name_admin(user)] attempted to handcuff [key_name_admin(H)] (<A href='byond://?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user),ckey_target=key_name(H))
 	feedback_add_details("handcuffs","H")
 
 	if(user)
 		user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
 		user.do_attack_animation(H)
 		user.visible_message(SPAN_DANGER("\The [user] has put [cuff_type] on \the [H]!"))
-
-	if(!legcuff)
-		target.drop_r_hand()
-		target.drop_l_hand()
 
 	// Apply cuffs.
 	var/obj/item/handcuffs/cuffs = src
@@ -108,10 +108,10 @@
 
 	if(!legcuff)
 		target.handcuffed = cuffs
-		target.update_inv_handcuffed()
+		target.handcuff_update()
 	else
 		target.legcuffed = cuffs
-		target.update_inv_legcuffed()
+		target.legcuff_update()
 	return TRUE
 
 /mob/living/carbon/human/RestrainedClickOn(var/atom/A)
@@ -132,12 +132,12 @@
 
 	var/s = SPAN_WARNING("[H] chews on [H.get_pronoun("his")] [O.name]!")
 	H.visible_message(s, SPAN_WARNING("You chew on your [O.name]!"))
-	message_admins("[key_name_admin(H)] is chewing on [H.get_pronoun("his")] restrained hand - (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[H.x];Y=[H.y];Z=[H.z]'>JMP</a>)")
-	H.attack_log += text("\[[time_stamp()]\] <span class='warning'>[s] ([H.ckey])</span>")
-	log_attack("[s] ([H.ckey])",ckey=key_name(H))
+	message_admins("[key_name_admin(H)] is chewing on [H.get_pronoun("his")] restrained hand - (<A href='byond://?_src_=holder;adminplayerobservecoodjump=1;X=[H.x];Y=[H.y];Z=[H.z]'>JMP</a>)")
+	H.attack_log += "\[[time_stamp()]\] <span class='warning'>[s] ([H.ckey])</span>"
+	log_attack("[s] ([H.ckey])")
 
 	if(O.take_damage(3, 0, damage_flags = DAMAGE_FLAG_SHARP|DAMAGE_FLAG_EDGE, used_weapon = "teeth marks"))
-		H:UpdateDamageIcon()
+		H.UpdateDamageIcon()
 
 	last_chew = world.time
 
@@ -147,15 +147,12 @@
 	icon_state = "cablecuff"
 	item_state = "coil"
 	color = COLOR_RED
-	item_icons = list(
-		slot_l_hand_str = 'icons/mob/items/stacks/lefthand_materials.dmi',
-		slot_r_hand_str = 'icons/mob/items/stacks/righthand_materials.dmi',
-		)
 	breakouttime = 30 SECONDS
 	cuff_sound = 'sound/weapons/cablecuff.ogg'
 	cuff_type = "cable restraint handcuffs"
 	var/can_be_cut = TRUE
 	elastic = TRUE
+	contained_sprite = TRUE
 	build_from_parts = TRUE
 	worn_overlay = "end"
 
@@ -219,7 +216,7 @@
 			to_chat(user, SPAN_NOTICE("You wrap \the [src] around the top of the rod."))
 			qdel(src)
 			update_icon(user)
-	else if(can_be_cut && attacking_item.iswirecutter())
+	else if(can_be_cut && attacking_item.tool_behaviour == TOOL_WIRECUTTER)
 		user.visible_message("[user] cuts the [src].", SPAN_NOTICE("You cut the [src]."))
 		playsound(src.loc, 'sound/items/Wirecutter.ogg', 50, 1)
 		new/obj/item/stack/cable_coil(get_turf(src), 15, color)

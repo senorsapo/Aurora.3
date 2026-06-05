@@ -8,7 +8,7 @@
 	held_item = /obj/item/material/stool/chair/wheelchair
 	withdraw_verb = "fold"
 	can_dismantle = FALSE
-	slowdown = 1
+	slowdown = 0.5
 
 	var/bloodiness
 
@@ -20,7 +20,9 @@
 	if(buckled)
 		buckled.set_dir(dir)
 
-/obj/structure/bed/stool/chair/office/wheelchair/relaymove(mob/user, direction)
+/obj/structure/bed/stool/chair/office/wheelchair/relaymove(mob/living/user, direction)
+	. = ..()
+
 	// Redundant check?
 	if(user.stat || user.stunned || user.weakened || user.paralysis || user.lying || user.restrained())
 		if(user==pulling)
@@ -127,13 +129,16 @@
 		usr.pulledby = null
 	..()
 
+/obj/structure/bed/stool/chair/office/wheelchair/generate_strings()
+	return
+
 /obj/item/material/stool/chair/wheelchair
 	name = "wheelchair"
 	desc = "A folded wheelchair that can be carried around."
 	icon_state = "wheelchair_item_preview"
 	item_state = "wheelchair"
 	base_icon = "wheelchair"
-	w_class = ITEMSIZE_HUGE // Can't be put in backpacks. Oh well.
+	w_class = WEIGHT_CLASS_HUGE // Can't be put in backpacks. Oh well.
 	origin_type = /obj/structure/bed/stool/chair/office/wheelchair
 	deploy_verb = "deploy"
 

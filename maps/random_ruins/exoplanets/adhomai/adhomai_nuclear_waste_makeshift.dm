@@ -7,7 +7,7 @@
 	sectors = list(SECTOR_SRANDMARR)
 
 	prefix = "adhomai/"
-	suffixes = list("adhomai_nuclear_waste_makeshift.dmm")
+	suffix = "adhomai_nuclear_waste_makeshift.dmm"
 
 	unit_test_groups = list(2)
 
@@ -15,7 +15,6 @@
 	name = "Makeshift Radioactive Waste Disposal Site"
 	icon_state = "bluenew"
 	requires_power = FALSE
-	dynamic_lighting = TRUE
 	no_light_control = FALSE
 	base_turf = /turf/simulated/floor/exoplanet/mineral/adhomai
 	area_flags = AREA_FLAG_RAD_SHIELDED

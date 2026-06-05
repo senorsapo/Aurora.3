@@ -1,19 +1,19 @@
 /* Surgery Tools
  * Contains:
- *		Retractor
- *		Hemostat
- *		Cautery
- *		Surgical Drill
- *		Scalpel
- *		Circular Saw
- *   	Tray
+ * * Retractor
+ * * Hemostat
+ * * Cautery
+ * * Surgical Drill
+ * * Scalpel
+ * * Circular Saw
+ * * Tray
  */
 /obj/item/surgery
 	name = "surgery tool parent item"
 	desc = DESC_PARENT
 	icon = 'icons/obj/surgery.dmi'
 	contained_sprite = TRUE
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	drop_sound = 'sound/items/drop/weldingtool.ogg'
 	pickup_sound = 'sound/items/pickup/weldingtool.ogg'
 	recyclable = TRUE
@@ -34,6 +34,7 @@
 	matter = list(DEFAULT_WALL_MATERIAL = 10000, MATERIAL_GLASS = 5000)
 	obj_flags = OBJ_FLAG_CONDUCTABLE
 	origin_tech = list(TECH_MATERIAL = 1, TECH_BIO = 1)
+	tool_behaviour = TOOL_RETRACTOR
 
 /*
  * Hemostat
@@ -48,6 +49,7 @@
 	obj_flags = OBJ_FLAG_CONDUCTABLE
 	origin_tech = list(TECH_MATERIAL = 1, TECH_BIO = 1)
 	attack_verb = list("attacked", "pinched")
+	tool_behaviour = TOOL_HEMOSTAT
 
 /*
  * Cautery
@@ -62,6 +64,7 @@
 	obj_flags = OBJ_FLAG_CONDUCTABLE
 	origin_tech = list(TECH_MATERIAL = 1, TECH_BIO = 1)
 	attack_verb = list("burnt")
+	tool_behaviour = TOOL_CAUTERY
 
 /*
  * Surgical Drill
@@ -72,15 +75,16 @@
 	icon_state = "drill"
 	item_state = "drill"
 	surgerysound = 'sound/items/surgery/surgicaldrill.ogg'
-	hitsound = /singleton/sound_category/drillhit_sound
+	hitsound = SFX_DRILL_HIT
 	matter = list(DEFAULT_WALL_MATERIAL = 15000, MATERIAL_GLASS = 10000)
 	obj_flags = OBJ_FLAG_CONDUCTABLE
 	force = 22
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	origin_tech = list(TECH_MATERIAL = 1, TECH_BIO = 1)
 	attack_verb = list("drilled")
 	drop_sound = 'sound/items/drop/accessory.ogg'
 	pickup_sound = 'sound/items/pickup/accessory.ogg'
+	tool_behaviour = TOOL_DRILL
 
 /*
  * Scalpel
@@ -95,7 +99,7 @@
 	force = 15
 	sharp = 1
 	edge = TRUE
-	w_class = ITEMSIZE_TINY
+	w_class = WEIGHT_CLASS_TINY
 	slot_flags = SLOT_EARS
 	throwforce = 5
 	throw_speed = 3
@@ -105,6 +109,7 @@
 	attack_verb = list("attacked", "slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
 	drop_sound = 'sound/items/drop/knife.ogg'
 	pickup_sound = 'sound/items/pickup/knife.ogg'
+	tool_behaviour = TOOL_SCALPEL
 
 /*
  * Researchable Scalpels
@@ -139,7 +144,7 @@
 	hitsound = 'sound/weapons/saw/circsawhit.ogg'
 	obj_flags = OBJ_FLAG_CONDUCTABLE
 	force = 22
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	throwforce = 9
 	throw_speed = 3
 	throw_range = 5
@@ -150,6 +155,7 @@
 	edge = TRUE
 	drop_sound = 'sound/items/drop/accessory.ogg'
 	pickup_sound = 'sound/items/pickup/accessory.ogg'
+	tool_behaviour = TOOL_SAW
 
 // Miscellanous
 /obj/item/surgery/bone_gel
@@ -187,6 +193,7 @@
 	throw_speed = 3
 	throw_range = 5
 	attack_verb = list("attacked", "hit", "bludgeoned")
+	tool_behaviour = TOOL_BONESET
 
 /obj/item/storage/box/fancy/tray
 	name = "surgery tray"
@@ -197,7 +204,7 @@
 	drop_sound = 'sound/items/drop/axe.ogg'
 	pickup_sound = 'sound/items/pickup/axe.ogg'
 	force = 2
-	w_class = ITEMSIZE_HUGE
+	w_class = WEIGHT_CLASS_HUGE
 	storage_slots = 10
 	attack_verb = list("slammed")
 	icon_type = "surgery tool"
@@ -246,7 +253,7 @@
 		/obj/item/surgery/fix_o_vein = "tray_fixovein",
 		/obj/item/stack/medical/advanced/bruise_pack = "tray_bruise_pack",
 		/obj/item/autopsy_scanner = "tray_autopsy_scanner",
-		/obj/item/device/mass_spectrometer = "tray_mass_spectrometer",
+		/obj/item/mass_spectrometer = "tray_mass_spectrometer",
 		/obj/item/reagent_containers/glass/beaker/vial = "tray_vial",
 		/obj/item/reagent_containers/syringe = "tray_syringe"
 	)
@@ -267,31 +274,30 @@
 	if(ishuman(user))
 		src.open(user)
 
-/obj/item/storage/box/fancy/tray/MouseDrop(mob/user as mob)
-	if((user && (!use_check(user))) && (user.contents.Find(src) || in_range(src, user)))
-		if(ishuman(user) && !user.get_active_hand())
+/obj/item/storage/box/fancy/tray/mouse_drop_dragged(atom/over, mob/user, src_location, over_location, params)
+	if((over && (!use_check(over))) && (over.contents.Find(src) || in_range(src, over)))
+		var/mob/dropped_onto_mob = over
+		if(ishuman(dropped_onto_mob) && !dropped_onto_mob.get_active_hand())
 			var/mob/living/carbon/human/H = user
-			var/obj/item/organ/external/temp = H.organs_by_name[BP_R_HAND]
+			var/obj/item/organ/external/temp = H.organs_by_name[H.hand?BP_L_HAND:BP_R_HAND]
 
-			if (H.hand)
-				temp = H.organs_by_name[BP_L_HAND]
 			if(temp && !temp.is_usable())
-				to_chat(user, SPAN_NOTICE("You try to move your [temp.name], but cannot!"))
+				to_chat(H, SPAN_NOTICE("You try to move your [temp.name], but cannot!"))
 				return
 
-			to_chat(user, SPAN_NOTICE("You pick up the [src]."))
+			to_chat(H, SPAN_NOTICE("You pick up the [src]."))
 			pixel_x = 0
 			pixel_y = 0
-			forceMove(get_turf(user))
-			user.put_in_hands(src)
+			forceMove(get_turf(H))
+			H.put_in_hands(src)
 
 	return
 
-/obj/item/storage/box/fancy/tray/attack(mob/living/M as mob, mob/user as mob, var/target_zone)
+/obj/item/storage/box/fancy/tray/attack(mob/living/target_mob, mob/living/user, target_zone)
 	if(..() && contents.len)
-		spill(3, get_turf(M))
-		playsound(M, /singleton/sound_category/tray_hit_sound, 50, 1)  //sound playin' again
-		user.visible_message(SPAN_DANGER("[user] smashes \the [src] into [M], causing it to spill its contents across the area!"))
+		spill(3, get_turf(target_mob))
+		playsound(target_mob, SFX_TRAY_HIT, 50, 1)  //sound playin' again
+		user.visible_message(SPAN_DANGER("[user] smashes \the [src] into [target_mob], causing it to spill its contents across the area!"))
 
 /obj/item/storage/box/fancy/tray/throw_impact(atom/hit_atom)
 	..()
@@ -307,7 +313,7 @@
 		/obj/item/surgery/surgicaldrill = 1,
 		/obj/item/surgery/cautery = 1,
 		/obj/item/autopsy_scanner = 1,
-		/obj/item/device/mass_spectrometer = 1,
+		/obj/item/mass_spectrometer = 1,
 		/obj/item/reagent_containers/glass/beaker/vial = 1,
 		/obj/item/reagent_containers/syringe = 1
 	)
@@ -320,7 +326,7 @@
 		/obj/item/surgery/surgicaldrill,
 		/obj/item/surgery/cautery,
 		/obj/item/autopsy_scanner,
-		/obj/item/device/mass_spectrometer,
+		/obj/item/mass_spectrometer,
 		/obj/item/reagent_containers/glass/beaker/vial,
 		/obj/item/reagent_containers/syringe
 	)

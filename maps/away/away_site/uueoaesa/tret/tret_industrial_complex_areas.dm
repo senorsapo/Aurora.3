@@ -4,7 +4,6 @@
 	name = "Tret Industrial Complex - Base/Parent"
 	icon_state = "bluenew"
 	requires_power = TRUE
-	dynamic_lighting = TRUE
 	no_light_control = FALSE
 	base_turf = /turf/simulated/floor/exoplanet/basalt/tret
 	area_flags = AREA_FLAG_RAD_SHIELDED | AREA_FLAG_HIDE_FROM_HOLOMAP //| AREA_FLAG_INDESTRUCTIBLE_TURFS
@@ -13,6 +12,7 @@
 
 /area/tret_industrial/outside
 	area_blurb = "The planet Tret, home of the K'lax Hive. Beneath you, the ground vibrates slightly - vast machinery deep below carrying out its work."
+	is_outside = OUTSIDE_YES
 
 /area/tret_industrial/outside/landing
 	name = "Tret - Landing Pad"
@@ -25,6 +25,7 @@
 
 /area/tret_industrial/inside
 	area_blurb = "The complex is pitch-dark, without any sign of lighting systems. The hums and whirs of vast alien machinery reverberate through the walls."
+	is_outside = OUTSIDE_NO
 
 // ------------- hallways
 
@@ -117,5 +118,3 @@
 
 /area/shuttle/tret_industrial/main
 	name = "Tret Mining Shuttle - Main"
-
-// ------------------------- fin

@@ -1,6 +1,6 @@
 /obj/machinery/camera
 	name = "security camera"
-	desc = "It's used to monitor rooms."
+	desc = "It's used to monitor compartments."
 	icon = 'icons/obj/monitors.dmi'
 	icon_state = "camera"
 	use_power = POWER_USE_ACTIVE
@@ -8,6 +8,12 @@
 	active_power_usage = 10
 	layer = CAMERA_LAYER
 	obj_flags = OBJ_FLAG_MOVES_UNSUPPORTED
+	maxhealth = OBJECT_HEALTH_EXTREMELY_LOW
+	armor = list(
+		MELEE = ARMOR_MELEE_SMALL,
+		BULLET = ARMOR_BALLISTIC_MINOR,
+		LASER = ARMOR_LASER_MINOR
+	)
 
 	var/list/network = list(NETWORK_STATION)
 	var/c_tag = null
@@ -21,7 +27,8 @@
 	var/toughness = 5 //sorta fragile
 
 	// WIRES
-	var/datum/wires/camera/wires = null // Wires datum
+	/// Wires datum
+	var/datum/wires/camera/wires = null
 
 	//OTHER
 
@@ -66,7 +73,7 @@
 
 	set_pixel_offsets()
 
-	var/list/open_networks = difflist(network, restricted_camera_networks)
+	var/list/open_networks = difflist(network, GLOB.restricted_camera_networks)
 	on_open_network = open_networks.len
 	if(on_open_network)
 		GLOB.cameranet.add_source(src)
@@ -80,6 +87,14 @@
 		QDEL_NULL(assembly)
 
 	cancelCameraAlarm(force = TRUE)
+	cancelAlarm()
+
+	for(var/mob/target in motionTargets.Copy())
+		lostTarget(target)
+
+	if(area_motion && area_motion.motioncamera == src)
+		area_motion.motioncamera = null
+	area_motion = null
 
 	QDEL_NULL(wires)
 
@@ -89,7 +104,6 @@
 		GLOB.cameranet.remove_source(src)
 
 	. = ..()
-	GC_TEMPORARY_HARDDEL
 
 /obj/machinery/camera/set_pixel_offsets()
 	pixel_x = dir & (NORTH|SOUTH) ? 0 : (dir == EAST ? -13 : 13)
@@ -138,8 +152,12 @@
 			update_icon()
 			update_coverage()
 
-/obj/machinery/camera/bullet_act(var/obj/item/projectile/P)
-	take_damage(P.get_structure_damage())
+/obj/machinery/camera/bullet_act(obj/projectile/hitting_projectile, def_zone, piercing_hit)
+	. = ..()
+	if(. != BULLET_ACT_HIT)
+		return .
+
+	add_damage(hitting_projectile.get_structure_damage(), hitting_projectile.damage_flags(), hitting_projectile.damage_type, hitting_projectile.armor_penetration, hitting_projectile)
 
 /obj/machinery/camera/ex_act(severity)
 	if(src.invuln)
@@ -151,13 +169,13 @@
 
 	..() //and give it the regular chance of being deleted outright
 
-/obj/machinery/camera/hitby(AM as mob|obj, var/speed = THROWFORCE_SPEED_DIVISOR)
+/obj/machinery/camera/hitby(atom/movable/hitting_atom, skipcatch, hitpush, blocked, datum/thrownthing/throwingdatum)
 	..()
-	if (istype(AM, /obj))
-		var/obj/O = AM
+	if (istype(hitting_atom, /obj))
+		var/obj/O = hitting_atom
 		if (O.throwforce >= src.toughness)
 			visible_message(SPAN_WARNING("<B>[src] was hit by [O].</B>"))
-		take_damage(O.throwforce)
+		add_damage(O.throwforce, O.damage_flags(), O.damtype, O.armor_penetration, O)
 
 /obj/machinery/camera/proc/setViewRange(var/num = 7)
 	src.view_range = num
@@ -179,7 +197,7 @@
 /obj/machinery/camera/attackby(obj/item/attacking_item, mob/user)
 	update_coverage()
 	// DECONSTRUCTION
-	if(attacking_item.isscrewdriver())
+	if(attacking_item.tool_behaviour == TOOL_SCREWDRIVER)
 		//to_chat(user, SPAN_NOTICE("You start to [panel_open ? "close" : "open"] the camera's panel."))
 		//if(toggle_panel(user)) // No delay because no one likes screwdrivers trying to be hip and have a duration cooldown
 		panel_open = !panel_open
@@ -188,11 +206,11 @@
 		attacking_item.play_tool_sound(get_turf(src), 50)
 		return TRUE
 
-	else if((attacking_item.iswirecutter() || attacking_item.ismultitool()) && panel_open)
+	else if((attacking_item.tool_behaviour == TOOL_WIRECUTTER || attacking_item.tool_behaviour == TOOL_MULTITOOL) && panel_open)
 		interact(user)
 		return TRUE
 
-	else if(attacking_item.iswelder() && (wires.CanDeconstruct() || (stat & BROKEN)))
+	else if(attacking_item.tool_behaviour == TOOL_WELDER && (wires.CanDeconstruct() || (stat & BROKEN)))
 		if(weld(attacking_item, user))
 			if(assembly)
 				assembly.forceMove(src.loc)
@@ -228,16 +246,16 @@
 			var/entry = O.addCameraRecord(itemname,info)
 			if(!O.client) continue
 			if(U.name == "Unknown")
-				to_chat(O, "<b>[U]</b> holds \a [itemname] up to one of your cameras ...<a href='?src=\ref[O];readcapturedpaper=\ref[entry]'>view message</a>")
+				to_chat(O, "<b>[U]</b> holds \a [itemname] up to one of your cameras ...<a href='byond://?src=[REF(O)];readcapturedpaper=[REF(entry)]'>view message</a>")
 			else
-				to_chat(O, "<b><a href='byond://?src=\ref[O];track2=\ref[O];track=\ref[U];trackname=[html_encode(U.name)]'>[U]</a></b> holds \a [itemname] up to one of your cameras ...<a href='?src=\ref[O];readcapturedpaper=[entry]'>view message</a>")
+				to_chat(O, "<b><a href='byond://?src=[REF(O)];track2=[REF(O)];track=[REF(U)];trackname=[html_encode(U.name)]'>[U]</a></b> holds \a [itemname] up to one of your cameras ...<a href='byond://?src=[REF(O)];readcapturedpaper=[entry]'>view message</a>")
 
 		for(var/mob/O in GLOB.player_list)
 			if (istype(O.machine, /obj/machinery/computer/security))
 				var/obj/machinery/computer/security/S = O.machine
 				if (S.current_camera == src)
 					to_chat(O, "[U] holds \a [itemname] up to one of the cameras ...")
-					O << browse(text("<HTML><HEAD><TITLE>[]</TITLE></HEAD><BODY><TT>[]</TT></BODY></HTML>", itemname, info), text("window=[]", itemname)) //Force people watching to open the page so they can't see it again)
+					O << browse("<HTML><HEAD><TITLE>[itemname]</TITLE></HEAD><BODY><TT>[info]</TT></BODY></HTML>", "window=[itemname]") //Force people watching to open the page so they can't see it again)
 		return TRUE
 
 	else if (istype(attacking_item, /obj/item/camera_bug))
@@ -260,7 +278,7 @@
 				var/obj/item/I = attacking_item
 				if (I.hitsound)
 					playsound(loc, I.hitsound, I.get_clamped_volume(), 1, -1)
-		take_damage(attacking_item.force)
+		add_damage(attacking_item.force, attacking_item.damage_flags(), attacking_item.damtype, attacking_item.armor_penetration, attacking_item)
 		return TRUE
 	else
 		return ..()
@@ -277,17 +295,17 @@
 		set_status(!src.status)
 		if (!(src.status))
 			if(user)
-				visible_message(SPAN_NOTICE(" [user] has deactivated [src]!"))
+				visible_message(SPAN_NOTICE("[user] has deactivated [src]!"))
 			else
-				visible_message(SPAN_NOTICE(" [src] clicks and shuts down. "))
+				visible_message(SPAN_NOTICE("[src] clicks and shuts down. "))
 			playsound(src.loc, 'sound/items/Wirecutter.ogg', 100, 1)
 			icon_state = "[initial(icon_state)]1"
 			add_hiddenprint(user)
 		else
 			if(user)
-				visible_message(SPAN_NOTICE(" [user] has reactivated [src]!"))
+				visible_message(SPAN_NOTICE("[user] has reactivated [src]!"))
 			else
-				visible_message(SPAN_NOTICE(" [src] clicks and reactivates itself. "))
+				visible_message(SPAN_NOTICE("[src] clicks and reactivates itself. "))
 			playsound(src.loc, 'sound/items/Wirecutter.ogg', 100, 1)
 			icon_state = initial(icon_state)
 			add_hiddenprint(user)
@@ -299,9 +317,8 @@
 
 	GLOB.cameranet.update_visibility(src)
 
-/obj/machinery/camera/proc/take_damage(var/force, var/message)
-	//prob(25) gives an average of 3-4 hits
-	if (force >= toughness && (force > toughness*4 || prob(25)))
+/obj/machinery/camera/on_death(damage, damage_flags, damage_type, armor_penetration, obj/weapon)
+	if(!(stat & BROKEN))
 		destroy()
 
 //Used when someone breaks a camera
@@ -316,7 +333,7 @@
 
 	//sparks
 	spark(loc, 5)
-	playsound(loc, /singleton/sound_category/spark_sound, 50, 1)
+	playsound(loc, SFX_SPARKS, 50, 1)
 
 /obj/machinery/camera/proc/set_status(var/newstatus)
 	if (status != newstatus)
@@ -355,14 +372,14 @@
 
 /obj/machinery/camera/proc/triggerCameraAlarm(var/duration = 0)
 	alarm_on = 1
-	camera_alarm.triggerAlarm(loc, src, duration)
+	GLOB.camera_alarm.triggerAlarm(loc, src, duration)
 
 /obj/machinery/camera/proc/cancelCameraAlarm(var/force = FALSE)
 	if(wires.is_cut(WIRE_ALARM) && !force)
 		return
 
 	alarm_on = 0
-	camera_alarm.clearAlarm(loc, src)
+	GLOB.camera_alarm.clearAlarm(loc, src)
 
 //if false, then the camera is listed as DEACTIVATED and cannot be used
 /obj/machinery/camera/proc/can_use()
@@ -387,7 +404,7 @@
 /atom/proc/auto_turn()
 	//Automatically turns based on nearby walls.
 	var/turf/simulated/wall/T = null
-	for(var/i = 1, i <= 8; i += i)
+	for(var/i = 1; i <= 8; i += i)
 		T = get_ranged_target_turf(src, i, 1)
 		if(istype(T))
 			//If someone knows a better way to do this, let me know. -Giacom
@@ -496,7 +513,7 @@
 	var/cam = list()
 	cam["name"] = sanitize(c_tag)
 	cam["deact"] = !can_use()
-	cam["camera"] = "\ref[src]"
+	cam["camera"] = "[REF(src)]"
 	cam["x"] = x
 	cam["y"] = y
 	cam["z"] = z

@@ -6,7 +6,7 @@
 	gender = NEUTER
 	throw_speed = 3
 	throw_range = 7
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	sharp = 0
 	edge = FALSE
 	icon = 'icons/obj/weapons.dmi'
@@ -24,6 +24,9 @@
 	var/material/material
 	var/drops_debris = TRUE
 
+	/// Multiplies the amount this item is worth with the following calculation: material.value * worth_multiplier
+	var/worth_multiplier = 1
+
 /obj/item/material/Initialize(var/newloc, var/material_key)
 	. = ..()
 	if(!material_key)
@@ -32,12 +35,6 @@
 	if(!material)
 		qdel(src)
 		return
-
-	matter = material.get_matter()
-	if(matter.len)
-		for(var/material_type in matter)
-			if(!isnull(matter[material_type]))
-				matter[material_type] *= force_divisor // May require a new var instead.
 
 /obj/item/material/should_equip()
 	return TRUE
@@ -81,6 +78,11 @@
 		if(material.products_need_process())
 			START_PROCESSING(SSprocessing, src)
 		update_force()
+
+		matter = material.get_matter()
+		for(var/material_type in matter)
+			if(!isnull(matter[material_type]))
+				matter[material_type] *= force_divisor // May require a new var instead.
 
 /obj/item/material/Destroy()
 	STOP_PROCESSING(SSprocessing, src)

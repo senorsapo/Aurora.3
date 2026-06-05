@@ -1,4 +1,4 @@
-var/global/vs_control/vsc = new
+GLOBAL_DATUM_INIT(vsc, /vs_control, new())
 
 /vs_control
 	var/fire_consuption_rate = 0.25
@@ -62,7 +62,7 @@ var/global/vs_control/vsc = new
 	var/airflow_delay_NAME = "Airflow Retrigger Delay"
 	var/airflow_delay_DESC = "Time in deciseconds before things can be moved by airflow again."
 
-	var/airflow_mob_slowdown = 1
+	var/airflow_mob_slowdown = 0.5
 	var/airflow_mob_slowdown_NAME = "Airflow Slowdown"
 	var/airflow_mob_slowdown_DESC = "Time in tenths of a second to add as a delay to each movement by a mob if they are fighting the pull of the airflow."
 
@@ -111,9 +111,9 @@ var/global/vs_control/vsc = new
 			vw = vars[ch]
 			if("[ch]_DESC" in vars) vw_desc = vars["[ch]_DESC"]
 			if("[ch]_NAME" in vars) vw_name = vars["[ch]_NAME"]
-		dat += "<b>[vw_name] = [vw]</b> <A href='?src=\ref[src];changevar=[ch]'>\[Change\]</A><br>"
+		dat += "<b>[vw_name] = [vw]</b> <A href='byond://?src=[REF(src)];changevar=[ch]'>\[Change\]</A><br>"
 		dat += "<i>[vw_desc]</i><br><br>"
-	user << browse(dat,"window=settings")
+	user << browse(HTML_SKELETON(dat), "window=settings")
 
 /vs_control/Topic(href,href_list)
 	if("changevar" in href_list)
@@ -246,7 +246,7 @@ var/global/vs_control/vsc = new
 			airflow_damage = 2
 			airflow_speed_decay = 1.5
 			airflow_delay = 30
-			airflow_mob_slowdown = 1
+			airflow_mob_slowdown = 0.5
 
 		if("ZAS - Forgiving")
 			airflow_lightest_pressure = 45
@@ -274,7 +274,7 @@ var/global/vs_control/vsc = new
 			airflow_damage = 3
 			airflow_speed_decay = 1.2
 			airflow_delay = 25
-			airflow_mob_slowdown = 2
+			airflow_mob_slowdown = 1
 
 		if("ZAS - Hellish")
 			airflow_lightest_pressure = 20
@@ -288,7 +288,7 @@ var/global/vs_control/vsc = new
 			airflow_damage = 4
 			airflow_speed_decay = 1
 			airflow_delay = 20
-			airflow_mob_slowdown = 3
+			airflow_mob_slowdown = 1.5
 			connection_insulation = 0
 
 		if("ZAS/Phoron - Initial")

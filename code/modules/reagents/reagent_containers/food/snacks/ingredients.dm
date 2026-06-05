@@ -4,7 +4,7 @@
 // sliceable is just an organization type path, it doesn't have any additional code or variables tied to it.
 
 /obj/item/reagent_containers/food/snacks/sliceable
-	w_class = ITEMSIZE_NORMAL //Whole pizzas and cakes shouldn't fit in a pocket, you can slice them if you want to do that.
+	w_class = WEIGHT_CLASS_NORMAL //Whole pizzas and cakes shouldn't fit in a pocket, you can slice them if you want to do that.
 
 /obj/item/reagent_containers/food/snacks/sliceable/cheesewheel
 	name = "cheese wheel"
@@ -46,7 +46,7 @@
 
 /obj/item/reagent_containers/food/snacks/nakarka_wedge
 	name = "nakarka cheese wedge"
-	desc = "Zzztop calling it Nakarka cheeeze. Nakarka meanzzz cheeeze. You are literally calling it cheezzze cheezzze."
+	desc = "Zzztop calling it Nakarka cheezzze. You zzzound ridicoulouzzz. Nakarka meanzzz cheezzze. You are literally calling it cheezzze cheezzze."
 	icon = 'icons/obj/item/reagent_containers/food/ingredients.dmi'
 	icon_state = "nakarka_wedge"
 	ingredient_name = "nakarka"
@@ -242,9 +242,15 @@
 	filling_color = "#EDDD00"
 	center_of_mass = list("x"=16, "y"=11)
 
-	reagents_to_add = list(/singleton/reagent/nutriment = 4)
+	reagents_to_add = list(/singleton/reagent/nutriment = 6)
 	reagent_data = list(/singleton/reagent/nutriment = list("mashed potatoes" = 4))
 	bitesize = 2
+
+/obj/item/reagent_containers/food/snacks/mashedpotato/on_reagent_change()
+	if(reagents.has_reagent(/singleton/reagent/condiment/gravy))
+		name = "mashed potato and gravy"
+		desc = "Pillowy mounds of mashed potato covered in thick gravy."
+		icon_state = "mashedpotatogravy"
 
 /obj/item/reagent_containers/food/snacks/sauerkraut
 	name = "sauerkraut"
@@ -267,3 +273,22 @@
 	center_of_mass = list("x"=16, "y"=16)
 	reagents_to_add = list(/singleton/reagent/nutriment = 1)
 	filling_color = "#caa178"
+
+/obj/item/reagent_containers/food/snacks/pickle
+	name = "pickle"
+	desc = "This thing is a pretty big dill."
+	icon = 'icons/obj/item/reagent_containers/food/ingredients.dmi'
+	icon_state = "pickle"
+	filling_color = "#6f861c"
+	reagents_to_add = list(/singleton/reagent/nutriment = 3)
+	reagent_data = list(/singleton/reagent/nutriment = list("pickle" = 4))
+	bitesize = 1
+	slice_path = /obj/item/reagent_containers/food/snacks/sliced_pickle
+	slices_num = 1
+
+/obj/item/reagent_containers/food/snacks/sliced_pickle
+	name = "bowl of sliced pickles"
+	desc = "A little green side dish, or just something to mindlessly snack on."
+	icon = 'icons/obj/item/reagent_containers/food/ingredients.dmi'
+	icon_state = "pickle_sliced"
+	trash = /obj/item/trash/bowl_small

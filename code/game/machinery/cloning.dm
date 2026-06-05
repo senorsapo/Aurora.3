@@ -87,7 +87,7 @@
 		if(ckey(clonemind.key) != R.ckey)
 			return 0
 	else
-		for(var/mob/abstract/observer/G in GLOB.player_list)
+		for(var/mob/abstract/ghost/observer/G in GLOB.player_list)
 			if(G.ckey == R.ckey)
 				if(G.can_reenter_corpse)
 					break
@@ -109,7 +109,7 @@
 	H.real_name = R.dna.real_name
 
 	//Get the clone body ready
-	H.setCloneLoss(H.maxHealth - 50)
+	H.setCloneLoss(H.maxhealth - 50)
 	H.adjustBrainLoss(100, 120) // Even if healed to full health, it will have some brain damage
 	H.Paralyse(4)
 
@@ -162,7 +162,7 @@
 	if(occupant.getCloneLoss() == 0) // Rare case, but theoretically possible
 		return 100
 
-	return between(0, 100 * (occupant.health - occupant.maxHealth * 75 / 100) / (occupant.maxHealth * (heal_level - 75) / 100), 100)
+	return between(0, 100 * (occupant.health - occupant.maxhealth * 75 / 100) / (occupant.maxhealth * (heal_level - 75) / 100), 100)
 
 //Grow clones to maturity then kick them out.  FREELOADERS
 /obj/machinery/clonepod/process()
@@ -222,7 +222,7 @@
 			return TRUE
 	if(attacking_item.GetID())
 		if(!check_access(attacking_item.GetID()))
-			to_chat(user, SPAN_WARNING("Access Denied."))
+			to_chat(user, SPAN_WARNING("Access denied."))
 			return TRUE
 		if((!locked) || (isnull(occupant)))
 			return TRUE
@@ -238,7 +238,7 @@
 		user.drop_from_inventory(attacking_item, src)
 		qdel(attacking_item)
 		return TRUE
-	else if(attacking_item.iswrench())
+	else if(attacking_item.tool_behaviour == TOOL_WRENCH)
 		if(locked && (anchored || occupant))
 			to_chat(user, SPAN_WARNING("Can not do that while [src] is in use."))
 		else
@@ -333,7 +333,9 @@
 			qdel(occupant)
 	return
 
-/obj/machinery/clonepod/relaymove(mob/user as mob)
+/obj/machinery/clonepod/relaymove(mob/living/user, direction)
+	. = ..()
+
 	if(user.stat)
 		return
 	go_out()
@@ -385,9 +387,13 @@
 	icon = 'icons/obj/cloning.dmi'
 	icon_state = "datadisk0" //Gosh I hope syndies don't mistake them for the nuke disk.
 	item_state = "card-id"
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	var/datum/dna2/record/buf = null
 	var/read_only = 0 //Well,it's still a floppy disk
+
+/obj/item/disk/data/feedback_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "The write-protect tab is set to [read_only ? "protected" : "unprotected"]."
 
 /obj/item/disk/data/proc/initializeDisk()
 	buf = new
@@ -432,12 +438,8 @@
 	read_only = !read_only
 	to_chat(user, "You flip the write-protect tab to [read_only ? "protected" : "unprotected"].")
 
-/obj/item/disk/data/get_examine_text(mob/user, distance, is_adjacent, infix, suffix)
-	. = ..()
-	. += "The write-protect tab is set to [read_only ? "protected" : "unprotected"]."
-
 /*
- *	Diskette Box
+ * Diskette Box
  */
 
 /obj/item/storage/box/disks
@@ -454,7 +456,7 @@
 	new /obj/item/disk/data(src)
 
 /*
- *	Manual -- A big ol' manual.
+ * Manual -- A big ol' manual.
  */
 
 /obj/item/paper/Cloning

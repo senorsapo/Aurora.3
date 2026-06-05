@@ -47,14 +47,27 @@
 	. = ..()
 	src.filters += filter(type="drop_shadow", size = 2, offset = 2, color = rgb(0,208,0,0))
 
+/mob/living/simple_animal/cat/Destroy()
+	lost_rattarget()
+	return ..()
+
+/mob/living/simple_animal/cat/proc/lost_rattarget()
+	if(rattarget)
+		UnregisterSignal(rattarget, COMSIG_QDELETING)
+		rattarget = null
+
 /mob/living/simple_animal/cat/think()
 	//MICE!
 	..()
 	if (!stat)
 		for(var/mob/living/simple_animal/rat/snack in oview(src,7))
 			if(snack.stat != DEAD && prob(65))//The probability allows her to not get stuck target the first rat, reducing exploits
+				if(rattarget) // fr?
+					UnregisterSignal(rattarget, COMSIG_QDELETING)
 				rattarget = snack
 				movement_target = snack
+				RegisterSignal(rattarget, COMSIG_QDELETING, PROC_REF(lost_rattarget))
+				RegisterSignal(movement_target, COMSIG_QDELETING, PROC_REF(lostMovementTarget))
 				if(prob(15))
 					audible_emote(pick("hisses and spits!","mrowls fiercely!","eyes [snack] hungrily."))
 
@@ -64,7 +77,7 @@
 
 		if(!buckled_to)
 			if (turns_since_move > 5 || (flee_target || rattarget))
-				SSmove_manager.stop_looping(src)
+				GLOB.move_manager.stop_looping(src)
 				turns_since_move = 0
 
 				if (flee_target) //fleeing takes precendence
@@ -73,15 +86,15 @@
 					handle_movement_target()
 
 		if (!movement_target)
-			SSmove_manager.stop_looping(src)
+			GLOB.move_manager.stop_looping(src)
 
 		if(prob(2)) //spooky
-			var/mob/abstract/observer/spook = locate() in range(src,5)
+			var/mob/abstract/ghost/observer/spook = locate() in range(src,5)
 			if(spook)
 				var/turf/T = spook.loc
 				var/list/visible = list()
 				for(var/obj/O in T.contents)
-					if(!O.invisibility && O.name)
+					if(!O.invisibility && O.name && !istype(O, /obj/effect))
 						visible += O
 				if(visible.len)
 					var/atom/A = pick(visible)
@@ -94,7 +107,7 @@
 				if(M.stat != DEAD)
 					M.splat()
 					visible_emote(pick("bites \the [M]!","toys with \the [M].","chomps on \the [M]!"),0)
-					movement_target = null
+					lostMovementTarget()
 					stop_automated_movement = 0
 					if (prob(75))
 						break//usually only kill one rat per proc
@@ -151,7 +164,7 @@
 	.=..()
 	set_stat(DEAD)
 
-/mob/living/simple_animal/cat/Life()
+/mob/living/simple_animal/cat/Life(seconds_per_tick, times_fired)
 	. = ..()
 	handle_radiation_light()
 
@@ -164,7 +177,7 @@
 	if (flee_target)
 		if(prob(25)) say("HSSSSS")
 		stop_automated_movement = 1
-		SSmove_manager.move_away(src, flee_target, 7, 2)
+		GLOB.move_manager.move_away(src, flee_target, 7, 2)
 
 /mob/living/simple_animal/cat/proc/set_flee_target(atom/A)
 	if(A)
@@ -185,13 +198,16 @@
 	. = ..()
 	set_flee_target(src.loc)
 
-/mob/living/simple_animal/cat/bullet_act(var/obj/item/projectile/proj)
+/mob/living/simple_animal/cat/bullet_act(obj/projectile/hitting_projectile, def_zone, piercing_hit)
 	. = ..()
-	set_flee_target(proj.firer? proj.firer : src.loc)
+	if(. != BULLET_ACT_HIT)
+		return .
 
-/mob/living/simple_animal/cat/hitby(atom/movable/AM)
+	set_flee_target(hitting_projectile.firer? hitting_projectile.firer : src.loc)
+
+/mob/living/simple_animal/cat/hitby(atom/movable/hitting_atom, skipcatch, hitpush, blocked, datum/thrownthing/throwingdatum)
 	. = ..()
-	set_flee_target(AM.thrower? AM.thrower : src.loc)
+	set_flee_target(throwingdatum?.thrower?.resolve() ? throwingdatum.thrower.resolve() : src.loc)
 
 /mob/living/simple_animal/cat/fall_impact()
 	src.visible_message(SPAN_NOTICE("\The [src] lands softly on \the [loc]!"))
@@ -215,18 +231,18 @@
 		if (movement_target != friend)
 			if (current_dist > follow_dist && !istype(movement_target, /mob/living/simple_animal/rat) && (friend in oview(src)))
 				//stop existing movement
-				SSmove_manager.stop_looping(src)
+				GLOB.move_manager.stop_looping(src)
 				turns_since_scan = 0
 
 				//walk to friend
 				stop_automated_movement = 1
 				movement_target = friend
-				SSmove_manager.move_to(src, movement_target, near_dist, seek_move_delay)
+				GLOB.move_manager.move_to(src, movement_target, near_dist, seek_move_delay)
 
 		//already following and close enough, stop
 		else if (current_dist <= near_dist)
-			SSmove_manager.stop_looping(src)
-			movement_target = null
+			GLOB.move_manager.stop_looping(src)
+			lostMovementTarget()
 			stop_automated_movement = 0
 			if (prob(10))
 				say("Meow!")
@@ -260,8 +276,8 @@
 			audible_emote("[verb] anxiously.")
 
 /mob/living/simple_animal/cat/fluff/verb/friend()
-	set name = "Become Friends"
-	set category = "IC"
+	set name = "Befriend Cat"
+	set category = "IC.Critters"
 	set src in view(1)
 
 	if(friend && usr == friend)

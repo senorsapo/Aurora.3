@@ -1,4 +1,4 @@
-var/list/lunchables_lunches_ = list(
+GLOBAL_LIST_INIT(lunchables_lunches_, list(
 	/obj/item/reagent_containers/food/snacks/sandwich,
 	/obj/item/reagent_containers/food/snacks/meatbreadslice/filled,
 	/obj/item/reagent_containers/food/snacks/tofubreadslice/filled,
@@ -10,7 +10,7 @@ var/list/lunchables_lunches_ = list(
 	/obj/item/reagent_containers/food/snacks/tastybread,
 	/obj/item/reagent_containers/food/snacks/liquidfood,
 	/obj/item/reagent_containers/food/snacks/jellysandwich/cherry,
-	/obj/item/reagent_containers/food/snacks/salad/tossedsalad,
+	/obj/item/reagent_containers/food/snacks/salad/applesalad,
 	/obj/item/reagent_containers/food/snacks/funnelcake,
 	/obj/item/reagent_containers/food/snacks/hotdog,
 	/obj/item/reagent_containers/food/snacks/tajaran_bread,
@@ -21,11 +21,27 @@ var/list/lunchables_lunches_ = list(
 	/obj/item/reagent_containers/food/snacks/neaerakabob,
 	/obj/item/reagent_containers/food/snacks/soup/qilvo,
 	/obj/item/reagent_containers/food/snacks/soup/zantiri,
-	/obj/item/reagent_containers/food/snacks/xuqqil
+	/obj/item/reagent_containers/food/snacks/xuqqil,
+	/obj/item/reagent_containers/food/snacks/burrito,
+	/obj/item/reagent_containers/food/snacks/macandcheese,
+	/obj/item/reagent_containers/food/snacks/meat_pocket,
+	/obj/item/reagent_containers/food/snacks/friedrice,
+	/obj/item/reagent_containers/food/snacks/blt,
+	/obj/item/reagent_containers/food/snacks/pbjsandwich,
+	/obj/item/reagent_containers/food/snacks/pita/falafel,
+	/obj/item/reagent_containers/food/snacks/stokkebab,
+	/obj/item/reagent_containers/food/snacks/batwings,
+	/obj/item/reagent_containers/food/snacks/salad/earthenroot,
+	/obj/item/reagent_containers/food/snacks/pepperoniroll,
+	/obj/item/reagent_containers/food/snacks/hardbread,
+	/obj/item/reagent_containers/food/snacks/nomadskewer,
+	/obj/item/reagent_containers/food/snacks/earthenroot_mash,
+	/obj/item/reagent_containers/food/snacks/earthenroot_fries,
+	/obj/item/reagent_containers/food/snacks/explorer_ration,
+	/obj/item/reagent_containers/food/snacks/clam_pasta
+))
 
-)
-
-var/list/lunchables_snacks_ = list(
+GLOBAL_LIST_INIT(lunchables_snacks_, list(
 	/obj/item/reagent_containers/food/snacks/donut/jelly,
 	/obj/item/reagent_containers/food/snacks/donut/cherryjelly,
 	/obj/item/reagent_containers/food/snacks/muffin,
@@ -64,10 +80,20 @@ var/list/lunchables_snacks_ = list(
 	/obj/item/reagent_containers/food/drinks/jyalra/apple,
 	/obj/item/reagent_containers/food/drinks/jyalra/cherry,
 	/obj/item/reagent_containers/food/snacks/gnaqmi,
-	/obj/item/reagent_containers/food/snacks/lortl
-)
+	/obj/item/reagent_containers/food/snacks/lortl,
+	/obj/item/reagent_containers/food/snacks/riceball,
+	/obj/item/reagent_containers/food/snacks/bananabreadslice/filled,
+	/obj/item/reagent_containers/food/snacks/croissant,
+	/obj/item/reagent_containers/food/snacks/honeybun,
+	/obj/item/reagent_containers/food/snacks/stuffed_meatball,
+	/obj/item/reagent_containers/food/snacks/grilled_peppers,
+	/obj/item/reagent_containers/food/snacks/salmiak,
+	/obj/item/reagent_containers/food/snacks/chip/miniavah/full,
+	/obj/item/reagent_containers/food/snacks/zkahnkowaslice/filled,
+	/obj/item/reagent_containers/food/snacks/dirt_roast
+))
 
-var/list/lunchables_drinks_ = list(
+GLOBAL_LIST_INIT(lunchables_drinks_, list(
 	/obj/item/reagent_containers/food/drinks/cans/cola,
 	/obj/item/reagent_containers/food/drinks/waterbottle,
 	/obj/item/reagent_containers/food/drinks/cans/space_mountain_wind,
@@ -90,6 +116,7 @@ var/list/lunchables_drinks_ = list(
 	/obj/item/reagent_containers/food/drinks/carton/small/milk/choco,
 	/obj/item/reagent_containers/food/drinks/carton/small/milk/strawberry,
 	/obj/item/reagent_containers/food/drinks/cans/melon_soda,
+	/obj/item/reagent_containers/food/drinks/cans/himeokvass,
 	/obj/item/reagent_containers/food/drinks/cans/zorasoda/cherry,
 	/obj/item/reagent_containers/food/drinks/cans/zorasoda/phoron,
 	/obj/item/reagent_containers/food/drinks/cans/zorasoda/klax,
@@ -100,17 +127,18 @@ var/list/lunchables_drinks_ = list(
 	/obj/item/reagent_containers/food/drinks/cans/zorasoda/lemonlime,
 	/obj/item/reagent_containers/food/drinks/cans/zorasoda/xuizi,
 	/obj/item/reagent_containers/food/drinks/cans/zorasoda/dyn,
-	/obj/item/reagent_containers/food/drinks/cans/zorasoda/buzz
-)
+	/obj/item/reagent_containers/food/drinks/cans/zorasoda/buzz,
+	/obj/item/reagent_containers/food/drinks/cans/earthen_juice
+))
 
-var/list/lunchables_vaurca_ = list(
+GLOBAL_LIST_INIT(lunchables_vaurca_, list(
 	/obj/item/reagent_containers/food/snacks/koiswaffles,
 	/obj/item/reagent_containers/food/snacks/koisburger,
 	/obj/item/reagent_containers/food/snacks/soup/kois,
 	/obj/item/reagent_containers/food/snacks/koissteak
-)
+))
 
-var/list/lunchables_vaurca_snack_ = list(
+GLOBAL_LIST_INIT(lunchables_vaurca_snack_, list(
 	/obj/item/reagent_containers/food/snacks/donut/kois,
 	/obj/item/reagent_containers/food/snacks/koiskebab3,
 	/obj/item/reagent_containers/food/snacks/friedkois,
@@ -118,28 +146,30 @@ var/list/lunchables_vaurca_snack_ = list(
 	/obj/item/reagent_containers/food/snacks/phoroncandy,
 	/obj/item/reagent_containers/food/snacks/koisbar,
 	/obj/item/reagent_containers/food/snacks/koisbar_clean,
-)
+	/obj/item/storage/box/fancy/vkrexitaffy,
+	/obj/item/reagent_containers/food/snacks/koisrouladeslice/filled
+))
 
-var/list/lunchables_utensil_ = list(
+GLOBAL_LIST_INIT(lunchables_utensil_, list(
 	/obj/item/material/kitchen/utensil/fork/chopsticks,
 	/obj/item/material/kitchen/utensil/fork/chopsticks/bamboo,
 	/obj/item/material/kitchen/utensil/fork/plastic,
 	/obj/item/material/kitchen/utensil/spoon/plastic,
 	/obj/item/material/kitchen/utensil/knife/plastic
-)
+))
 
 // This default list is a bit different, it contains items we don't want
-var/list/lunchables_drink_reagents_ = list(
+GLOBAL_LIST_INIT(lunchables_drink_reagents_, list(
 	/singleton/reagent/drink/nothing,
 	/singleton/reagent/drink/doctorsdelight,
 	/singleton/reagent/drink/dry_ramen,
 	/singleton/reagent/drink/hell_ramen,
 	/singleton/reagent/drink/hot_ramen,
 	/singleton/reagent/drink/nuka_cola
-)
+))
 
 // This default list is a bit different, it contains items we don't want
-var/list/lunchables_alcohol_reagents_ = list(
+GLOBAL_LIST_INIT(lunchables_alcohol_reagents_, list(
 	/singleton/reagent/alcohol,
 	/singleton/reagent/alcohol/acid_spit,
 	/singleton/reagent/alcohol/atomicbomb,
@@ -153,48 +183,88 @@ var/list/lunchables_alcohol_reagents_ = list(
 	/singleton/reagent/alcohol/pwine,
 	/singleton/reagent/alcohol/threemileisland,
 	/singleton/reagent/alcohol/toxins_special,
-	/singleton/reagent/alcohol/nmshaan_liquor/darmadhirbrew
-)
+	/singleton/reagent/alcohol/sugartree_liquor/darmadhirbrew
+))
+
+GLOBAL_LIST_INIT(teas_tea_type_, list(
+	/obj/item/storage/box/unique/tea,
+	/obj/item/storage/box/unique/tea/tieguanyin,
+	/obj/item/storage/box/unique/tea/jaekseol,
+	/obj/item/storage/box/unique/tea/messa,
+	/obj/item/storage/box/unique/tea/rasnif
+))
+
+GLOBAL_LIST_INIT(teas_teapot_type_, list(
+	/obj/item/reagent_containers/glass/beaker/teapot,
+	/obj/item/reagent_containers/glass/beaker/teapot/lidded,
+	/obj/item/reagent_containers/glass/beaker/teapot/lidded/kyusu
+))
+
+GLOBAL_LIST_INIT(teas_teacup_type_, list(
+	"plain tea cup" = /obj/item/reagent_containers/food/drinks/drinkingglass/newglass/coffeecup/teacup,
+	"clay yunomi" = /obj/item/reagent_containers/food/drinks/drinkingglass/newglass/konyang,
+	"grey yunomi" = /obj/item/reagent_containers/food/drinks/drinkingglass/newglass/konyang/grey,
+	"glazed pattern yunomi" = /obj/item/reagent_containers/food/drinks/drinkingglass/newglass/konyang/pattern,
+	"manila pattern yunomi" = /obj/item/reagent_containers/food/drinks/drinkingglass/newglass/konyang/manila,
+	"nature pattern yunomi" = /obj/item/reagent_containers/food/drinks/drinkingglass/newglass/konyang/nature
+))
 
 /proc/lunchables_lunches()
-	if(!(lunchables_lunches_[lunchables_lunches_[1]]))
-		lunchables_lunches_ = init_lunchable_list(lunchables_lunches_)
-	return lunchables_lunches_
+	if(!(GLOB.lunchables_lunches_[GLOB.lunchables_lunches_[1]]))
+		GLOB.lunchables_lunches_ = init_lunchable_list(GLOB.lunchables_lunches_)
+	return GLOB.lunchables_lunches_
 
 /proc/lunchables_vaurca()
-	if(!(lunchables_vaurca_[lunchables_vaurca_[1]]))
-		lunchables_vaurca_ = init_lunchable_list(lunchables_vaurca_)
-	return lunchables_vaurca_
+	if(!(GLOB.lunchables_vaurca_[GLOB.lunchables_vaurca_[1]]))
+		GLOB.lunchables_vaurca_ = init_lunchable_list(GLOB.lunchables_vaurca_)
+	return GLOB.lunchables_vaurca_
 
 /proc/lunchables_vaurca_snack()
-	if(!(lunchables_vaurca_snack_[lunchables_vaurca_snack_[1]]))
-		lunchables_vaurca_snack_ = init_lunchable_list(lunchables_vaurca_snack_)
-	return lunchables_vaurca_snack_
+	if(!(GLOB.lunchables_vaurca_snack_[GLOB.lunchables_vaurca_snack_[1]]))
+		GLOB.lunchables_vaurca_snack_ = init_lunchable_list(GLOB.lunchables_vaurca_snack_)
+	return GLOB.lunchables_vaurca_snack_
 
 /proc/lunchables_snacks()
-	if(!(lunchables_snacks_[lunchables_snacks_[1]]))
-		lunchables_snacks_ = init_lunchable_list(lunchables_snacks_)
-	return lunchables_snacks_
+	if(!(GLOB.lunchables_snacks_[GLOB.lunchables_snacks_[1]]))
+		GLOB.lunchables_snacks_ = init_lunchable_list(GLOB.lunchables_snacks_)
+	return GLOB.lunchables_snacks_
 
 /proc/lunchables_drinks()
-	if(!(lunchables_drinks_[lunchables_drinks_[1]]))
-		lunchables_drinks_ = init_lunchable_list(lunchables_drinks_)
-	return lunchables_drinks_
+	if(!(GLOB.lunchables_drinks_[GLOB.lunchables_drinks_[1]]))
+		GLOB.lunchables_drinks_ = init_lunchable_list(GLOB.lunchables_drinks_)
+	return GLOB.lunchables_drinks_
 
 /proc/lunchables_utensil()
-	if(!(lunchables_utensil_[lunchables_utensil_[1]]))
-		lunchables_utensil_ = init_lunchable_list(lunchables_utensil_)
-	return lunchables_utensil_
+	if(!(GLOB.lunchables_utensil_[GLOB.lunchables_utensil_[1]]))
+		GLOB.lunchables_utensil_ = init_lunchable_list(GLOB.lunchables_utensil_)
+	return GLOB.lunchables_utensil_
+
+/proc/teas_tea_type()
+	if(!(GLOB.teas_tea_type_[GLOB.teas_tea_type_[1]]))
+		GLOB.teas_tea_type_ = init_lunchable_list(GLOB.teas_tea_type_)
+	return GLOB.teas_tea_type_
+
+/proc/teas_teapot_type()
+	if(!(GLOB.teas_teapot_type_[GLOB.teas_teapot_type_[1]]))
+		GLOB.teas_teapot_type_ = init_lunchable_list(GLOB.teas_teapot_type_)
+	return GLOB.teas_teapot_type_
+
+/proc/teas_teacup_type()
+	if(!(GLOB.teas_teacup_type_[GLOB.teas_teacup_type_[1]]))
+		GLOB.teas_teacup_type_ = init_lunchable_list(GLOB.teas_teacup_type_)
+	return GLOB.teas_teacup_type_
 
 /proc/lunchables_drink_reagents()
-	if(!(lunchables_drink_reagents_[lunchables_drink_reagents_[1]]))
-		lunchables_drink_reagents_ = init_lunchable_reagent_list(lunchables_drink_reagents_, /singleton/reagent/drink)
-	return lunchables_drink_reagents_
+	if(!(GLOB.lunchables_drink_reagents_[GLOB.lunchables_drink_reagents_[1]]))
+		GLOB.lunchables_drink_reagents_ = init_lunchable_reagent_list(GLOB.lunchables_drink_reagents_, /singleton/reagent/drink)
+		GLOB.lunchables_drink_reagents_["Water"] = /singleton/reagent/water //We do it here because it is not considered a 'drink'
+		GLOB.lunchables_drink_reagents_ = sortList(GLOB.lunchables_drink_reagents_)
+	return GLOB.lunchables_drink_reagents_
 
 /proc/lunchables_alcohol_reagents()
-	if(!(lunchables_alcohol_reagents_[lunchables_alcohol_reagents_[1]]))
-		lunchables_alcohol_reagents_ = init_lunchable_reagent_list(lunchables_alcohol_reagents_, /singleton/reagent/alcohol)
-	return lunchables_alcohol_reagents_
+	if(!(GLOB.lunchables_alcohol_reagents_[GLOB.lunchables_alcohol_reagents_[1]]))
+		GLOB.lunchables_alcohol_reagents_ = init_lunchable_reagent_list(GLOB.lunchables_alcohol_reagents_, /singleton/reagent/alcohol)
+	return GLOB.lunchables_alcohol_reagents_
 
 /proc/lunchables_all_drink_reagents()
 	return sortList(lunchables_drink_reagents() + lunchables_alcohol_reagents())

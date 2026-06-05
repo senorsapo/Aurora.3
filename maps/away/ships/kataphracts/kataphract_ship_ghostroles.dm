@@ -32,7 +32,7 @@
 	spawnpoints = list("kataphract_klax")
 
 	outfit = /obj/outfit/admin/kataphract/klax
-	possible_species = list(SPECIES_VAURCA_WARRIOR)
+	possible_species = list(SPECIES_VAURCA_WARRIOR, SPECIES_VAURCA_ATTENDANT)
 	extra_languages = list(LANGUAGE_VAURCA)
 
 /datum/ghostspawner/human/kataphract/knight
@@ -79,10 +79,10 @@
 	back = /obj/item/storage/backpack/satchel/hegemony
 
 
-	l_ear = /obj/item/device/radio/headset/ship
+	l_ear = /obj/item/radio/headset/ship
 
 	backpack_contents = list(
-		/obj/item/storage/box/donkpockets = 1
+		/obj/item/storage/box/unique/donkpockets = 1
 	)
 
 /obj/outfit/admin/kataphract/post_equip(mob/living/carbon/human/H, visualsOnly = FALSE)

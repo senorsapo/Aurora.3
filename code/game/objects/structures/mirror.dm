@@ -48,7 +48,7 @@
 	if(shattered)	return
 	shattered = 1
 	icon_state = "mirror_broke"
-	playsound(src, /singleton/sound_category/glass_break_sound, 70, 1)
+	playsound(src, SFX_BREAK_GLASS, 70, 1)
 	desc = "Oh no, seven years of bad luck!"
 
 	var/obj/effect/reflection/reflection = ref.resolve()
@@ -57,13 +57,16 @@
 		reflection.update_mirror_filters()
 
 
-/obj/structure/mirror/bullet_act(var/obj/item/projectile/Proj)
-	if(prob(Proj.get_structure_damage() * 2))
+/obj/structure/mirror/bullet_act(obj/projectile/hitting_projectile, def_zone, piercing_hit)
+	. = ..()
+	if(. != BULLET_ACT_HIT)
+		return .
+
+	if(prob(hitting_projectile.get_structure_damage() * 2))
 		if(!shattered)
 			shatter()
 		else
 			playsound(src, 'sound/effects/hit_on_shattered_glass.ogg', 70, 1)
-	..()
 
 /obj/structure/mirror/attackby(obj/item/attacking_item, mob/user)
 	if(shattered)
@@ -77,7 +80,7 @@
 		visible_message(SPAN_WARNING("[user] hits [src] with [attacking_item]!"))
 		playsound(src.loc, 'sound/effects/glass_hit.ogg', 70, 1)
 
-/obj/structure/mirror/attack_generic(var/mob/user, var/damage)
+/obj/structure/mirror/attack_generic(mob/user, damage, attack_message, environment_smash, armor_penetration, attack_flags, damage_type)
 
 	user.do_attack_animation(src)
 	if(shattered)
@@ -175,7 +178,7 @@
 	desc = "A SalonPro Nano-Mirror(TM) brand mirror! Now a portable version."
 	icon = 'icons/obj/cosmetics.dmi'
 	icon_state = "mirror"
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 
 /obj/item/mirror/attack_self(mob/user as mob)
 	if(user.mind)

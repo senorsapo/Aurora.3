@@ -18,9 +18,14 @@
 	response_disarm = "gently pushes aside the"
 	response_harm = "hits the"
 	speed = 4
-	maxHealth = 25
+	maxhealth = 25
 	health = 25
 	mob_size = 10
+
+	can_be_milked = TRUE
+	udder_size = 3
+	milk_type = /singleton/reagent/toxin/carpotoxin
+	milk_regeneration = list(1, 2)
 
 	blood_overlay_icon = 'icons/mob/npc/blood_overlay_carp.dmi'
 	harm_intent_damage = 4
@@ -28,7 +33,7 @@
 	melee_damage_upper = 15
 	armor_penetration = 5
 	attack_flags = DAMAGE_FLAG_EDGE
-	attacktext = "bitten"
+	attacktext = "bites"
 	attack_sound = 'sound/weapons/bite.ogg'
 
 	//Space carp aren't affected by atmos.
@@ -48,9 +53,10 @@
 	attack_emote = "nashes at"
 
 	flying = TRUE
-	see_invisible = SEE_INVISIBLE_NOLIGHTING
+	lighting_alpha = LIGHTING_PLANE_ALPHA_SOMEWHAT_INVISIBLE
 
 	smart_melee = FALSE
+	sample_data = list("Cellular structure shows adaptation for survival in vacuum", "Genetic biomarkers identified linked with agressiveness", "Tissue sample contains micro-gas release structures")
 
 /mob/living/simple_animal/hostile/carp/update_icon()
 	..()
@@ -65,15 +71,15 @@
 
 /mob/living/simple_animal/hostile/carp/MoveToTarget()
 	stop_automated_movement = 1
-	if(istype(target_mob, /obj/effect/energy_field) && !QDELETED(target_mob) && (target_mob in targets))
+	if(istype(last_found_target, /obj/effect/energy_field) && !QDELETED(last_found_target) && (last_found_target in targets))
 		change_stance(HOSTILE_STANCE_ATTACKING)
-		SSmove_manager.move_to(src, target_mob, 1, move_to_delay)
+		GLOB.move_manager.move_to(src, last_found_target, 1, speed)
 		return 1
 	..()
 
 /mob/living/simple_animal/hostile/carp/AttackTarget()
 	stop_automated_movement = 1
-	if(istype(target_mob, /obj/effect/energy_field) && !QDELETED(target_mob) && (get_dist(src, target_mob) <= 1))
+	if(istype(last_found_target, /obj/effect/energy_field) && !QDELETED(last_found_target) && (get_dist(src, last_found_target) <= 1))
 		AttackingTarget()
 		attacked_times += 1
 		return 1
@@ -83,9 +89,9 @@
 	. = ..()
 	if(.)
 		return
-	if(istype(target_mob, /obj/effect/energy_field))
-		var/obj/effect/energy_field/e = target_mob
-		e.Stress(rand(1,2))
+	if(istype(last_found_target, /obj/effect/energy_field))
+		var/obj/effect/energy_field/e = last_found_target
+		e.damage_field(rand(1,2))
 		visible_message(SPAN_DANGER("\the [src] bites \the [e]!"))
 		src.do_attack_animation(e)
 		return e
@@ -102,7 +108,7 @@
 	icon_state = "carp_russian"
 	icon_living = "carp_russian"
 	icon_dead = "carp_russian_dead"
-	maxHealth = 50 //stronk
+	maxhealth = 50 //stronk
 	health = 50
 
 /mob/living/simple_animal/hostile/carp/russian/FindTarget()
@@ -125,13 +131,14 @@
 	icon_rest = "shark_rest"
 	meat_amount = 5
 
-	maxHealth = 100
+	maxhealth = 100
 	health = 100
 
 	mob_size = 15
 
 	melee_damage_lower = 20
 	melee_damage_upper = 25
+	sample_data = list("Cellular structure shows adaptation for survival in vacuum", "Genetic biomarkers identified linked with agressiveness", "Tissue sample contains micro-gas release structures", "Tissue sample contains high muscle content")
 
 /mob/living/simple_animal/hostile/carp/shark/reaver
 	name = "reaver"
@@ -142,8 +149,10 @@
 	icon_dead = "reaver"
 	meat_amount = 5
 
-	maxHealth = 100
+	maxhealth = 100
 	health = 100
+
+	speed = 10
 
 	mob_size = 15
 
@@ -165,7 +174,7 @@
 	icon_dead = "eel"
 	meat_amount = 5
 
-	maxHealth = 150
+	maxhealth = 150
 	health = 150
 
 	speed = 6
@@ -178,10 +187,16 @@
 /mob/living/simple_animal/hostile/carp/shark/reaver/eel/Initialize()
 	. = ..()
 	eye_overlay = image(icon, "eel_eyeglow")
-	eye_overlay.plane = EFFECTS_ABOVE_LIGHTING_PLANE
+	eye_overlay.plane = ABOVE_LIGHTING_PLANE
 	eye_overlay.appearance_flags = KEEP_APART
 	AddOverlays(eye_overlay)
 	set_light(MINIMUM_USEFUL_LIGHT_RANGE, 2, LIGHT_COLOR_TUNGSTEN)
+
+/mob/living/simple_animal/hostile/carp/shark/reaver/eel/Destroy()
+	ClearOverlays()
+	QDEL_NULL(eye_overlay)
+	set_light(0)
+	return ..()
 
 /mob/living/simple_animal/hostile/carp/shark/reaver/eel/death()
 	. = ..()
@@ -197,13 +212,14 @@
 	icon_dead = "bloater"
 	meat_amount = 5
 
-	maxHealth = 50
+	maxhealth = 50
 	health = 50
 
 	mob_size = 5
 
 	melee_damage_lower = 15
 	melee_damage_upper = 15
+	sample_data = list("Cellular structure shows adaptation for survival in vacuum", "Genetic biomarkers identified linked with agressiveness", "Tissue sample contains micro-gas release structures", "Intracellular synthesis of volatile compounds detected")
 
 	var/has_exploded = FALSE
 
@@ -213,13 +229,19 @@
 	change_stance(HOSTILE_STANCE_TIRED)
 	stop_automated_movement = 1
 	wander = 0
-	if(!has_exploded)
-		icon_state = "bloater_bloating"
-		icon_living = "bloater_bloating"
-		has_exploded = TRUE
-		addtimer(CALLBACK(src, PROC_REF(explode)), 5)
+	if(has_exploded)
+		return
 
-/mob/living/simple_animal/hostile/carp/bloater/bullet_act(var/obj/item/projectile/Proj)
+	icon_state = "bloater_bloating"
+	icon_living = "bloater_bloating"
+	has_exploded = TRUE
+	addtimer(CALLBACK(src, PROC_REF(explode)), 5, TIMER_STOPPABLE|TIMER_DELETE_ME)
+
+/mob/living/simple_animal/hostile/carp/bloater/bullet_act(obj/projectile/hitting_projectile, def_zone, piercing_hit)
+	. = ..()
+	if(. != BULLET_ACT_HIT)
+		return .
+
 	if(!has_exploded)
 		has_exploded = TRUE
 		explode()
@@ -266,7 +288,7 @@
 	response_disarm = "gently pushes aside the"
 	response_harm = "hits the"
 	speed = 2
-	maxHealth = 5
+	maxhealth = 5
 	health = 5
 	mob_size = 2
 	density = FALSE
@@ -276,7 +298,7 @@
 	harm_intent_damage = 5
 	melee_damage_lower = 5
 	melee_damage_upper = 5
-	attacktext = "bitten"
+	attacktext = "bites"
 	attack_sound = 'sound/weapons/bite.ogg'
 
 	min_oxy = 0
@@ -293,4 +315,5 @@
 	attack_emote = "nashes at"
 
 	flying = TRUE
-	see_invisible = SEE_INVISIBLE_NOLIGHTING
+	lighting_alpha = LIGHTING_PLANE_ALPHA_SOMEWHAT_INVISIBLE
+	sample_data = list("Cellular structure shows adaptation for survival in vacuum", "Genetic biomarkers identified linked with agressiveness", "Tissue sample contains micro-gas release structures")

@@ -10,7 +10,7 @@
 	if(species && species.indefinite_sleep)
 		add_verb(src, /verb/toggle_indefinite_sleep)
 
-/mob/living/carbon/Life()
+/mob/living/carbon/Life(seconds_per_tick, times_fired)
 	if(!..())
 		return
 
@@ -43,8 +43,10 @@
 	QDEL_NULL(bloodstr)
 	QDEL_NULL(dna)
 	QDEL_NULL(breathing)
-	for(var/guts in internal_organs)
-		qdel(guts)
+	// Delete and null a direct list of references to our internal organs (such as brain, lungs, heart, etc).
+	QDEL_LIST(internal_organs)
+	// Null an Associative list of String = Reference to the same organs.
+	internal_organs_by_name = null
 	return ..()
 
 /mob/living/carbon/rejuvenate()
@@ -76,7 +78,9 @@
 
 		src.help_up_offer = 0
 
-/mob/living/carbon/relaymove(var/mob/living/user, direction)
+/mob/living/carbon/relaymove(mob/living/user, direction)
+	. = ..()
+
 	if((user in contents) && istype(user))
 		if(user.last_special <= world.time)
 			user.last_special = world.time + 50
@@ -143,7 +147,7 @@
 		return 0
 
 	src.apply_damage(shock_damage, DAMAGE_BURN, def_zone, used_weapon="Electrocution")
-	playsound(loc, /singleton/sound_category/spark_sound, 50, 1, -1)
+	playsound(loc, SFX_SPARKS, 50, 1, -1)
 	if(shock_damage > 15 || tesla_shock)
 		src.visible_message(
 			SPAN_WARNING("[src] was shocked by the [source]!"), \
@@ -260,9 +264,10 @@
 			if((isskeleton(H)) && (!H.w_uniform) && (!H.wear_suit))
 				H.play_xylophone()
 		else
-			if (istype(src,/mob/living/carbon/human) && src:w_uniform)
+			if (istype(src,/mob/living/carbon/human))
 				var/mob/living/carbon/human/H = src
-				H.w_uniform.add_fingerprint(M)
+				if(H.w_uniform)
+					H.w_uniform.add_fingerprint(M)
 
 			var/show_ssd
 			var/mob/living/carbon/human/H
@@ -312,6 +317,19 @@
 							M.resting = 0
 
 				else if(istype(tapper))
+					var/skip_emote_check = on_fire
+					if(!skip_emote_check)
+						var/tapper_selected_zone = tapper.zone_sel.selecting
+						for(var/list/body_part_key in tapper.species.overhead_emote_types)
+							if(tapper_selected_zone in body_part_key)
+								var/emote_type = tapper.species.overhead_emote_types[body_part_key]
+								var/datum/component/overhead_emote/emote_component = GetComponent(/datum/component/overhead_emote)
+								if(emote_component)
+									var/singleton/overhead_emote/emote_singleton = GET_SINGLETON(emote_component.emote_type)
+									emote_singleton.reciprocate_emote(tapper, src, emote_type)
+								else
+									tapper.AddComponent(/datum/component/overhead_emote, emote_type, src)
+								return
 					tapper.species.tap(tapper,src)
 				else
 					M.visible_message("<b>[M]</b> taps [src] to get their attention!", \
@@ -335,6 +353,12 @@
 
 // ++++ROCKDTBEN++++ MOB PROCS //END
 
+/**
+ * Checks the carbon's get_heat_protection (bitflags of covered areas). The maximum temp increase per tick is BODYTEMP_HEATING_MAX, so it
+ * compares how
+ * Limited per tick by BODYTEMP_HEATING_MAX.
+ * Only uses exposed_temperature param.
+ */
 /mob/living/carbon/fire_act(exposed_temperature, exposed_volume)
 	..()
 	var/temp_inc = max(min(BODYTEMP_HEATING_MAX*(1-get_heat_protection()), exposed_temperature - bodytemperature), 0)
@@ -352,23 +376,6 @@
 		return 1
 	return
 
-/mob/living/carbon/u_equip(obj/item/W as obj)
-	if(!W)	return 0
-
-	else if (W == handcuffed)
-		handcuffed = null
-		update_inv_handcuffed()
-		if(buckled_to && buckled_to.buckle_require_restraints)
-			buckled_to.unbuckle()
-
-	else if (W == legcuffed)
-		legcuffed = null
-		update_inv_legcuffed()
-	else
-		..()
-
-	return
-
 //			output for machines^	^^^^^^^output for people^^^^^^^^^
 
 /mob/living/carbon/verb/mob_sleep()
@@ -376,17 +383,21 @@
 	set category = "IC"
 
 	if(usr.sleeping)
-		to_chat(usr, SPAN_WARNING("You are already asleep."))
+		if(species && species.indefinite_sleep) // Species can wake up at will when sleeping.
+			to_chat(usr, SPAN_NOTICE("You start to wake up."))
+			if(usr.sleeping_indefinitely)
+				to_chat(usr, SPAN_NOTICE("You will no longer sleep indefinitely."))
+				usr.sleeping_indefinitely = FALSE // Stop any glitches from happening with overriding indefinite sleep.
+
+			usr.sleeping = 1 // Wake up soon.
+			usr.eye_blurry = 1
+		else
+			to_chat(usr, SPAN_WARNING("You are already asleep."))
 		return
 	if(alert(src,"Are you sure you want to sleep for a while?", "Sleep", "Yes", "No") == "Yes")
 		willfully_sleeping = TRUE
 		usr.sleeping = 20 // Short nap.
 		usr.eye_blurry = 20
-
-/mob/living/carbon/sleeps_horizontal()
-	if(species && species.sleeps_upright)
-		return FALSE
-	return ..()
 
 /verb/toggle_indefinite_sleep()
 	set name = "Toggle Indefinite Sleep"
@@ -486,8 +497,6 @@
 /mob/living/carbon/proc/can_feel_pain()
 	if (species && (species.flags & NO_PAIN))
 		return FALSE
-	if (is_berserk())
-		return FALSE
 	if ((mutations & HULK))
 		return FALSE
 	if (analgesic > 100)
@@ -534,6 +543,13 @@
 	for(var/source in stasis_sources)
 		stasis_value += stasis_sources[source]
 	stasis_sources.Cut()
+	if(stasis_value == 0)
+		remove_filter("stasis_status_ripple")
+	else if(!get_filter("stasis_status_ripple"))
+		add_filter("stasis_status_ripple", 2, ripple_filter(flags = WAVE_BOUNDED, radius = 0, size = 2))
+		var/filter = get_filter("stasis_status_ripple")
+		animate(filter, radius = 0, time = 0.2 SECONDS, size = 2, easing = JUMP_EASING, loop = -1, flags = ANIMATION_PARALLEL)
+		animate(radius = 32, time = 1.5 SECONDS, size = 0)
 
 /mob/living/carbon/get_contained_external_atoms()
 	. = contents - internal_organs
@@ -543,3 +559,6 @@
 
 /mob/living/carbon/proc/should_have_limb(var/organ_check)
 	return FALSE
+
+/mob/living/carbon/get_equipped_speed_mod_items()
+	return ..() + get_equipped_items()

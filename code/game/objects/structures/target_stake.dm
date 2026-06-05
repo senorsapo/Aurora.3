@@ -5,7 +5,7 @@
 	icon = 'icons/obj/target_stake.dmi'
 	icon_state = "target_stake"
 	density = TRUE
-	w_class = ITEMSIZE_IMMENSE
+	w_class = WEIGHT_CLASS_GIGANTIC
 	build_amt = 10
 	var/obj/item/target/pinned_target
 
@@ -22,7 +22,7 @@
 			to_chat(user, SPAN_NOTICE("You slide \the [attacking_item] into the stake."))
 			set_target(attacking_item)
 		return
-	if(attacking_item.iswrench())
+	if(attacking_item.tool_behaviour == TOOL_WRENCH)
 		if(pinned_target)
 			to_chat(user, SPAN_WARNING("You cannot dismantle \the [src] while it has a target attached."))
 			return
@@ -43,8 +43,6 @@
 		T.pixel_x = 0
 		T.pixel_y = 0
 		T.layer = ABOVE_OBJ_LAYER
-		GLOB.moved_event.register(T, src, TYPE_PROC_REF(/atom/movable, move_to_turf))
-		GLOB.moved_event.register(src, T, TYPE_PROC_REF(/atom/movable, move_to_turf))
 		T.stake = src
 		pinned_target = T
 	else
@@ -52,8 +50,6 @@
 		if(pinned_target)
 			pinned_target.density = FALSE
 			pinned_target.layer = OBJ_LAYER
-			GLOB.moved_event.unregister(pinned_target, src)
-			GLOB.moved_event.unregister(src, pinned_target)
 			pinned_target.stake = null
 		pinned_target = null
 

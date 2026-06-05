@@ -5,7 +5,7 @@
 /mob/living/simple_animal/hostile/mimic
 	name = "crate"
 	desc = "A rectangular steel crate."
-	icon = 'icons/obj/crate.dmi'
+	icon = 'icons/obj/containers/crate.dmi'
 	icon_state = "crate_preview"
 	icon_living = "crate_preview"
 
@@ -15,13 +15,13 @@
 	response_disarm = "pushes"
 	response_harm = "hits"
 	speed = 4
-	maxHealth = 250
+	maxhealth = 250
 	health = 250
 
 	harm_intent_damage = 5
 	melee_damage_lower = 8
 	melee_damage_upper = 12
-	attacktext = "attacked"
+	attacktext = "attacks"
 	attack_sound = 'sound/weapons/bite.ogg'
 
 	min_oxy = 0
@@ -35,9 +35,10 @@
 	minbodytemp = 0
 
 	faction = "mimic"
-	move_to_delay = 8
+	speed = 8
 
 	tameable = FALSE
+	sample_data = null
 
 /mob/living/simple_animal/hostile/mimic/FindTarget()
 	. = ..()
@@ -56,7 +57,7 @@
 // Aggro when you try to open them. Will also pickup loot when spawns and drop it when dies.
 /mob/living/simple_animal/hostile/mimic/crate
 
-	attacktext = "bitten"
+	attacktext = "bites"
 
 	stop_automated_movement = 1
 	wander = 0
@@ -119,12 +120,12 @@
 // Copy Mimic
 //
 
-var/global/list/protected_objects = list(/obj/structure/table, /obj/structure/cable, /obj/structure/window, /obj/item/projectile/animate)
+GLOBAL_LIST_INIT(protected_objects, list(/obj/structure/table, /obj/structure/cable, /obj/structure/window, /obj/projectile/animate))
 
 /mob/living/simple_animal/hostile/mimic/copy
 
 	health = 100
-	maxHealth = 100
+	maxhealth = 100
 	var/mob/living/creator = null // the creator
 	var/destroy_objects = 0
 	var/knockdown_people = 0
@@ -144,7 +145,7 @@ var/global/list/protected_objects = list(/obj/structure/table, /obj/structure/ca
 
 /mob/living/simple_animal/hostile/mimic/copy/proc/CopyObject(var/obj/O, var/mob/living/creator)
 
-	if((istype(O, /obj/item) || istype(O, /obj/structure)) && !is_type_in_list(O, protected_objects))
+	if((istype(O, /obj/item) || istype(O, /obj/structure)) && !is_type_in_list(O, GLOB.protected_objects))
 
 		O.forceMove(src)
 		appearance = O
@@ -162,12 +163,12 @@ var/global/list/protected_objects = list(/obj/structure/table, /obj/structure/ca
 			health = 15 * I.w_class
 			melee_damage_lower = 2 + I.force
 			melee_damage_upper = 2 + I.force
-			move_to_delay = 2 * I.w_class
+			speed = 2 * I.w_class
 
-		maxHealth = health
+		maxhealth = health
 		if(creator)
 			src.creator = creator
-			faction = "\ref[creator]" // very unique
+			faction = "[REF(creator)]" // very unique
 		return 1
 	return
 

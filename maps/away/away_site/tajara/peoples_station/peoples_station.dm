@@ -3,7 +3,7 @@
 	description = "Built in the interwar period, the People's Space Station bears the prestige of being the first space installation designed, constructed, and manned by Tajara."
 
 	prefix = "away_site/tajara/peoples_station/"
-	suffixes = list("peoples_station.dmm")
+	suffix = "peoples_station.dmm"
 
 	sectors = list(SECTOR_SRANDMARR)
 	spawn_weight = 2.5
@@ -11,16 +11,17 @@
 	id = "peoples_station"
 	shuttles_to_initialise = list(/datum/shuttle/autodock/overmap/peoples_station_fang, /datum/shuttle/autodock/overmap/peoples_station_transport)
 
-	unit_test_groups = list(1)
+	unit_test_groups = list(2)
 
 /singleton/submap_archetype/peoples_station
 	map = "People's Space Station"
 	descriptor = "Built in the interwar period, the People's Space Station bears the prestige of being the first space installation designed, constructed, and manned by Tajara."
 
-/obj/effect/overmap/visitable/sector/peoples_station
+/obj/effect/overmap/visitable/ship/stationary/peoples_station
 	name = "People's Space Station"
+	class = "PRASS"
+	designation = "People's Space Station"
 	desc = "Built in the interwar period, the People's Space Station bears the prestige of being the first space installation designed, constructed, and manned by Tajara."
-
 	icon = 'icons/obj/overmap/overmap_stationary.dmi'
 	icon_state = "battlestation"
 	color = "#8C8A81"
@@ -39,7 +40,9 @@
 		"nav_peoples_station_ship_3",
 		"nav_peoples_station_ship_4",
 		"nav_peoples_station_fore_dock",
-		"nav_peoples_station_port_dock"
+		"nav_peoples_station_aft_dock",
+		"nav_peoples_station_port_dock",
+		"nav_peoples_station_starboard_dock"
 	)
 	initial_restricted_waypoints = list(
 		"Orbital Fleet Fang" = list("nav_hangar_peoples_station_fang"),
@@ -48,7 +51,7 @@
 	comms_support = TRUE
 	comms_name = "people's station"
 
-/obj/effect/overmap/visitable/sector/peoples_station/get_skybox_representation()
+/obj/effect/overmap/visitable/ship/stationary/peoples_station/get_skybox_representation()
 	var/image/skybox_image = image('icons/skybox/subcapital_ships.dmi', "pss")
 	skybox_image.pixel_x = rand(0,64)
 	skybox_image.pixel_y = rand(128,256)

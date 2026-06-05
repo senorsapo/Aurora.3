@@ -1,11 +1,13 @@
 GLOBAL_LIST_EMPTY(gps_list)
 
-/obj/item/device/gps
+/obj/item/gps
 	name = "global positioning system"
 	desc = "Helping lost spacemen find their way through the planets since 2016."
-	icon = 'icons/obj/telescience.dmi'
+	icon = 'icons/obj/item/gps.dmi'
 	icon_state = "gps-com"
-	w_class = ITEMSIZE_SMALL
+	item_state = "radio"
+	contained_sprite = TRUE
+	w_class = WEIGHT_CLASS_SMALL
 	slot_flags = SLOT_BELT
 	origin_tech = list(TECH_DATA = 2, TECH_ENGINEERING = 2)
 	var/gps_prefix = "COM"
@@ -26,7 +28,7 @@ GLOBAL_LIST_EMPTY(gps_list)
 	var/process_interval = 6 SECONDS
 	var/last_process = 0
 
-/obj/item/device/gps/Initialize()
+/obj/item/gps/Initialize()
 	. = ..()
 	compass = new(src)
 	gpstag = next_initial_tag()
@@ -50,29 +52,36 @@ GLOBAL_LIST_EMPTY(gps_list)
 	update_icon()
 
 	if(held_by)
-		GLOB.moved_event.register(held_by, src, PROC_REF(update_position))
+		RegisterSignal(held_by, COMSIG_MOVABLE_MOVED, PROC_REF(update_position), TRUE)
 	if(implanted_into)
-		GLOB.moved_event.register(implanted_into, src, PROC_REF(update_position))
-	GLOB.moved_event.register(src, src, PROC_REF(update_position))
+		RegisterSignal(implanted_into, COMSIG_MOVABLE_MOVED, PROC_REF(update_position), TRUE)
+	RegisterSignal(src, COMSIG_MOVABLE_MOVED, PROC_REF(update_position))
 
 	for(var/gps in GLOB.gps_list)
 		tracking += GLOB.gps_list[gps]["tag"]
 
 	START_PROCESSING(SSprocessing, src)
 
-/obj/item/device/gps/Destroy()
+/obj/item/gps/Destroy()
 	GLOB.gps_list -= GLOB.gps_list[gpstag]
-	GLOB.moved_event.unregister(src, src)
+	UnregisterSignal(src, COMSIG_MOVABLE_MOVED)
 	if(held_by)
-		GLOB.moved_event.unregister(held_by, src)
+		UnregisterSignal(held_by, COMSIG_MOVABLE_MOVED)
 		held_by = null
 	if(implanted_into)
-		GLOB.moved_event.unregister(implanted_into, src)
+		UnregisterSignal(implanted_into, COMSIG_MOVABLE_MOVED)
 		implanted_into = null
 	STOP_PROCESSING(SSprocessing, src)
 	return ..()
 
-/obj/item/device/gps/update_icon()
+/obj/item/gps/attack_self(mob/user, modifiers)
+	if(!emped)
+		ui_interact(user)
+
+	var/turf/T = get_turf(src)
+	to_chat(user, SPAN_NOTICE("[icon2html(src, user)] [src] flashes <i>[T.x].[rand(0,9)]:[T.y].[rand(0,9)]:[T.z].[rand(0,9)]</i>."))
+
+/obj/item/gps/update_icon()
 	ClearOverlays()
 	if(emped)
 		AddOverlays("emp")
@@ -81,44 +90,44 @@ GLOBAL_LIST_EMPTY(gps_list)
 	else
 		AddOverlays("confused")
 
-/obj/item/device/gps/pickup(var/mob/user)
+/obj/item/gps/pickup(var/mob/user)
 	..()
 	if(held_by)
-		GLOB.moved_event.unregister(held_by, src)
+		UnregisterSignal(held_by, COMSIG_MOVABLE_MOVED)
 	held_by = user
-	GLOB.moved_event.register(user, src, PROC_REF(update_position))
+	RegisterSignal(user, COMSIG_MOVABLE_MOVED, PROC_REF(update_position), TRUE)
 	update_icon()
 
-/obj/item/device/gps/dropped(mob/user)
+/obj/item/gps/dropped(mob/user)
 	..()
 	if(isturf(loc))
 		held_by = null
-		GLOB.moved_event.unregister(user, src)
+		UnregisterSignal(user, COMSIG_MOVABLE_MOVED)
 	if(user.client)
 		user.client.screen -= compass
 	update_icon()
 
-/obj/item/device/gps/on_slotmove(mob/user, slot)
+/obj/item/gps/on_slotmove(mob/user, slot)
 	. = ..()
 	if(user.client && !(slot == slot_r_hand || slot == slot_l_hand))
 		user.client.screen -= compass
 
-/obj/item/device/gps/equipped(mob/user, slot)
+/obj/item/gps/equipped(mob/user, slot)
 	. = ..()
 	if(user.client && (slot == slot_r_hand || slot == slot_l_hand))
 		user.client.screen |= compass
 
-/obj/item/device/gps/on_module_activate(mob/living/silicon/robot/R)
+/obj/item/gps/on_module_activate(mob/living/silicon/robot/R)
 	..()
 	if(R.client)
 		R.client.screen |= compass
 
-/obj/item/device/gps/on_module_deactivate(mob/living/silicon/robot/R)
+/obj/item/gps/on_module_deactivate(mob/living/silicon/robot/R)
 	..()
 	if(R.client)
 		R.client.screen -= compass
 
-/obj/item/device/gps/emp_act(severity)
+/obj/item/gps/emp_act(severity)
 	. = ..()
 
 	emped = TRUE
@@ -126,12 +135,12 @@ GLOBAL_LIST_EMPTY(gps_list)
 	update_icon()
 	update_position()
 
-/obj/item/device/gps/proc/post_emp()
+/obj/item/gps/proc/post_emp()
 	emped = FALSE
 	update_icon()
 	update_position()
 
-/obj/item/device/gps/ui_data(mob/user)
+/obj/item/gps/ui_data(mob/user)
 	var/list/data = list()
 
 	data["own_tag"] = gpstag
@@ -150,18 +159,18 @@ GLOBAL_LIST_EMPTY(gps_list)
 
 	return data
 
-/obj/item/device/gps/ui_interact(mob/user, var/datum/tgui/ui)
+/obj/item/gps/ui_interact(mob/user, var/datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
 	if(!ui)
-		ui = new(user, src, "GPS", capitalize_first_letters(name), 460, 600)
+		ui = new(user, src, "GPS", capitalize_first_letters(name), 550, 650)
 		ui.open()
 
-/obj/item/device/gps/process()
+/obj/item/gps/process()
 	if(held_by || implanted_into || (world.time < last_process + process_interval))
 		return
 	update_position(FALSE)
 
-/obj/item/device/gps/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+/obj/item/gps/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
 	if(.)
 		return
@@ -231,19 +240,36 @@ GLOBAL_LIST_EMPTY(gps_list)
 
 	return FALSE
 
-/obj/item/device/gps/proc/update_position(var/check_held_by = TRUE)
+/obj/item/gps/proc/update_position(var/check_held_by = TRUE)
 	var/turf/T = get_turf(src)
 	if(check_held_by && held_by && (held_by.x != T.x || held_by.y != T.y || held_by.z != T.z) && held_by != recursive_loc_turf_check(src, 3, held_by))
-		GLOB.moved_event.unregister(held_by, src)
+		UnregisterSignal(held_by, COMSIG_MOVABLE_MOVED)
 		held_by = null
 		update_icon()
 		return
 	var/area/gpsarea = get_area(src)
-	GLOB.gps_list[gpstag] = list("tag" = gpstag, "pos_x" = T.x, "pos_y" = T.y, "pos_z" = T.z, "area" = "[gpsarea.name]", "emped" = emped, "compass_color" = compass_color)
+	var/gps_areaname = get_area_display_name(gpsarea, TRUE, FALSE, FALSE, TRUE)
+
+	// Sanity checking with default locations in case something isn't right with locational data.
+	// The GPS will prefer the coordinate of its turf, but if the turf is null it will try the coordinate of whoever is holding it.
+	// And if both fail, it'll default to <0,0,0> so we don't crash.
+	var/x_coord = 0
+	var/y_coord = 0
+	var/z_coord = 0
+	if (T)
+		x_coord = T.x
+		y_coord = T.y
+		z_coord = T.z
+	else if (held_by)
+		x_coord = held_by.x
+		y_coord = held_by.y
+		z_coord = held_by.z
+
+	GLOB.gps_list[gpstag] = list("tag" = gpstag, "pos_x" = x_coord, "pos_y" = y_coord, "pos_z" = z_coord, "area" = "[gps_areaname]", "emped" = emped, "compass_color" = compass_color)
 	if(check_held_by && held_by && (held_by.get_active_hand() == src || held_by.get_inactive_hand() == src))
 		update_compass(TRUE)
 
-/obj/item/device/gps/proc/update_compass(var/update_compass_icon)
+/obj/item/gps/proc/update_compass(var/update_compass_icon)
 	compass.hide_waypoints(FALSE)
 	if(LAZYLEN(tracking_compass))
 		for(var/tracking_tag in tracking_compass - gpstag)
@@ -259,7 +285,7 @@ GLOBAL_LIST_EMPTY(gps_list)
 				compass.show_waypoint(tracking_tag)
 	compass.rebuild_overlay_lists(update_compass_icon)
 
-/obj/item/device/gps/proc/next_initial_tag()
+/obj/item/gps/proc/next_initial_tag()
 	if(!LAZYACCESS(gps_count, gps_prefix))
 		gps_count[gps_prefix] = 0
 
@@ -268,38 +294,38 @@ GLOBAL_LIST_EMPTY(gps_list)
 	if(GLOB.gps_list[.]) // if someone has renamed a GPS manually to take this tag already
 		. = next_initial_tag()
 
-/obj/item/device/gps/science
+/obj/item/gps/science
 	icon_state = "gps-sci"
 	gps_prefix = "SCI"
 	compass_color = "#993399"
 	gpstag = "SCI0"
 
-/obj/item/device/gps/engineering
+/obj/item/gps/engineering
 	icon_state = "gps-eng"
 	gps_prefix = "ENG"
 	compass_color = "#A66300"
 	gpstag = "ENG0"
 
-/obj/item/device/gps/mining
+/obj/item/gps/mining
 	icon_state = "gps-min"
 	gps_prefix = "MIN"
 	compass_color = "#5F4519"
 	gpstag = "MIN0"
 	desc = "A positioning system helpful for rescuing trapped or injured miners, keeping one on you at all times while mining might just save your life."
 
-/obj/item/device/gps/janitor
+/obj/item/gps/janitor
 	icon_state = "gps-jan"
 	gps_prefix = "JAN"
 	compass_color = "#6eaa2c"
 	gpstag = "JAN0"
 
-/obj/item/device/gps/medical
+/obj/item/gps/medical
 	icon_state = "gps-med"
 	gps_prefix = "MED"
 	compass_color = "#5EABEB"
 	gpstag = "MED0"
 
-/obj/item/device/gps/marooning_equipment
+/obj/item/gps/marooning_equipment
 	icon_state = "gps-mar"
 	gps_prefix = "MAROON"
 	compass_color = "#EAD152"
@@ -307,7 +333,7 @@ GLOBAL_LIST_EMPTY(gps_list)
 
 /********** Static GPS Start **********/
 // Static GPS
-/obj/item/device/gps/stationary
+/obj/item/gps/stationary
 	name = "static GPS"
 	desc = "A static global positioning system."
 	anchored = TRUE
@@ -315,7 +341,7 @@ GLOBAL_LIST_EMPTY(gps_list)
 	layer = BASE_ABOVE_OBJ_LAYER
 	gpstag = "STAT0"
 
-/obj/item/device/gps/stationary/Initialize()
+/obj/item/gps/stationary/Initialize()
 	SHOULD_CALL_PARENT(FALSE)
 
 	if(flags_1 & INITIALIZED_1)
@@ -342,10 +368,10 @@ GLOBAL_LIST_EMPTY(gps_list)
 	update_icon()
 
 	if(held_by)
-		GLOB.moved_event.register(held_by, src, PROC_REF(update_position))
+		RegisterSignal(held_by, COMSIG_MOVABLE_MOVED, PROC_REF(update_position), TRUE)
 	if(implanted_into)
-		GLOB.moved_event.register(implanted_into, src, PROC_REF(update_position))
-	GLOB.moved_event.register(src, src, PROC_REF(update_position))
+		RegisterSignal(implanted_into, COMSIG_MOVABLE_MOVED, PROC_REF(update_position), TRUE)
+	RegisterSignal(src, COMSIG_MOVABLE_MOVED, PROC_REF(update_position))
 
 	for(var/gps in GLOB.gps_list)
 		tracking += GLOB.gps_list[gps]["tag"]
@@ -354,11 +380,11 @@ GLOBAL_LIST_EMPTY(gps_list)
 
 	return INITIALIZE_HINT_NORMAL
 
-/obj/item/device/gps/stationary/attack_hand() // Don't let users pick it up.
+/obj/item/gps/stationary/attack_hand() // Don't let users pick it up.
 	return
 
 // Spark
-/obj/item/device/gps/stationary/mining_shuttle
+/obj/item/gps/stationary/mining_shuttle
 	name = "static GPS (SCCV Spark)"
 	desc = "A static global positioning system helpful for finding your way back to the mining shuttle."
 	icon_state = "gps-min"
@@ -367,7 +393,7 @@ GLOBAL_LIST_EMPTY(gps_list)
 	gpstag = "SPARK"
 
 // Intrepid
-/obj/item/device/gps/stationary/sccv_intrepid
+/obj/item/gps/stationary/sccv_intrepid
 	name = "static GPS (SCCV Intrepid)"
 	desc = "A static global positioning system helpful for finding your way back to the SCCV Intrepid."
 	icon_state = "gps-com"
@@ -375,11 +401,20 @@ GLOBAL_LIST_EMPTY(gps_list)
 	compass_color = "#193A7A"
 	gpstag = "INTREPID"
 
-/obj/item/device/gps/stationary/sccv_canary
+/obj/item/gps/stationary/sccv_canary
 	name = "static GPS (SCCV Canary)"
 	desc = "A static global positioning system helpful for finding your way back to the SCCV Canary."
 	icon_state = "gps-com"
 	gps_prefix = "COM"
 	compass_color = "#57c5e0"
 	gpstag = "CANARY"
+
+/obj/item/gps/stationary/sccv_quark
+	name = "static GPS (SCCV Quark)"
+	desc = "A static global positioning system helpful for finding your way back to the SCCV Quark."
+	icon_state = "gps-sci"
+	gps_prefix = "SCI"
+	compass_color = "#d691ce"
+	gpstag = "QUARK"
+
 /********** Static GPS End **********/

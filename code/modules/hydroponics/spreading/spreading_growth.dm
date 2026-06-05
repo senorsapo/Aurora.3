@@ -2,7 +2,7 @@
 
 /obj/effect/plant/proc/get_cardinal_neighbors()
 	var/list/cardinal_neighbors = list()
-	for(var/check_dir in GLOB.cardinal)
+	for(var/check_dir in GLOB.cardinals)
 		var/turf/simulated/T = get_step(get_turf(src), check_dir)
 		if(istype(T))
 			cardinal_neighbors |= T
@@ -38,7 +38,7 @@
 		die_off()
 		return 0
 
-	for(var/obj/effect/effect/smoke/chem/smoke in view(1, src))
+	for(var/obj/effect/smoke/chem/smoke in view(1, src))
 		if(smoke.reagents.has_reagent(/singleton/reagent/toxin/plantbgone))
 			die_off()
 			return
@@ -47,16 +47,16 @@
 	var/turf/simulated/T = get_turf(src)
 	if(istype(T))
 		health -= seed.handle_environment(T,T.return_air(),null,1)
-	if(health < max_health)
+	if(health < maxhealth)
 		health += rand(3,5)
 		refresh_icon()
-		if(health > max_health)
-			health = max_health
-	else if(health == max_health && !plant)
+		if(health > maxhealth)
+			health = maxhealth
+	else if(health == maxhealth && !plant)
 		plant = new(T,seed)
 		plant.dir = src.dir
 		plant.transform = src.transform
-		plant.age = seed.get_trait(TRAIT_MATURATION)-1
+		plant.age = GET_SEED_TRAIT(seed, TRAIT_MATURATION)-1
 		plant.update_icon()
 		if(growth_type==0) //Vines do not become invisible.
 			set_invisibility(INVISIBILITY_MAXIMUM)
@@ -65,7 +65,7 @@
 
 	if(buckled)
 		seed.do_sting(buckled,src)
-		if(seed.get_trait(TRAIT_CARNIVOROUS))
+		if(GET_SEED_TRAIT(seed, TRAIT_CARNIVOROUS))
 			seed.do_thorns(buckled,src)
 
 	if(world.time >= last_tick+NEIGHBOR_REFRESH_TIME)
@@ -75,22 +75,22 @@
 	if(sampled)
 		//Should be between 2-7 for given the default range of values for TRAIT_PRODUCTION
 		var/chance
-		if(!seed.get_trait(TRAIT_PRODUCTION))
+		if(!GET_SEED_TRAIT(seed, TRAIT_PRODUCTION))
 			chance = 1
 		else
-			chance = max(1, round(30/seed.get_trait(TRAIT_PRODUCTION)))
+			chance = max(1, round(30/GET_SEED_TRAIT(seed, TRAIT_PRODUCTION)))
 		if(prob(chance))
 			sampled = 0
 
 	if(is_mature() && neighbors.len && prob(spread_chance))
 		//spread to 1-3 adjacent turfs depending on yield trait.
-		var/max_spread = between(1, round(seed.get_trait(TRAIT_YIELD)*3/14), 3)
+		var/max_spread = between(1, round(GET_SEED_TRAIT(seed, TRAIT_YIELD)*3/14), 3)
 
 		do_spread(spread_chance, max_spread)
 
 	// We shouldn't have spawned if the controller doesn't exist.
 	check_health()
-	if(neighbors.len || health != max_health || buckled || !is_mature())
+	if(neighbors.len || health != maxhealth || buckled || !is_mature())
 		SSplants.add_plant(src)
 
 /obj/effect/plant/proc/do_spread(spread_chance, max_spread)

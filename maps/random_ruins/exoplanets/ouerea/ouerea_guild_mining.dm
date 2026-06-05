@@ -7,7 +7,7 @@
 	template_flags = TEMPLATE_FLAG_NO_RUINS|TEMPLATE_FLAG_RUIN_STARTS_DISALLOWED
 	sectors = list(SECTOR_UUEOAESA)
 	prefix = "ouerea/"
-	suffixes = list("ouerea_guild_mining.dmm")
+	suffix = "ouerea_guild_mining.dmm"
 	ban_ruins = list(/datum/map_template/ruin/exoplanet/ouerea_heph_mining)
 	unit_test_groups = list(3)
 
@@ -15,7 +15,6 @@
 	name = "Miners' Guild Camp"
 	icon_state = "bluenew"
 	requires_power = FALSE
-	dynamic_lighting = TRUE
 	no_light_control = FALSE
 	base_turf = /turf/simulated/floor/exoplanet/barren
 	area_flags = AREA_FLAG_RAD_SHIELDED|AREA_FLAG_INDESTRUCTIBLE_TURFS

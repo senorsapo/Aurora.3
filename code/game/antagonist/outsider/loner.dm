@@ -1,4 +1,4 @@
-var/datum/antagonist/loner/loners
+GLOBAL_DATUM(loners, /datum/antagonist/loner)
 
 /datum/antagonist/loner
 	id = MODE_LONER
@@ -7,8 +7,6 @@ var/datum/antagonist/loner/loners
 	bantype = "loner"
 	antag_indicator = "loner"
 	landmark_id = "lonerspawn"
-	welcome_text = "You are a Loner, someone underequipped to deal with the station. You will probably not survive for the whole round, so don't sweat it if you die!<br> \
-					You have a special psionic power that allows you to absorb a psionic energy from a being's Zona Bovinae, granting you an extra point to be used in the Point Shop."
 	flags = ANTAG_OVERRIDE_JOB | ANTAG_CLEAR_EQUIPMENT | ANTAG_CHOOSE_NAME | ANTAG_VOTABLE | ANTAG_SET_APPEARANCE
 	antaghud_indicator = "hudloner"
 	required_age = 7
@@ -22,9 +20,17 @@ var/datum/antagonist/loner/loners
 
 	id_type = /obj/item/card/id/syndicate
 
+	/// List of additional psi powers to give the loner.
+	var/list/singleton/psionic_power/additional_powers = list(
+		/singleton/psionic_power/zona_absorption,
+		/singleton/psionic_power/awaken,
+		/singleton/psionic_power/psi_drain)
+
 /datum/antagonist/loner/New()
 	..()
-	loners = src
+	welcome_text = "You are a Loner, someone underequipped to deal with the [station_name()]. You will probably not survive for the whole round, so don't sweat it if you die!<br> \
+	You have a special psionic power that allows you to absorb a psionic energy from a being's Zona Bovinae, granting you an extra point to be used in the Point Shop."
+	GLOB.loners = src
 
 /datum/antagonist/loner/equip(var/mob/living/carbon/human/player)
 	if(!..())
@@ -40,10 +46,13 @@ var/datum/antagonist/loner/loners
 	player.preEquipOutfit(/obj/outfit/admin/syndicate/mercenary/loner, FALSE)
 	player.equipOutfit(/obj/outfit/admin/syndicate/mercenary/loner, FALSE)
 	player.set_psi_rank(PSI_RANK_HARMONIOUS)
-	var/singleton/psionic_power/P = GET_SINGLETON(/singleton/psionic_power/zona_absorption)
-	P.apply(player)
+
+	for (var/power in additional_powers)
+		astype(GET_SINGLETON(power), /singleton/psionic_power)?.apply(player)
+
 	player.force_update_limbs()
 	player.update_eyes()
 	player.regenerate_icons()
+
 
 	return TRUE

@@ -12,7 +12,7 @@
 	away_site = TRUE
 
 	outfit = /obj/outfit/admin/zenghu_survivor
-	possible_species = list(SPECIES_HUMAN, SPECIES_HUMAN_OFFWORLD, SPECIES_SKRELL, SPECIES_SKRELL_AXIORI, SPECIES_VAURCA_WORKER, SPECIES_VAURCA_WARRIOR, SPECIES_IPC, SPECIES_IPC_G1, SPECIES_IPC_G2, SPECIES_IPC_XION, SPECIES_IPC_ZENGHU, SPECIES_IPC_BISHOP)
+	possible_species = list(SPECIES_HUMAN, SPECIES_HUMAN_OFFWORLD, SPECIES_SKRELL, SPECIES_SKRELL_AXIORI, SPECIES_VAURCA_WORKER, SPECIES_VAURCA_WARRIOR, SPECIES_VAURCA_ATTENDANT, SPECIES_IPC, SPECIES_IPC_G1, SPECIES_IPC_G2, SPECIES_IPC_XION, SPECIES_IPC_ZENGHU, SPECIES_IPC_BISHOP)
 	allow_appearance_change = APPEARANCE_PLASTICSURGERY
 
 	assigned_role = "Zeng-Hu Survivor"
@@ -26,4 +26,4 @@
 	shoes = /obj/item/clothing/shoes/sneakers/medsci/zeng
 	belt = /obj/item/storage/belt/utility/full
 	id = /obj/item/card/id/zeng_hu
-	r_hand = /obj/item/device/flashlight
+	r_hand = /obj/item/flashlight

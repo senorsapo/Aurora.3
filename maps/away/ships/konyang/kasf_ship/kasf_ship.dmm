@@ -118,7 +118,6 @@
 /area/shuttle/kasf_shuttle)
 "aM" = (
 /obj/effect/floor_decal/industrial/warning{
-	layer = 2.71;
 	dir = 6
 	},
 /obj/structure/ship_weapon_dummy,
@@ -563,7 +562,7 @@
 /obj/item/clothing/head/welding{
 	pixel_x = 4
 	},
-/obj/item/device/robotanalyzer{
+/obj/item/robotanalyzer{
 	pixel_y = -8
 	},
 /obj/structure/table/standard,
@@ -714,8 +713,8 @@
 /obj/item/clothing/accessory/badge/passcard/konyang,
 /obj/item/clothing/accessory/storage/white_vest,
 /obj/item/clothing/accessory/storage/pouches/white,
-/obj/item/storage/belt/medical/first_responder/combat/full,
-/obj/item/clothing/accessory/armband/medgreen,
+/obj/item/storage/belt/medical/paramedic/combat/full,
+/obj/item/clothing/accessory/armband/med,
 /obj/effect/floor_decal/corner_wide/dark_blue{
 	dir = 6
 	},
@@ -729,8 +728,7 @@
 	dir = 1
 	},
 /obj/effect/floor_decal/industrial/warning{
-	dir = 8;
-	layer = 2.71
+	dir = 8
 	},
 /turf/simulated/floor/tiled/dark,
 /area/ship/kasf_corvette/hangar)
@@ -942,7 +940,8 @@
 	},
 /obj/structure/railing/mapped,
 /obj/machinery/computer/ship/targeting/terminal{
-	dir = 1
+	dir = 1;
+	req_access = list(218)
 	},
 /turf/simulated/floor/carpet/rubber,
 /area/ship/kasf_corvette/portwep)
@@ -1745,7 +1744,8 @@
 	pixel_y = -24
 	},
 /obj/machinery/computer/ship/helm/terminal{
-	dir = 1
+	dir = 1;
+	req_access = list(218)
 	},
 /turf/simulated/floor/tiled/dark/full,
 /area/ship/kasf_corvette/cic)
@@ -1898,7 +1898,7 @@
 	name = "Shuttle Safety Shutters";
 	pixel_y = 10
 	},
-/obj/item/device/binoculars{
+/obj/item/binoculars{
 	pixel_x = -4;
 	pixel_y = 2
 	},
@@ -1906,7 +1906,7 @@
 	pixel_y = 10;
 	pixel_x = -6
 	},
-/obj/item/device/gps{
+/obj/item/gps{
 	pixel_x = 6;
 	pixel_y = -2
 	},
@@ -2282,7 +2282,7 @@
 /obj/item/clothing/glasses/safety/goggles{
 	pixel_y = 4
 	},
-/obj/item/device/binoculars{
+/obj/item/binoculars{
 	pixel_y = 4
 	},
 /turf/simulated/floor/carpet/rubber,
@@ -2549,7 +2549,7 @@
 	pixel_x = 4;
 	pixel_y = 12
 	},
-/obj/item/device/paint_sprayer,
+/obj/item/paint_sprayer,
 /obj/effect/floor_decal/industrial/warning/corner{
 	dir = 4
 	},
@@ -2734,7 +2734,7 @@
 /turf/simulated/floor/tiled/dark,
 /area/ship/kasf_corvette/engie)
 "qv" = (
-/obj/machinery/autolathe,
+/obj/machinery/fabricator/autolathe,
 /obj/structure/sign/poster{
 	pixel_y = 32
 	},
@@ -4634,6 +4634,7 @@
 	pixel_x = 5;
 	pixel_y = 6
 	},
+/obj/item/eftpos,
 /turf/simulated/floor/tiled/dark/full,
 /area/ship/kasf_corvette/cic)
 "AM" = (
@@ -5013,7 +5014,7 @@
 /obj/structure/table/rack,
 /obj/item/hoist_kit,
 /obj/item/storage/toolbox/mechanical,
-/obj/item/device/multitool,
+/obj/item/multitool,
 /turf/simulated/floor/carpet/rubber,
 /area/ship/kasf_corvette/starboardwep)
 "CU" = (
@@ -5146,7 +5147,8 @@
 	pixel_y = -24
 	},
 /obj/machinery/computer/ship/targeting/terminal{
-	dir = 1
+	dir = 1;
+	req_access = list(218)
 	},
 /turf/simulated/floor/tiled/dark/full,
 /area/ship/kasf_corvette/cic)
@@ -5212,7 +5214,6 @@
 "DS" = (
 /obj/machinery/atmospherics/unary/vent_pump/siphon/on/atmos{
 	dir = 1;
-	frequency = 1441;
 	id_tag = "kasf_co2_out_starboard"
 	},
 /turf/simulated/floor/reinforced/carbon_dioxide,
@@ -5281,7 +5282,7 @@
 /obj/item/clothing/glasses/safety/goggles{
 	pixel_y = 4
 	},
-/obj/item/device/binoculars{
+/obj/item/binoculars{
 	pixel_y = 4
 	},
 /turf/simulated/floor/carpet/rubber,
@@ -5485,7 +5486,7 @@
 	pixel_y = -6;
 	pixel_x = -6
 	},
-/obj/item/storage/box/sharps{
+/obj/item/storage/box/unique/sharps{
 	pixel_y = 6;
 	pixel_x = -6
 	},
@@ -5755,7 +5756,9 @@
 /obj/effect/floor_decal/spline/plain/black{
 	dir = 1
 	},
-/obj/machinery/computer/ship/helm/terminal,
+/obj/machinery/computer/ship/helm/terminal{
+	req_access = list(218)
+	},
 /turf/simulated/floor/tiled/dark,
 /area/shuttle/kasf_shuttle)
 "GD" = (
@@ -5845,7 +5848,6 @@
 "Hd" = (
 /obj/machinery/atmospherics/unary/vent_pump/siphon/on/atmos{
 	dir = 1;
-	frequency = 1441;
 	id_tag = "kasf_co2_out_port"
 	},
 /turf/simulated/floor/reinforced/carbon_dioxide,
@@ -5947,12 +5949,8 @@
 /obj/item/reagent_containers/food/snacks/fish/fishfillet,
 /obj/item/reagent_containers/food/snacks/meat/chicken,
 /obj/item/reagent_containers/food/snacks/meat/chicken,
-/obj/item/storage/box/produce{
-	layer = 2.99
-	},
-/obj/item/storage/box/produce{
-	layer = 2.99
-	},
+/obj/item/storage/box/large/produce,
+/obj/item/storage/box/large/produce,
 /obj/item/storage/box/fancy/egg_box,
 /obj/item/storage/box/fancy/egg_box,
 /obj/effect/decal/cleanable/dirt,
@@ -5988,7 +5986,7 @@
 	pixel_y = -2;
 	pixel_x = -4
 	},
-/obj/item/device/electronic_assembly/simple{
+/obj/item/electronic_assembly/simple{
 	desc = "The remote for a PanaVision 2400. This one feels a bit hollow.";
 	name = "television remote";
 	pixel_y = 7;
@@ -6030,7 +6028,7 @@
 /obj/machinery/vending/engineering{
 	req_access = null
 	},
-/obj/effect/floor_decal/industrial/outline/engineering,
+/obj/effect/floor_decal/industrial/outline/operations,
 /obj/structure/sign/nosmoking_1{
 	pixel_y = 32
 	},
@@ -6245,8 +6243,8 @@
 /obj/item/handcuffs/ziptie,
 /obj/item/handcuffs/ziptie,
 /obj/item/handcuffs/ziptie,
-/obj/item/device/flash,
-/obj/item/device/flash,
+/obj/item/flash,
+/obj/item/flash,
 /obj/item/grenade/flashbang,
 /obj/item/grenade/flashbang,
 /obj/item/gun/energy/rifle/ionrifle,
@@ -6277,7 +6275,7 @@
 /obj/machinery/vending/robotics{
 	req_access = null
 	},
-/obj/effect/floor_decal/industrial/outline/engineering,
+/obj/effect/floor_decal/industrial/outline/operations,
 /turf/simulated/floor/carpet/rubber,
 /area/ship/kasf_corvette/engie)
 "Jq" = (
@@ -6305,9 +6303,7 @@
 /obj/machinery/alarm/south{
 	req_one_access = list(218)
 	},
-/obj/effect/decal/cleanable/generic{
-	layer = 2.81
-	},
+/obj/effect/decal/cleanable/generic,
 /turf/simulated/floor/tiled/dark,
 /area/ship/kasf_corvette/brig)
 "Js" = (
@@ -7474,20 +7470,20 @@
 	dir = 5
 	},
 /obj/structure/table/rack,
-/obj/item/device/suit_cooling_unit,
-/obj/item/device/suit_cooling_unit,
-/obj/item/device/suit_cooling_unit,
-/obj/item/device/suit_cooling_unit,
-/obj/item/device/suit_cooling_unit,
-/obj/item/device/suit_cooling_unit,
-/obj/item/device/suit_cooling_unit,
-/obj/item/device/gps,
-/obj/item/device/gps,
-/obj/item/device/gps,
-/obj/item/device/gps,
-/obj/item/device/gps,
-/obj/item/device/gps,
-/obj/item/device/gps,
+/obj/item/suit_cooling_unit,
+/obj/item/suit_cooling_unit,
+/obj/item/suit_cooling_unit,
+/obj/item/suit_cooling_unit,
+/obj/item/suit_cooling_unit,
+/obj/item/suit_cooling_unit,
+/obj/item/suit_cooling_unit,
+/obj/item/gps,
+/obj/item/gps,
+/obj/item/gps,
+/obj/item/gps,
+/obj/item/gps,
+/obj/item/gps,
+/obj/item/gps,
 /obj/effect/floor_decal/industrial/outline/yellow,
 /turf/simulated/floor/tiled/dark/full,
 /area/ship/kasf_corvette/armory)
@@ -7579,7 +7575,7 @@
 /area/ship/kasf_corvette/medbay)
 "QP" = (
 /obj/machinery/vending/tool,
-/obj/effect/floor_decal/industrial/outline/engineering,
+/obj/effect/floor_decal/industrial/outline/operations,
 /obj/structure/sign/poster{
 	pixel_y = 32
 	},
@@ -7615,14 +7611,14 @@
 /obj/effect/floor_decal/corner_wide/dark_blue{
 	dir = 5
 	},
-/obj/item/device/radio/off{
+/obj/item/radio/off{
 	pixel_y = 10
 	},
-/obj/item/device/radio/off{
+/obj/item/radio/off{
 	pixel_y = 10
 	},
-/obj/item/device/binoculars,
-/obj/item/device/binoculars{
+/obj/item/binoculars,
+/obj/item/binoculars{
 	pixel_y = 5
 	},
 /turf/simulated/floor/tiled/dark/full,
@@ -7712,7 +7708,7 @@
 /obj/structure/table/rack,
 /obj/item/hoist_kit,
 /obj/item/storage/toolbox/mechanical,
-/obj/item/device/multitool,
+/obj/item/multitool,
 /turf/simulated/floor/carpet/rubber,
 /area/ship/kasf_corvette/portwep)
 "RA" = (
@@ -8273,7 +8269,7 @@
 /obj/item/clothing/head/radiation,
 /obj/item/clothing/suit/radiation,
 /obj/item/clothing/glasses/safety/goggles,
-/obj/item/device/geiger,
+/obj/item/geiger,
 /turf/simulated/floor/carpet/rubber,
 /area/ship/kasf_corvette/engie)
 "Vv" = (
@@ -8412,7 +8408,8 @@
 	},
 /obj/structure/railing/mapped,
 /obj/machinery/computer/ship/targeting/terminal{
-	dir = 1
+	dir = 1;
+	req_access = list(218)
 	},
 /turf/simulated/floor/carpet/rubber,
 /area/ship/kasf_corvette/starboardwep)
@@ -8537,7 +8534,8 @@
 	req_one_access = list(218)
 	},
 /obj/machinery/computer/shuttle_control/explore/terminal/kasf_shuttle{
-	dir = 8
+	dir = 8;
+	req_access = list(218)
 	},
 /turf/simulated/floor/tiled/dark,
 /area/shuttle/kasf_shuttle)
@@ -8635,7 +8633,7 @@
 /obj/machinery/vending/engivend{
 	req_access = null
 	},
-/obj/effect/floor_decal/industrial/outline/engineering,
+/obj/effect/floor_decal/industrial/outline/operations,
 /obj/machinery/light{
 	dir = 1
 	},
@@ -8720,7 +8718,7 @@
 /obj/machinery/atmospherics/pipe/simple/hidden/supply{
 	dir = 6
 	},
-/obj/structure/flora/pottedplant/orientaltree,
+/obj/structure/flora/pottedplant/cherrytree,
 /turf/simulated/floor/tiled,
 /area/ship/kasf_corvette/mainhall)
 "XU" = (

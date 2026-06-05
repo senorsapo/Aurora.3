@@ -24,31 +24,43 @@
 	holder_type = /obj/item/holder/diona
 	meat_type = /obj/item/reagent_containers/food/snacks/meat/dionanymph
 	meat_amount = 2
-	maxHealth = 50
+	maxhealth = 50
 	health = 50
+	max_stamina = -1
 	pass_flags = PASSTABLE
 
-	// Decorative head flower.
+	/// Decorative head flower colour.
 	var/flower_color
+	/// Decorative head flower sprite.
 	var/image/flower_image
 
+	/// Fashionable headwear the nymph may or may not be wearing.
 	var/obj/item/clothing/head/hat
 	var/datum/reagents/vessel
-	var/energy_duration = 144                 // The time in seconds that this diona can exist in total darkness before its energy runs out
-	var/dark_consciousness = 144              // How long this diona can stay on its feet and keep moving in darkness after energy is gone.
-	var/dark_survival = 216                   // How long this diona can survive in darkness after energy is gone, before it dies
+	/// The time in seconds that this diona can exist in total darkness before its energy runs out.
+	var/energy_duration = 144
+	/// How long this diona can stay on its feet and keep moving in darkness after energy is gone.
+	var/dark_consciousness = 144
+	/// How long this diona can survive in darkness after energy is gone, before it dies.
+	var/dark_survival = 216
 	var/datum/dionastats/DS
-	var/mob/living/carbon/gestalt = null      // If set, then this nymph is inside a gestalt
+	/// If set, then this nymph is inside a gestalt.
+	var/mob/living/carbon/gestalt = null
 	var/kept_clean = FALSE
 
-	var/mob/living/carbon/alien/diona/master_nymph //nymph who owns this nymph if split. AI diona nymphs will follow this nymph, and these nymphs can be controlled by the master.
-	var/list/mob/living/carbon/alien/diona/birds_of_feather = list() //list of all related nymphs
-	var/echo = FALSE //if it's an echo nymph, which has unique properties
+	/// Nymph who owns this nymph if split. AI diona nymphs will follow this nymph, and these nymphs can be controlled by the master.
+	var/mob/living/carbon/alien/diona/master_nymph
+	/// List of all related nymphs.
+	var/list/mob/living/carbon/alien/diona/birds_of_feather = list()
+	/// If it's an echo nymph, which has unique properties.
+	var/echo = FALSE
+	/// Whether or not the nymph is detached.
 	var/detached = FALSE
 
 	var/datum/reagents/metabolism/ingested
 
-	var/can_attach = TRUE // Whether they can attach to a host
+	/// Whether they can attach to a host.
+	var/can_attach = TRUE
 
 /mob/living/carbon/alien/diona/Initialize(var/mapload, var/flower_chance = 5)
 	if(prob(flower_chance))
@@ -79,7 +91,6 @@
 	ClearOverlays()
 
 	. = ..()
-	GC_TEMPORARY_HARDDEL
 
 /mob/living/carbon/alien/diona/get_ingested_reagents()
 	return ingested
@@ -97,7 +108,7 @@
 			mind.transfer_to(master_nymph)
 			master_nymph.stunned = 0//Switching mind seems to temporarily stun mobs
 			message_admins("\The [src] has died with nymphs remaining; player now controls [key_name_admin(master_nymph)]")
-			log_admin("\The [src] has died with nymphs remaining; player now controls [key_name(master_nymph)]", ckey=key_name(master_nymph))
+			log_admin("\The [src] has died with nymphs remaining; player now controls [key_name(master_nymph)]")
 		master_nymph = null
 		birds_of_feather.Cut()
 
@@ -125,7 +136,7 @@
 
 /mob/living/carbon/alien/diona/verb/check_light()
 	set category = "Abilities"
-	set name = "Check light level"
+	set name = "Check Light Level"
 
 	var/light = get_lightlevel_diona(DS)
 
@@ -227,7 +238,7 @@
 	DS = new/datum/dionastats()
 	DS.max_energy = energy_duration * MLS
 	DS.stored_energy = (DS.max_energy / 2)
-	DS.max_health = maxHealth
+	DS.max_health = maxhealth
 	DS.pain_factor = (50 / dark_consciousness) / MLS
 	DS.trauma_factor = (DS.max_health / dark_survival) / MLS
 	DS.dionatype = DIONA_NYMPH
@@ -239,7 +250,7 @@
 		var/mob/living/carbon/human/H = gestalt
 		if(!H.bad_internal_organs)
 			return
-		if(health < maxHealth)
+		if(health < maxhealth)
 			if (!(src in H.bad_internal_organs))
 				H.bad_internal_organs.Add(src)
 		else
@@ -376,4 +387,10 @@
 /mob/living/carbon/alien/diona/adjustBruteLoss(var/amount)
 	if (status_flags & GODMODE)
 		return
-	health = min(health - amount, maxHealth)
+	health = min(health - amount, maxhealth)
+
+/mob/living/carbon/alien/diona/getHalLoss()
+	if(status_flags & GODMODE)
+		return
+
+	return max((maxhealth - health), 0)

@@ -3,10 +3,11 @@
 	description = "Based on the Lammergeier-class corvette, this vessel has been repurposed by House Volvalaad for long range survey and scientific tasks. Due to its repurposement, the vessel features an enlarged hangar and shuttle, as well as scientific labs and a smaller defensive armament."
 
 	prefix = "ships/dominia/dominian_science_vessel/"
-	suffixes = list("dominian_science_vessel.dmm")
+	suffix = "dominian_science_vessel.dmm"
 
-	sectors = list(ALL_TAU_CETI_SECTORS, SECTOR_BADLANDS)
+	sectors = list(ALL_TAU_CETI_SECTORS, SECTOR_BADLANDS, SECTOR_VALLEY_HALE)
 	spawn_weight = 1
+	template_flags = TEMPLATE_FLAG_RUIN_STARTS_DISALLOWED // Disabled for debloating. Feel free to enable again if reworked or relevant.
 	ship_cost = 1
 	id = "dominian_science_vessel"
 	shuttles_to_initialise = list(/datum/shuttle/autodock/overmap/dominian_science_shuttle)

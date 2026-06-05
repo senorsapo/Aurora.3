@@ -3,7 +3,7 @@
 		return FALSE
 
 	if(user.incapacitated() || !user.Adjacent(src))
-		user << browse(null, text("window=mob[src.name]"))
+		user << browse(null, "window=mob[src.name]")
 		return FALSE
 
 	if(ishuman(user))
@@ -31,7 +31,7 @@
 			visible_message(SPAN_WARNING("\The [user] is taking a look at \the [src]'s air tank."))
 			if(do_after(user, HUMAN_STRIP_DELAY, src, do_flags = DO_EQUIP))
 				var/obj/item/tank/T = internal
-				to_chat(user, SPAN_NOTICE("\The [T] has [T.air_contents.return_pressure()] kPA left."))
+				to_chat(user, SPAN_NOTICE("\The [T] has [XGM_PRESSURE(T.air_contents)] kPA left."))
 				to_chat(user, SPAN_NOTICE("The [T] is set to release [T.distribute_pressure] kPA."))
 			return TRUE
 		if("pockets")
@@ -82,7 +82,7 @@
 				user.visible_message(SPAN_DANGER("\The [user] tears off \the [A] from [src]'s [suit.name]!"))
 			attack_log += "\[[time_stamp()]\] <font color='orange'>Has had \the [A] removed by [user.name] ([user.ckey])</font>"
 			user.attack_log += "\[[time_stamp()]\] <span class='warning'>Attempted to remove [name]'s ([ckey]) [A.name]</span>"
-			suit.remove_accessory(user, A)
+			suit.remove_accessory(src, A)
 			return 1
 
 	// Are we placing or stripping?
@@ -134,8 +134,8 @@
 	if (suit.has_sensor >= 2)
 		to_chat(user, SPAN_WARNING("\The [src]'s suit sensor controls are locked."))
 		return
-	attack_log += text("\[[time_stamp()]\] <font color='orange'>Has had their sensors toggled by [user.name] ([user.ckey])</font>")
-	user.attack_log += text("\[[time_stamp()]\] <span class='warning'>Attempted to toggle [name]'s ([ckey]) sensors</span>")
+	attack_log += "\[[time_stamp()]\] <font color='orange'>Has had their sensors toggled by [user.name] ([user.ckey])</font>"
+	user.attack_log += "\[[time_stamp()]\] <span class='warning'>Attempted to toggle [name]'s ([ckey]) sensors</span>"
 	suit.set_sensors(user)
 
 // Remove all splints.

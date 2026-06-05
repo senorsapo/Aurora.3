@@ -14,17 +14,17 @@
 	slot_flags = SLOT_BACK
 	req_one_access = list()
 	req_access = list()
-	w_class = ITEMSIZE_LARGE
+	w_class = WEIGHT_CLASS_BULKY
 
 	// These values are passed on to all component pieces.
 	armor = list(
-		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_MINOR,
-		laser = ARMOR_LASER_SMALL,
-		energy = ARMOR_ENERGY_MINOR,
-		bomb = ARMOR_BOMB_PADDED,
-		bio = ARMOR_BIO_SHIELDED,
-		rad = ARMOR_RAD_MINOR
+		MELEE = ARMOR_MELEE_RESISTANT,
+		BULLET = ARMOR_BALLISTIC_MINOR,
+		LASER = ARMOR_LASER_SMALL,
+		ENERGY = ARMOR_ENERGY_MINOR,
+		BOMB = ARMOR_BOMB_PADDED,
+		BIO = ARMOR_BIO_SHIELDED,
+		RAD = ARMOR_RAD_MINOR
 	)
 	min_cold_protection_temperature = SPACE_SUIT_MIN_COLD_PROTECTION_TEMPERATURE
 	max_heat_protection_temperature = SPACE_SUIT_MAX_HEAT_PROTECTION_TEMPERATURE
@@ -34,7 +34,7 @@
 	siemens_coefficient = 0.35
 	permeability_coefficient = 0.1
 	unacidable = 1
-	slowdown = 1 // All rigs by default should have slowdown.
+	slowdown = 0.5 // All rigs by default should have slowdown.
 
 	var/has_sealed_state = FALSE
 	var/has_hidden_jumpsuit = FALSE
@@ -88,7 +88,7 @@
 	var/seal_delay = SEAL_DELAY
 	var/sealing                                               // Keeps track of seal status independantly of canremove.
 	var/offline = 1                                           // Should we be applying suit maluses?
-	var/offline_slowdown = 3                                  // If the suit is deployed and unpowered, it sets slowdown to this.
+	var/offline_slowdown = 1.5                                  // If the suit is deployed and unpowered, it sets slowdown to this.
 	var/vision_restriction = TINT_NONE
 	var/offline_vision_restriction = TINT_HEAVY
 	var/airtight = 1 //If set, will adjust the ITEM_FLAG_AIRTIGHT flag on components. Otherwise it should leave them untouched.
@@ -159,7 +159,7 @@
 	for(var/obj/item/clothing/piece in list(gloves,helmet,boots,chest))
 		if(!istype(piece))
 			continue
-		piece.canremove = 0
+		piece.canremove = FALSE
 		piece.name = "[suit_type] [initial(piece.name)]"
 		piece.desc = "It seems to be part of a [src.name]."
 		piece.icon = icon
@@ -167,8 +167,7 @@
 		piece.item_state = "[initial(icon_state)]"
 		piece.contained_sprite = TRUE
 		if(length(icon_supported_species_tags))
-			piece.icon_auto_adapt = TRUE
-			piece.icon_supported_species_tags = icon_supported_species_tags
+			set_piece_adaptation(piece)
 		piece.min_cold_protection_temperature = min_cold_protection_temperature
 		piece.max_heat_protection_temperature = max_heat_protection_temperature
 		if(piece.siemens_coefficient > siemens_coefficient) //So that insulated gloves keep their insulation.
@@ -179,7 +178,7 @@
 		if(islist(armor))
 			var/datum/component/armor/armor_component = piece.GetComponent(/datum/component/armor)
 			if(istype(armor_component))
-				armor_component.RemoveComponent()
+				qdel(armor_component)
 			piece.AddComponent(/datum/component/armor, armor, ARMOR_TYPE_STANDARD|ARMOR_TYPE_RIG)
 
 	if(chest.flags_inv & HIDEJUMPSUIT)
@@ -188,6 +187,11 @@
 
 	set_vision(!offline)
 	update_icon(1)
+
+/// Sets the icon adaptation and species supported tags equal to parent, can be overriden for custom functionality
+/obj/item/rig/proc/set_piece_adaptation(var/obj/item/clothing/piece)
+	piece.icon_auto_adapt = TRUE
+	piece.icon_supported_species_tags = icon_supported_species_tags
 
 /obj/item/rig/Destroy()
 	for(var/obj/item/piece in list(gloves,boots,helmet,chest))
@@ -305,8 +309,7 @@
 					if(seal_delay && !instant && !do_after(wearer, seal_delay, src, do_flags = DO_DEFAULT & ~DO_USER_SAME_HAND))
 						failed_to_seal = 1
 
-					piece.icon_state = "[initial(icon_state)][!seal_target ? "_sealed" : ""]_[piece.clothing_class()]"
-					piece.item_state = "[initial(icon_state)][!seal_target ? "_sealed" : ""]"
+					update_sealed_piece_icon(piece, seal_target)
 					switch(msg_type)
 						if("boots")
 							to_chat(wearer, SPAN_NOTICE("\The [piece] [!seal_target ? "seal around your feet" : "relax their grip on your legs"]."))
@@ -379,6 +382,11 @@
 		initiator.loc.update_icon()
 	SSstatpanels.set_action_tabs(initiator.client, initiator)
 
+/// Sets the piece's icon and item state based on the seal target, can be overriden for custom functionality
+/obj/item/rig/proc/update_sealed_piece_icon(var/obj/item/clothing/piece, var/seal_target)
+	piece.icon_state = "[initial(icon_state)][!seal_target ? "_sealed" : ""]_[piece.clothing_class()]"
+	piece.item_state = "[initial(icon_state)][!seal_target ? "_sealed" : ""]"
+
 /obj/item/rig/proc/update_component_sealed()
 	for(var/obj/item/piece in list(helmet,boots,gloves,chest))
 		if(canremove)
@@ -392,7 +400,6 @@
 	update_icon(1)
 
 /obj/item/rig/process()
-
 	// If we've lost any parts, grab them back.
 	var/mob/living/M
 	for(var/obj/item/piece in list(gloves,boots,helmet,chest))
@@ -403,6 +410,7 @@
 			else
 				piece.forceMove(src)
 
+	var/previous_offline_status = offline
 	if(!istype(wearer) || loc != wearer || wearer.back != src || canremove || !cell || cell.charge <= 0)
 		if(!cell || cell.charge <= 0)
 			if(electrified > 0)
@@ -426,7 +434,12 @@
 			offline = 0
 			if(istype(wearer) && !wearer.wearing_rig)
 				wearer.wearing_rig = src
-			slowdown = initial(slowdown)
+			if(slowdown != initial(slowdown))
+				slowdown = initial(slowdown)
+				wearer?.update_equipment_speed_mods()
+
+	if(offline != previous_offline_status)
+		update_icon(TRUE)
 
 	set_vision(!offline)
 	if(offline)
@@ -435,7 +448,9 @@
 			for(var/obj/item/rig_module/module in installed_modules)
 				module.deactivate()
 			offline = 2
-			slowdown = offline_slowdown
+			if(slowdown != offline_slowdown)
+				slowdown = offline_slowdown
+				wearer?.update_equipment_speed_mods()
 		return
 
 	if(crushing)
@@ -597,18 +612,30 @@
 		return cell
 	return ..()
 
-/obj/item/rig/proc/check_suit_access(var/mob/living/carbon/human/user)
+/obj/item/rig/proc/is_integrated_rig_ai(var/mob/living/user)
+	if(!user)
+		return FALSE
+	for(var/obj/item/rig_module/ai_container/module in installed_modules)
+		if(module.integrated_ai == user)
+			return TRUE
+	return FALSE
+
+/obj/item/rig/proc/check_suit_access(var/mob/living/user)
 
 	if(!security_check_enabled || !locked)
 		return 1
 
-	if(istype(user))
-		if(malfunction_check(user))
+	if(is_integrated_rig_ai(user))
+		return 1
+
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+		if(malfunction_check(H))
 			return 0
-		if(user.back != src)
+		if(H.back != src)
 			return 0
-		else if(!src.allowed(user))
-			to_chat(user, SPAN_DANGER("Unauthorized user. Access denied."))
+		else if(!src.allowed(H))
+			to_chat(H, SPAN_DANGER("Unauthorized user. Access denied."))
 			return 0
 
 	else if(!ai_override_enabled)
@@ -746,6 +773,8 @@
 			if(check_slot && check_slot == use_obj)
 				return
 			use_obj.forceMove(wearer)
+			if(src.color)
+				use_obj.color = src.color
 			if(!wearer.equip_to_slot_if_possible(use_obj, equip_to, 0, 1))
 				use_obj.forceMove(src)
 				if(check_slot)
@@ -895,7 +924,7 @@
 			to_chat(wearer, SPAN_WARNING("The [source] has damaged your [dam_module.interface_name]!"))
 	dam_module.deactivate()
 
-/obj/item/rig/proc/malfunction_check(var/mob/living/carbon/human/user)
+/obj/item/rig/proc/malfunction_check(var/mob/living/user)
 	if(malfunction_delay)
 		if(offline)
 			to_chat(user, SPAN_DANGER("The suit is completely unresponsive."))
@@ -972,7 +1001,7 @@
 			wearer.inertia_dir = 0 //If not then we can reset inertia and move
 
 	if(malfunctioning)
-		direction = pick(GLOB.cardinal)
+		direction = pick(GLOB.cardinals)
 
 	// Inside an object, tell it we moved.
 	if(isobj(wearer.loc) || ismob(wearer.loc))

@@ -1,9 +1,6 @@
 # Folder Rules
 Database:
-- SQL/**
-
-'🗺️ Mapping - Aurora':
-- maps/aurora/**
+- '**/*.sql'
 
 '🗺️ Mapping - Away Ship/Away Site':
 - maps/away/**

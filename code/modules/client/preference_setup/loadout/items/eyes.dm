@@ -48,7 +48,7 @@
 	display_name = "flash-proof sunglasses selection (Security/Command)"
 	description = "A selection of flash-proof sunglasses."
 	path = /obj/item/clothing/glasses/sunglasses
-	allowed_roles = list("Security Officer", "Head of Security", "Warden", "Captain", "Executive Officer", "Operations Manager", "Investigator", "Bridge Crew", "Security Personnel")
+	allowed_roles = list("Consular Officer", "Corporate Liaison", "Diplomatic Aide", "Diplomatic Bodyguard", "Security Officer", "Head of Security", "Warden", "Captain", "Executive Officer", "Operations Manager", "Investigator", "Bridge Crew", "Security Personnel")
 
 /datum/gear/eyes/sunglasses/New()
 	..()
@@ -79,7 +79,7 @@
 	display_name = "medical HUD selection"
 	description = "A selection of medical HUDs."
 	path = /obj/item/clothing/glasses/hud/health/aviator
-	allowed_roles = list("Physician", "Surgeon", "Chief Medical Officer", "Pharmacist", "First Responder", "Psychiatrist", "Medical Intern", "Medical Personnel")
+	allowed_roles = list("Physician", "Surgeon", "Chief Medical Officer", "Pharmacist", "Paramedic", "Psychiatrist", "Medical Intern", "Medical Personnel")
 
 /datum/gear/eyes/medhuds/New()
 	..()
@@ -158,7 +158,7 @@
 	display_name = "HUD goggles selection (medical)"
 	description = "A selection of medical goggles. Note that factional ones can only be taken by members of that faction."
 	path = /obj/item/clothing/glasses/safety/goggles/medical
-	allowed_roles = list("First Responder", "Medical Personnel")
+	allowed_roles = list("Paramedic", "Medical Personnel")
 
 /datum/gear/eyes/medical_goggles/New()
 	..()

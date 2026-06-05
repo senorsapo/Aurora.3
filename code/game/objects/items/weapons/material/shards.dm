@@ -9,7 +9,7 @@
 	sharp = 1
 	edge = TRUE
 	recyclable = TRUE
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	force_divisor = 0.2 // 6 with hardness 30 (glass)
 	thrown_force_divisor = 0.4 // 4 with weight 15 (glass)
 	item_state = "shard-glass"
@@ -20,9 +20,14 @@
 	drop_sound = 'sound/effects/glass_step.ogg'
 	surgerysound = 'sound/items/surgery/scalpel.ogg'
 
-/obj/item/material/shard/Destroy()
+/obj/item/material/shard/Initialize(newloc, material_key)
 	. = ..()
-	GC_TEMPORARY_HARDDEL
+
+	var/static/list/loc_connections = list(
+		COMSIG_ATOM_ENTERED = PROC_REF(on_entered),
+	)
+
+	AddElement(/datum/element/connect_loc, loc_connections)
 
 /obj/item/material/shard/set_material(var/new_material)
 	..(new_material)
@@ -55,7 +60,7 @@
 		alpha = 255
 
 /obj/item/material/shard/attackby(obj/item/attacking_item, mob/user as mob)
-	if(attacking_item.iswelder() && material.shard_can_repair)
+	if(attacking_item.tool_behaviour == TOOL_WELDER && material.shard_can_repair)
 		var/obj/item/weldingtool/WT = attacking_item
 		if(WT.use(0, user))
 			material.place_sheet(user.loc)
@@ -63,10 +68,9 @@
 			return
 	return ..()
 
-/obj/item/material/shard/Crossed(AM as mob|obj)
-	..()
-	if(isliving(AM))
-		var/mob/M = AM
+/obj/item/material/shard/proc/on_entered(datum/source, atom/movable/arrived, atom/old_loc, list/atom/old_locs)
+	if(isliving(arrived))
+		var/mob/M = arrived
 
 		if(M.buckled_to) //wheelchairs, office chairs, rollerbeds
 			return

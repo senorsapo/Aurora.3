@@ -9,12 +9,12 @@
 
 /obj/structure/easel/Initialize(ml, _mat, _reinf_mat)
 	. = ..()
-	GLOB.moved_event.register(src, src, PROC_REF(move_painting))
+	RegisterSignal(src, COMSIG_MOVABLE_MOVED, PROC_REF(move_painting))
 	material = SSmaterials.get_material_by_name(MATERIAL_WOOD)
 
 /obj/structure/easel/Destroy()
 	painting = null
-	GLOB.moved_event.unregister(src, src, PROC_REF(move_painting))
+	UnregisterSignal(src, COMSIG_MOVABLE_MOVED)
 	return ..()
 
 /*
@@ -32,7 +32,7 @@
 			C.pixel_z = 0
 			user.visible_message("<b>[user]</b> puts \the [C] on \the [src].", SPAN_NOTICE("You place \the [C] on \the [src]."))
 		return TRUE
-	if(attacking_item.iswrench())
+	if(attacking_item.tool_behaviour == TOOL_WRENCH)
 		to_chat(user, SPAN_NOTICE("You dismantle \the [src]."))
 		dismantle()
 		return TRUE

@@ -8,14 +8,13 @@
 	template_flags = TEMPLATE_FLAG_NO_RUINS|TEMPLATE_FLAG_RUIN_STARTS_DISALLOWED
 	sectors = list(SECTOR_UUEOAESA)
 	prefix = "moghes/"
-	suffixes = list("moghes_wasteland_priests.dmm")
+	suffix = "moghes_wasteland_priests.dmm"
 	unit_test_groups = list(2)
 
 /area/moghes_wasteland_priests
 	name = "Moghes - Sk'akh Wasteland Outpost"
 	icon_state = "bluenew"
 	requires_power = FALSE
-	dynamic_lighting = TRUE
 	no_light_control = FALSE
 	base_turf = /turf/simulated/floor/exoplanet/desert
 	area_flags = AREA_FLAG_RAD_SHIELDED|AREA_FLAG_INDESTRUCTIBLE_TURFS
@@ -42,9 +41,12 @@
 
 /datum/ghostspawner/human/moghes_wasteland_priest/guard
 	name = "Sk'akh Wasteland Guard"
+	short_name = "moghes_wasteland_guard"
 	desc = "Protect a Sk'akh Church medical station in the Wasteland. Keep the priestesses and patients alive."
 	welcome_message = "You are a warrior, guarding a Sk'akh Church medical station in the Wasteland - whether out of religious devotion or simple pragmatism. Do the best that you can to keep the priestesses alive and the outpost intact."
 	uses_species_whitelist = FALSE
+	max_count = 2
+	spawnpoints = list("moghes_wasteland_guard")
 
 	assigned_role = "Guard"
 	special_role = "Guard"

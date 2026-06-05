@@ -13,8 +13,8 @@
 	origin_tech = list(TECH_COMBAT = 3, TECH_MATERIAL = 4, TECH_POWER = 3, TECH_MAGNET = 2)
 	slot_flags = SLOT_BELT|SLOT_BACK
 
-	projectile_type = /obj/item/projectile/temp
-	can_turret = 1
+	projectile_type = /obj/projectile/temp
+	can_turret = TRUE
 	turret_sprite_set = "temperature"
 
 	cell_type = /obj/item/cell/crap //WAS High, but brought down to match energy use

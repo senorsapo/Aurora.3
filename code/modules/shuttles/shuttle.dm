@@ -35,6 +35,7 @@
 	var/motherdock    //tag of mothershuttle landmark, defaults to starting location
 
 	var/squishes = TRUE //decides whether or not things get squished when it moves.
+	var/cargo_elevator = FALSE // Snowflake variable for the cargo elevator. Decides whether you will take fall damage or not
 
 /datum/shuttle/New(_name, var/obj/effect/shuttle_landmark/initial_location)
 	..()
@@ -191,7 +192,7 @@
 
 	for(var/turf/src_turf in turf_translation)
 		var/turf/dst_turf = turf_translation[src_turf]
-		if(squishes && src_turf.is_solid_structure()) //in case someone put a hole in the shuttle and you were lucky enough to be under it
+		if((squishes || cargo_elevator) && src_turf.is_solid_structure()) //in case someone put a hole in the shuttle and you were lucky enough to be under it
 			for(var/atom/movable/AM in dst_turf)
 				if(AM.movable_flags & MOVABLE_FLAG_DEL_SHUTTLE)
 					qdel(AM)
@@ -199,16 +200,27 @@
 				if(!AM.simulated)
 					continue
 				if(isliving(AM))
-					var/mob/living/bug = AM
-					bug.gib()
+					var/mob/living/safety_hater = AM
+					if(squishes)
+						safety_hater.gib()
+					else if(cargo_elevator)
+						safety_hater.visible_message(
+							SPAN_WARNING("[safety_hater] falls down the cargo elevator hatch!"),
+							SPAN_WARNING("You fall down the cargo elevator hatch!")
+						)
+						shake_camera(safety_hater, 10, 1)
+						safety_hater.fall_impact(1)
+						safety_hater.apply_damage(20, DAMAGE_PAIN)
 				else
-					qdel(AM) //it just gets atomized I guess? TODO throw it into space somewhere, prevents people from using shuttles as an atom-smasher
+					if(squishes)
+						qdel(AM) //it just gets atomized I guess? TODO throw it into space somewhere, prevents people from using shuttles as an atom-smasher
 	var/list/powernets = list()
 	for(var/area/A in shuttle_area)
 		// if there was a zlevel above our origin, erase our ceiling now we're leaving
-		if(HasAbove(current_location.z))
+		var/turf/T = get_turf(current_location)
+		if(GET_TURF_ABOVE(T))
 			for(var/turf/TO in A.contents)
-				var/turf/TA = GetAbove(TO)
+				var/turf/TA = GET_TURF_ABOVE(TO)
 				if(istype(TA, ceiling_type))
 					TA.ChangeTurf(get_base_turf_by_area(TA), 1, 1)
 		if(knockdown)
@@ -236,28 +248,21 @@
 	current_location = destination
 
 	// if there's a zlevel above our destination, paint in a ceiling on it so we retain our air
-	if(HasAbove(current_location.z))
+	var/turf/T = get_turf(current_location)
+	if(GET_TURF_ABOVE(T))
 		for(var/area/A in shuttle_area)
 			for(var/turf/TD in A.contents)
 				TD.update_above()
 				TD.update_icon()
-				var/turf/TA = GetAbove(TD)
+				var/turf/TA = GET_TURF_ABOVE(TD)
 				if(istype(TA, get_base_turf_by_area(TA)) || (istype(TA) && TA.is_open()))
 					if(get_area(TA) in shuttle_area)
 						continue
 					TA.ChangeTurf(ceiling_type, TRUE, TRUE, TRUE)
 
 	for(var/area/sub_area in shuttle_area)
-		for(var/obj/structure/shuttle_part/part in sub_area)
-			var/turf/target_turf = get_turf(part)
-			if(part.outside_part)
-				target_turf.ChangeTurf(destination.base_turf)
-		for(var/obj/structure/window/shuttle/unique/SW in sub_area)
-			if(SW.outside_window)
-				var/turf/target_turf = get_turf(SW)
-				target_turf.ChangeTurf(destination.base_turf)
-		for(var/obj/effect/energy_field/ef in sub_area)
-			qdel(ef)
+		for(var/atom/movable/movable in sub_area)
+			movable.afterShuttleMove(destination)
 
 	// Remove all powernets that were affected, and rebuild them.
 	var/list/cables = list()

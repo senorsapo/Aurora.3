@@ -1,7 +1,7 @@
-var/list/localhost_addresses = list(
+GLOBAL_LIST_INIT(localhost_addresses, list(
 	"127.0.0.1" = TRUE,
 	"::1" = TRUE
-)
+))
 
 	////////////
 	//SECURITY//
@@ -25,7 +25,8 @@ var/list/localhost_addresses = list(
 	If you have any  questions about this stuff feel free to ask. ~Carn
 	*/
 
-/client/Topic(href, href_list, hsrc)
+//the undocumented 4th argument is for ?[0x\ref] style topic links. hsrc is set to the reference and anything after the ] gets put into hsrc_command
+/client/Topic(href, href_list, hsrc, hsrc_command)
 	if(!usr || usr != mob)	//stops us calling Topic for somebody else's client. Also helps prevent usr=null
 		return
 
@@ -144,13 +145,13 @@ var/list/localhost_addresses = list(
 
 		var/request_id = text2num(href_list["linkingrequest"])
 
-		if (!establish_db_connection(GLOB.dbcon))
+		if (!SSdbcore.Connect())
 			to_chat(src, SPAN_WARNING("Action failed! Database link could not be established!"))
 			return
 
 
-		var/DBQuery/check_query = GLOB.dbcon.NewQuery("SELECT player_ckey, status FROM ss13_player_linking WHERE id = :id:")
-		check_query.Execute(list("id" = request_id))
+		var/datum/db_query/check_query = SSdbcore.NewQuery("SELECT player_ckey, status FROM ss13_player_linking WHERE id = :id",list("id" = request_id))
+		check_query.Execute()
 
 		if (!check_query.NextRow())
 			to_chat(src, SPAN_WARNING("No request found!"))
@@ -160,18 +161,20 @@ var/list/localhost_addresses = list(
 			to_chat(src, SPAN_WARNING("Request authentication failed!"))
 			return
 
+		qdel(check_query)
+
 		var/query_contents = ""
 		var/list/query_details = list("new_status", "id")
 		var/feedback_message = ""
 		switch (href_list["linkingaction"])
 			if ("accept")
-				query_contents = "UPDATE ss13_player_linking SET status = :new_status:, updated_at = NOW() WHERE id = :id:"
+				query_contents = "UPDATE ss13_player_linking SET status = :new_status, updated_at = NOW() WHERE id = :id"
 				query_details["new_status"] = "confirmed"
 				query_details["id"] = request_id
 
 				feedback_message = SPAN_DANGER("<b>Account successfully linked!</b>")
 			if ("deny")
-				query_contents = "UPDATE ss13_player_linking SET status = :new_status:, deleted_at = NOW() WHERE id = :id:"
+				query_contents = "UPDATE ss13_player_linking SET status = :new_status, deleted_at = NOW() WHERE id = :id"
 				query_details["new_status"] = "rejected"
 				query_details["id"] = request_id
 
@@ -180,8 +183,9 @@ var/list/localhost_addresses = list(
 				to_chat(src, SPAN_WARNING("Invalid command sent."))
 				return
 
-		var/DBQuery/update_query = GLOB.dbcon.NewQuery(query_contents)
-		update_query.Execute(query_details)
+		var/datum/db_query/update_query = SSdbcore.NewQuery(query_contents,query_details)
+		update_query.Execute()
+		qdel(update_query)
 
 		if (href_list["linkingaction"] == "accept" && alert("To complete the process, you have to visit the website. Do you want to do so now?",,"Yes","No") == "Yes")
 			process_webint_link("interface/user/link")
@@ -257,7 +261,16 @@ var/list/localhost_addresses = list(
 		if(QDELETED(real_src))
 			return
 
+	//fun fact: Topic() acts like a verb and is executed at the end of the tick like other verbs. So we have to queue it if the server is
+	//overloaded
+	if(hsrc && hsrc != holder && DEFAULT_TRY_QUEUE_VERB(VERB_CALLBACK(src, PROC_REF(_Topic), hsrc, href, href_list)))
+		return
 	..()	//redirect to hsrc.Topic()
+
+///dumb workaround because byond doesnt seem to recognize the Topic() typepath for /datum/proc/Topic() from the client Topic,
+///so we cant queue it without this
+/client/proc/_Topic(datum/hsrc, href, list/href_list)
+	return hsrc.Topic(href, href_list)
 
 /proc/client_by_ckey(ckey)
 	return GLOB.directory[ckey]
@@ -373,6 +386,11 @@ var/list/localhost_addresses = list(
 	tgui_panel = new(src, "browseroutput")
 	tgui_say = new(src, "tgui_say")
 
+	// Forcibly enable hardware-accelerated graphics, as we need them for the lighting overlays.
+	winset(src, null, "command=\".configure graphics-hwmode on\"")
+
+	winset(src, "map", "style=\"[MAP_STYLESHEET]\"")
+
 	if(IsGuestKey(key) && GLOB.config.external_auth)
 		src.authed = FALSE
 		var/mob/abstract/unauthed/m = new()
@@ -385,39 +403,25 @@ var/list/localhost_addresses = list(
 		. = ..()
 		src.InitClient()
 		src.InitPrefs()
+		src.InitUI()
 		mob.LateLogin()
-
-	// Initialize stat panel
-	stat_panel.initialize(
-		inline_html = file("html/statbrowser.html"),
-		inline_js = file("html/statbrowser.js"),
-		inline_css = file("html/statbrowser.css"),
-	)
-	addtimer(CALLBACK(src, PROC_REF(check_panel_loaded)), 30 SECONDS)
-
-	// Initialize tgui panel
-	tgui_panel.initialize()
-
-	tgui_say.initialize()
-
-	// Forcibly enable hardware-accelerated graphics, as we need them for the lighting overlays.
-	winset(src, null, "command=\".configure graphics-hwmode on\"")
 
 	send_resources()
 
 	if(!winexists(src, "asset_cache_browser")) // The client is using a custom skin, tell them.
-		to_chat(src, SPAN_WARNING("Unable to access asset cache browser, if you are using a custom skin file, please allow DS to download the updated version, if you are not, then make a bug report. This is not a critical issue but can cause issues with resource downloading, as it is impossible to know when extra resources arrived to you."))
+		to_chat_immediate(src, SPAN_WARNING("Unable to access asset cache browser, if you are using a custom skin file, please allow DS to download the updated version, if you are not, then make a bug report. This is not a critical issue but can cause issues with resource downloading, as it is impossible to know when extra resources arrived to you."))
 
 	Master.UpdateTickRate()
+	fully_created = TRUE
 
 /client/proc/InitPrefs()
 	SHOULD_NOT_SLEEP(TRUE)
 
 	//preferences datum - also holds some persistant data for the client (because we may as well keep these datums to a minimum)
-	prefs = preferences_datums[ckey]
+	prefs = GLOB.preferences_datums[ckey]
 	if(!prefs)
 		prefs = new /datum/preferences(src)
-		preferences_datums[ckey] = prefs
+		GLOB.preferences_datums[ckey] = prefs
 
 		prefs.gather_notifications(src)
 	prefs.client = src					// Safety reasons here.
@@ -427,14 +431,32 @@ var/list/localhost_addresses = list(
 		fps = prefs.clientfps
 
 	if(prefs.toggles_secondary & FULLSCREEN_MODE)
-		toggle_fullscreen(TRUE)
+		addtimer(CALLBACK(src, VERB_REF(toggle_fullscreen), 1 SECONDS))
+
+	if(prefs.toggles_secondary & CLIENT_PREFERENCE_HIDE_MENU)
+		addtimer(CALLBACK(src, VERB_REF(toggle_menu), 1 SECONDS))
+
+/client/proc/InitUI()
+	INVOKE_ASYNC(src, PROC_REF(acquire_dpi))
+
+	// Initialize tgui panel
+	tgui_panel.initialize()
+	tgui_say.initialize()
+
+	// Initialize stat panel
+	stat_panel.initialize(
+		inline_html = file("html/statbrowser.html"),
+		inline_js = file("html/statbrowser.js"),
+		inline_css = file("html/statbrowser.css"),
+	)
+	addtimer(CALLBACK(src, PROC_REF(check_panel_loaded)), 30 SECONDS)
 
 /client/proc/InitClient()
 	SHOULD_NOT_SLEEP(TRUE)
 
 	to_chat_immediate(src, SPAN_ALERT("If the title screen is black, resources are still downloading. Please be patient until the title screen appears."))
 
-	var/local_connection = (GLOB.config.auto_local_admin && !GLOB.config.use_forumuser_api && (isnull(address) || localhost_addresses[address]))
+	var/local_connection = (GLOB.config.auto_local_admin && !GLOB.config.use_authentik_api && (isnull(address) || GLOB.localhost_addresses[address]))
 	// Automatic admin rights for people connecting locally.
 	// Concept stolen from /tg/ with deepest gratitude.
 	// And ported from Nebula with love.
@@ -465,7 +487,7 @@ var/list/localhost_addresses = list(
 	// New player, and we don't want any.
 	if (!holder)
 		if (GLOB.config.access_deny_new_players && player_age == -1)
-			log_access("Failed Login: [key] [computer_id] [address] - New player attempting connection during panic bunker.", ckey = ckey)
+			log_access("Failed Login: [key] [computer_id] [address] - New player attempting connection during panic bunker.")
 			message_admins("Failed Login: [key] [computer_id] [address] - New player attempting connection during panic bunker.")
 			to_chat_immediate(src, SPAN_DANGER("Apologies, but the server is currently not accepting connections from never before seen players."))
 			del(src)
@@ -473,7 +495,7 @@ var/list/localhost_addresses = list(
 
 		// Check if the account is too young.
 		if (GLOB.config.access_deny_new_accounts != -1 && account_age != -1 && account_age <= GLOB.config.access_deny_new_accounts)
-			log_access("Failed Login: [key] [computer_id] [address] - Account too young to play. [account_age] days.", ckey = ckey)
+			log_access("Failed Login: [key] [computer_id] [address] - Account too young to play. [account_age] days.")
 			message_admins("Failed Login: [key] [computer_id] [address] - Account too young to play. [account_age] days.")
 			to_chat_immediate(src, SPAN_DANGER("Apologies, but the server is currently not accepting connections from BYOND accounts this young."))
 			del(src)
@@ -512,6 +534,9 @@ var/list/localhost_addresses = list(
 		holder.owner = null
 		GLOB.staff -= src
 
+	if(mob)
+		mob.clear_important_client_contents()
+
 	SSping.currentrun -= src
 
 	QDEL_NULL(tooltips)
@@ -520,21 +545,35 @@ var/list/localhost_addresses = list(
 	..() //Even though we're going to be hard deleted there are still some things that want to know the destroy is happening
 	return QDEL_HINT_HARDDEL_NOW
 
-// here because it's similar to below
 
-// Returns null if no DB connection can be established, or -1 if the requested key was not found in the database
+/**
+ * Ensures whitelist_status is populated from the database.
+ *
+ * Idempotent: returns immediately if already loaded.
+ * Called by log_client_to_db() as part of the full player record fetch,
+ * and by the loadout sanitization to block until the status is available.
+ */
+/client/proc/load_whitelist_status()
+	if (whitelist_status_loaded)
+		return
 
-/proc/get_player_age(key)
-	if(!establish_db_connection(GLOB.dbcon))
-		return null
+	if (IsGuestKey(key) || !GLOB.config.sql_whitelists)
+		whitelist_status_loaded = TRUE
+		return
 
-	var/DBQuery/query = GLOB.dbcon.NewQuery("SELECT datediff(Now(),firstseen) as age FROM ss13_player WHERE ckey = :ckey:")
-	query.Execute(list("ckey"=ckey(key)))
+	var/datum/db_query/query = SSdbcore.NewQuery(
+		"SELECT whitelist_status FROM ss13_player WHERE ckey = :ckey",
+		list("ckey" = ckey(key))
+	)
+	if (!query.Execute())
+		qdel(query)
+		whitelist_status_loaded = TRUE
+		return
 
-	if(query.NextRow())
-		return text2num(query.item[1])
-	else
-		return -1
+	if (query.NextRow())
+		whitelist_status = text2num(query.item[1])
+	qdel(query)
+	whitelist_status_loaded = TRUE
 
 /client/proc/log_client_to_db()
 	set waitfor = FALSE
@@ -542,16 +581,17 @@ var/list/localhost_addresses = list(
 	if (IsGuestKey(src.key))
 		return
 
-	if(!establish_db_connection(GLOB.dbcon))
-		return
-
-	var/DBQuery/query = GLOB.dbcon.NewQuery("SELECT datediff(Now(),firstseen) as age, whitelist_status, account_join_date, DATEDIFF(NOW(), account_join_date) FROM ss13_player WHERE ckey = :ckey:")
-
-	if(!query.Execute(list("ckey"=ckey(key))))
+	// --- Main player record lookup ---
+	var/datum/db_query/query = SSdbcore.NewQuery(
+		"SELECT datediff(Now(),firstseen), whitelist_status, account_join_date, DATEDIFF(NOW(), account_join_date), ckey_is_external FROM ss13_player WHERE ckey = :ckey",
+		list("ckey" = ckey(key))
+	)
+	if (!query.Execute())
+		qdel(query)
 		return
 
 	var/found = 0
-	player_age = 0	// New players won't have an entry so knowing we have a connection we set this to zero to be updated if their is a record.
+	player_age = 0 // New players won't have an entry; zero signals we have a connection but no record yet.
 
 	if (query.NextRow())
 		found = 1
@@ -559,45 +599,87 @@ var/list/localhost_addresses = list(
 		whitelist_status = text2num(query.item[2])
 		account_join_date = query.item[3]
 		account_age = text2num(query.item[4])
+		ckey_is_external = !!text2num(query.item[5])
 		if (!account_age)
-			account_join_date = sanitizeSQL(findJoinDate())
+			account_join_date = findJoinDate()
 			if (!account_join_date)
 				account_age = -1
 			else
-				var/DBQuery/query_datediff = GLOB.dbcon.NewQuery("SELECT DATEDIFF(NOW(), [account_join_date])")
+				var/datum/db_query/query_datediff = SSdbcore.NewQuery(
+					"SELECT DATEDIFF(NOW(), :join_date)",
+					list("join_date" = account_join_date)
+				)
 				if (!query_datediff.Execute())
+					qdel(query)
+					qdel(query_datediff)
 					return
 				if (query_datediff.NextRow())
 					account_age = text2num(query_datediff.item[1])
+				qdel(query_datediff)
+	qdel(query)
+	whitelist_status_loaded = TRUE
 
-	var/DBQuery/query_ip = GLOB.dbcon.NewQuery("SELECT ckey FROM ss13_player WHERE ip = '[address]'")
+	// --- Related account lookups ---
+	var/datum/db_query/query_ip = SSdbcore.NewQuery(
+		"SELECT ckey FROM ss13_player WHERE ip = :ip",
+		list("ip" = address)
+	)
 	query_ip.Execute()
 	related_accounts_ip = ""
-	while(query_ip.NextRow())
-		related_accounts_ip += "[query_ip.item[1]], "
-		break
+	if (query_ip.NextRow())
+		related_accounts_ip = "[query_ip.item[1]], "
+	qdel(query_ip)
 
-	var/DBQuery/query_cid = GLOB.dbcon.NewQuery("SELECT ckey FROM ss13_player WHERE computerid = '[computer_id]'")
+	var/datum/db_query/query_cid = SSdbcore.NewQuery(
+		"SELECT ckey FROM ss13_player WHERE computerid = :computerid",
+		list("computerid" = computer_id)
+	)
 	query_cid.Execute()
 	related_accounts_cid = ""
-	while(query_cid.NextRow())
-		related_accounts_cid += "[query_cid.item[1]], "
-		break
+	if (query_cid.NextRow())
+		related_accounts_cid = "[query_cid.item[1]], "
+	qdel(query_cid)
 
+	// --- Write ---
 	var/admin_rank = "Player"
-	if(src.holder)
+	if (src.holder)
 		admin_rank = src.holder.rank
 
-	if(found)
-		//Player already identified previously, we need to just update the 'lastseen', 'ip', 'computer_id', 'byond_version' and 'byond_build' variables
-		var/DBQuery/query_update = GLOB.dbcon.NewQuery("UPDATE ss13_player SET lastseen = Now(), ip = :ip:, computerid = :computerid:, lastadminrank = :lastadminrank:, account_join_date = :account_join_date:, byond_version = :byond_version:, byond_build = :byond_build: WHERE ckey = :ckey:")
-		query_update.Execute(list("ckey"=ckey(key),"ip"=src.address,"computerid"=src.computer_id,"lastadminrank"=admin_rank,"account_join_date"=account_join_date,"byond_version"=byond_version,"byond_build"=byond_build))
+	if (found)
+		var/datum/db_query/query_update = SSdbcore.NewQuery(
+			"UPDATE ss13_player SET lastseen = Now(), ip = :ip, computerid = :computerid, lastadminrank = :lastadminrank, account_join_date = :account_join_date, byond_version = :byond_version, byond_build = :byond_build WHERE ckey = :ckey",
+			list(
+				"ckey" = ckey(key),
+				"ip" = src.address,
+				"computerid" = src.computer_id,
+				"lastadminrank" = admin_rank,
+				"account_join_date" = account_join_date,
+				"byond_version" = byond_version,
+				"byond_build" = byond_build,
+			)
+		)
+		query_update.SetSuccessCallback(CALLBACK(GLOBAL_PROC, /proc/qdel))
+		query_update.SetFailCallback(CALLBACK(GLOBAL_PROC, /proc/qdel))
+		query_update.Execute()
 	else if (!GLOB.config.access_deny_new_players)
-		//New player!! Need to insert all the stuff
-		var/DBQuery/query_insert = GLOB.dbcon.NewQuery("INSERT INTO ss13_player (ckey, firstseen, lastseen, ip, computerid, lastadminrank, account_join_date, byond_version, byond_build) VALUES (:ckey:, Now(), Now(), :ip:, :computerid:, :lastadminrank:, :account_join_date:, :byond_version:, :byond_build:)")
-		query_insert.Execute(list("ckey"=ckey(key),"ip"=src.address,"computerid"=src.computer_id,"lastadminrank"=admin_rank,"account_join_date"=account_join_date,"byond_version"=byond_version,"byond_build"=byond_build))
+		var/datum/db_query/query_insert = SSdbcore.NewQuery(
+			"INSERT INTO ss13_player (ckey, ckey_is_external, firstseen, lastseen, ip, computerid, lastadminrank, account_join_date, byond_version, byond_build) VALUES (:ckey, :ckey_is_external, Now(), Now(), :ip, :computerid, :lastadminrank, :account_join_date, :byond_version, :byond_build)",
+			list(
+				"ckey" = ckey(key),
+				"ckey_is_external" = src.ckey_is_external,
+				"ip" = src.address,
+				"computerid" = src.computer_id,
+				"lastadminrank" = admin_rank,
+				"account_join_date" = account_join_date,
+				"byond_version" = byond_version,
+				"byond_build" = byond_build,
+			)
+		)
+		query_insert.SetSuccessCallback(CALLBACK(GLOBAL_PROC, /proc/qdel))
+		query_insert.SetFailCallback(CALLBACK(GLOBAL_PROC, /proc/qdel))
+		query_insert.Execute()
 	else
-		// Flag as -1 to know we have to kiiick them.
+		// Flag as -1 to signal this player must be kicked (new players denied).
 		player_age = -1
 
 	if (!account_join_date)
@@ -619,7 +701,7 @@ var/list/localhost_addresses = list(
 	var/static/next_external_rsc = 0
 	var/list/external_rsc_urls = GLOB.config.external_rsc_urls
 	if(length(external_rsc_urls))
-		next_external_rsc = Wrap(next_external_rsc+1, 1, external_rsc_urls.len+1)
+		next_external_rsc = WRAP(next_external_rsc+1, 1, external_rsc_urls.len+1)
 		preload_rsc = external_rsc_urls[next_external_rsc]
 #endif
 
@@ -639,27 +721,38 @@ var/list/localhost_addresses = list(
 	if(mob)
 		return mob.MayRespawn()
 
-	// Something went wrong, client is usually kicked or transfered to a new mob at this point
+	// Something went wrong, client is usually kicked or transferred to a new mob at this point
 	return 0
 
 /client/verb/character_setup()
 	set name = "Character Setup"
-	set category = "Preferences"
+	set category = "Preferences.Character"
 	if(prefs)
 		prefs.ShowChoices(usr)
 
 /client/verb/toggle_fullscreen_preference()
 	set name = "Toggle Fullscreen Preference"
-	set category = "Preferences"
+	set category = "Preferences.Menu"
 	set desc = "Toggles whether the game window will be true fullscreen or normal."
 
 	prefs.toggles_secondary ^= FULLSCREEN_MODE
 	prefs.save_preferences()
-	toggle_fullscreen(prefs.toggles_secondary & FULLSCREEN_MODE)
+	if(prefs.toggles_secondary & FULLSCREEN_MODE)
+		toggle_fullscreen()
+
+/client/verb/toggle_hide_menu_preference()
+	set name = "Toggle Hide Menu Preference"
+	set category = "Preferences.Menu"
+	set desc = "Toggles whether the game window will have the top menu bar hidden or not."
+
+	prefs.toggles_secondary ^= CLIENT_PREFERENCE_HIDE_MENU
+	prefs.save_preferences()
+	if(prefs.toggles_secondary & CLIENT_PREFERENCE_HIDE_MENU)
+		toggle_menu()
 
 /client/verb/toggle_accent_tag_text()
 	set name = "Toggle Accent Tag Text"
-	set category = "Preferences"
+	set category = "Preferences.Game"
 	set desc = "Toggles whether accents will be shown as text or images.."
 
 	to_chat(usr, SPAN_NOTICE("You toggle the accent tag text [(prefs?.toggles_secondary & ACCENT_TAG_TEXT) ? "off" : "on"]."))
@@ -667,14 +760,34 @@ var/list/localhost_addresses = list(
 	prefs.toggles_secondary ^= ACCENT_TAG_TEXT
 	prefs.save_preferences()
 
-/client/proc/toggle_fullscreen(new_value)
-	if(new_value)
-		winset(src, "mainwindow", "is-maximized=false;can-resize=false;titlebar=false;menu=menu")
-		winset(src, "mainwindow.mainvsplit", "pos=0x0")
+/client/verb/toggle_fullscreen()
+	set name = "Toggle Fullscreen"
+	set category = "Preferences.Menu"
+
+	fullscreen = !fullscreen
+
+	winset(src, "mainwindow", "menu=[fullscreen ? "" : "menu"];is-fullscreen=[fullscreen ? "true" : "false"];titlebar=[fullscreen ? "false" : "true"]")
+	attempt_auto_fit_viewport()
+
+/client/verb/toggle_status_bar()
+	set name = "Toggle Status Bar"
+	set category = "Preferences.Menu"
+
+	show_status_bar = !show_status_bar
+
+	if (show_status_bar)
+		winset(src, "mapwindow.status_bar", "is-visible=true")
 	else
-		winset(src, "mainwindow", "is-maximized=false;can-resize=true;titlebar=true;menu=menu")
-		winset(src, "mainwindow.mainvsplit", "pos=3x0")
-	winset(src, "mainwindow", "is-maximized=true")
+		winset(src, "mapwindow.status_bar", "is-visible=false")
+
+/client/verb/toggle_menu()
+	set name = "Toggle Menu"
+	set category = "Preferences.Menu"
+
+	var/has_menu = winget(src, "mainwindow", "menu")
+
+	winset(src, "mainwindow", "menu=[has_menu ? "" : "menu"]")
+	attempt_auto_fit_viewport()
 
 /client/proc/apply_fps(var/client_fps)
 	if(world.byond_version >= 511 && byond_version >= 511 && client_fps >= 0 && client_fps <= 1000)
@@ -692,17 +805,19 @@ var/list/localhost_addresses = list(
 	if (!GLOB.config.webint_url || !GLOB.config.sql_enabled)
 		return
 
-	if (!establish_db_connection(GLOB.dbcon))
+	if (!SSdbcore.Connect())
 		return
 
 	var/list/requests = list()
 	var/list/query_details = list("ckey" = ckey)
 
-	var/DBQuery/select_query = GLOB.dbcon.NewQuery("SELECT id, forum_id, forum_username, datediff(Now(), created_at) as request_age FROM ss13_player_linking WHERE status = 'new' AND player_ckey = :ckey: AND deleted_at IS NULL")
-	select_query.Execute(query_details)
+	var/datum/db_query/select_query = SSdbcore.NewQuery("SELECT id, forum_id, forum_username, datediff(Now(), created_at) as request_age FROM ss13_player_linking WHERE status = 'new' AND player_ckey = :ckey AND deleted_at IS NULL",query_details)
+	select_query.Execute()
 
 	while (select_query.NextRow())
 		requests.Add(list(list("id" = text2num(select_query.item[1]), "forum_id" = text2num(select_query.item[2]), "forum_username" = select_query.item[3], "request_age" = select_query.item[4])))
+
+	qdel(select_query)
 
 	if (!requests.len)
 		return
@@ -715,31 +830,32 @@ var/list/localhost_addresses = list(
 		var/linked_forum_name = null
 		if (GLOB.config.forumurl)
 			var/route_attributes = list2params(list("mode" = "viewprofile", "u" = request["forum_id"]))
-			linked_forum_name = "<a href='byond://?src=\ref[src];routeWebInt=forums/members;routeAttributes=[route_attributes]'>[request["forum_username"]]</a>"
+			linked_forum_name = "<a href='byond://?src=[REF(src)];routeWebInt=forums/members;routeAttributes=[route_attributes]'>[request["forum_username"]]</a>"
 
 		dat += "<hr>"
 		dat += "#[i] - Request to link your current key ([key]) to a forum account with the username of: <b>[linked_forum_name ? linked_forum_name : request["forum_username"]]</b>.<br>"
 		dat += "The request is [request["request_age"]] days old.<br>"
-		dat += "OPTIONS: <a href='byond://?src=\ref[src];linkingrequest=[request["id"]];linkingaction=accept'>Accept Request</a> | <a href='byond://?src=\ref[src];linkingrequest=[request["id"]];linkingaction=deny'>Deny Request</a>"
+		dat += "OPTIONS: <a href='byond://?src=[REF(src)];linkingrequest=[request["id"]];linkingaction=accept'>Accept Request</a> | <a href='byond://?src=[REF(src)];linkingrequest=[request["id"]];linkingaction=deny'>Deny Request</a>"
 
-	src << browse(dat, "window=LinkingRequests")
+	src << browse(HTML_SKELETON(dat), "window=LinkingRequests")
 	return
 
 /client/proc/gather_linking_requests()
 	if (!GLOB.config.webint_url || !GLOB.config.sql_enabled)
 		return
 
-	if (!establish_db_connection(GLOB.dbcon))
+	if (!SSdbcore.Connect())
 		return
 
-	var/DBQuery/select_query = GLOB.dbcon.NewQuery("SELECT COUNT(*) AS request_count FROM ss13_player_linking WHERE status = 'new' AND player_ckey = :ckey: AND deleted_at IS NULL")
-	select_query.Execute(list("ckey" = ckey))
+	var/datum/db_query/select_query = SSdbcore.NewQuery("SELECT COUNT(*) AS request_count FROM ss13_player_linking WHERE status = 'new' AND player_ckey = :ckey AND deleted_at IS NULL", list("ckey" = ckey))
+	select_query.SetSuccessCallback(CALLBACK(src, PROC_REF(_gather_linking_requests_cb)))
+	select_query.SetFailCallback(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(qdel)))
+	select_query.ExecuteNoSleep(TRUE)
 
-	if (select_query.NextRow())
-		if (text2num(select_query.item[1]) > 0)
-			return "You have [select_query.item[1]] account linking requests pending review. Click <a href='?JSlink=linking;notification=:src_ref'>here</a> to see them!"
-
-	return null
+/client/proc/_gather_linking_requests_cb(datum/db_query/query)
+	if (query.NextRow() && text2num(query.item[1]) > 0)
+		prefs?.new_notification("info", "You have [query.item[1]] account linking requests pending review. Click <a href='byond://?JSlink=linking;notification=:src_ref'>here</a> to see them!", callback_src = src, callback_proc = "check_linking_requests")
+	qdel(query)
 
 /client/proc/process_webint_link(var/route, var/attributes)
 	if (!route)
@@ -784,36 +900,58 @@ var/list/localhost_addresses = list(
 	send_link(src, linkURL)
 	return
 
+
 /client/proc/check_ip_intel()
-	set waitfor = 0 //we sleep when getting the intel, no need to hold up the client connection while we sleep
+	set waitfor = 0
 	if (GLOB.config.ipintel_email)
-		var/datum/ipintel/res = get_ip_intel(address)
-		if (GLOB.config.ipintel_rating_kick && res.intel >= GLOB.config.ipintel_rating_kick)
-			if (!holder)
-				message_admins("Proxy Detection: [key_name_admin(src)] IP intel rated [res.intel*100]% likely to be a proxy/VPN. They are being kicked because of this.")
-				log_admin("Proxy Detection: [key_name_admin(src)] IP intel rated [res.intel*100]% likely to be a proxy/VPN. They are being kicked because of this.")
-				to_chat(src, SPAN_DANGER("Usage of proxies is not permitted by the rules. You are being kicked because of this."))
-				del(src)
-			else
-				message_admins("Proxy Detection: [key_name_admin(src)] IP intel rated [res.intel*100]% likely to be a Proxy/VPN.")
-		else if (res.intel >= GLOB.config.ipintel_rating_bad)
+		SSipintel.get_ip_intel(address, on_complete = CALLBACK(src, /client/proc/on_ip_intel_result))
+
+/client/proc/on_ip_intel_result(datum/ipintel/res)
+	if (GLOB.config.ipintel_rating_kick && res.intel >= GLOB.config.ipintel_rating_kick)
+		if (!holder)
+			message_admins("Proxy Detection: [key_name_admin(src)] IP intel rated [res.intel*100]% likely to be a proxy/VPN. They are being kicked because of this.")
+			log_admin("Proxy Detection: [key_name_admin(src)] IP intel rated [res.intel*100]% likely to be a proxy/VPN. They are being kicked because of this.")
+			to_chat(src, SPAN_DANGER("Usage of proxies is not permitted by the rules. You are being kicked because of this."))
+			del(src)
+		else
 			message_admins("Proxy Detection: [key_name_admin(src)] IP intel rated [res.intel*100]% likely to be a Proxy/VPN.")
-		ip_intel = res.intel
+	else if (res.intel >= GLOB.config.ipintel_rating_bad)
+		message_admins("Proxy Detection: [key_name_admin(src)] IP intel rated [res.intel*100]% likely to be a Proxy/VPN.")
+	ip_intel = res.intel
 
 /client/proc/findJoinDate()
-	var/list/http = world.Export("http://byond.com/members/[ckey]?format=text")
-	if(!http)
+	var/datum/http_request/req = new()
+	req.prepare(RUSTG_HTTP_METHOD_GET, "https://byond.com/members/[ckey]?format=text")
+	req.begin_async()
+
+	// Poll RUSTG directly rather than routing through SShttp — this proc can be called
+	// before SShttp is firing (e.g. during MC init), so we cannot rely on SShttp's fire
+	// loop to dispatch the callback.
+	while (!req.is_complete())
+		sleep(world.tick_lag)
+
+	var/datum/http_response/http = req.into_response()
+	if (http.errored || http.status_code != 200)
 		LOG_DEBUG("ACCESS CONTROL: Failed to connect to byond age check for [ckey]")
 		return
-	var/F = file2text(http["CONTENT"])
-	if(F)
-		var/regex/R = regex("joined = \"(\\d{4}-\\d{2}-\\d{2})\"")
-		if(R.Find(F))
-			. = R.group[1]
-		else
-			CRASH("Age check regex failed for [src.ckey]")
+
+	var/regex/R = regex("joined = \"(\\d{4}-\\d{2}-\\d{2})\"")
+	if (R.Find(http.body))
+		return R.group[1]
+	else
+		CRASH("Age check regex failed for [src.ckey]")
+
+/client/Click(atom/object, atom/location, control, params)
+	SEND_SIGNAL(src, COMSIG_CLIENT_CLICK, object, location, control, params, usr)
+	..()
 
 /client/MouseDrag(src_object, over_object, src_location, over_location, src_control, over_control, params)
+	var/list/modifiers = params2list(params)
+
+	if(!drag_start) // If we're just starting to drag
+		drag_start = world.time
+		drag_details = modifiers.Copy()
+
 	. = ..()
 
 	if(over_object)
@@ -831,32 +969,90 @@ var/list/localhost_addresses = list(
 
 	CHECK_TICK
 
-/client/MouseDown(object, location, control, params)
+/client/MouseDrop(atom/src_object, atom/over_object, atom/src_location, atom/over_location, src_control, over_control, params)
+	SHOULD_NOT_OVERRIDE(TRUE)
+
+	..()
+	drag_start = 0
+	drag_details = null
+
+/client/MouseDown(datum/object, location, control, params)
+	if(QDELETED(object)) //Yep, you can click on qdeleted things before they have time to nullspace. Fun.
+		return
+	SEND_SIGNAL(src, COMSIG_CLIENT_MOUSEDOWN, object, location, control, params)
+
 	var/obj/item/I = mob.get_active_hand()
 	var/obj/O = object
 	if(istype(I, /obj/item/gun) && !mob.in_throw_mode)
 		var/obj/item/gun/G = I
-		if(G.can_autofire(O, location, params) && O.is_auto_clickable() && !(G.safety()) && !(G == O))
-			autofire_aiming_at[1] = O
-			autofire_aiming_at[2] = params
-			var/accuracy_dec = 0
-			while(autofire_aiming_at[1])
-				G.Fire(autofire_aiming_at[1], mob, autofire_aiming_at[2], (get_dist(mob, location) <= 1), FALSE, accuracy_dec)
-				mob.set_dir(get_dir(mob, autofire_aiming_at[1]))
-				accuracy_dec = min(accuracy_dec + 0.25, 2)
-				sleep(G.fire_delay)
-			CHECK_TICK
+
+		// check if our gun can even autofire
+		var/can_autofire = G.can_autofire(O, location, params)
+		if(!can_autofire)
+			return
+
+		// check if the object we're clicking is auto clickable
+		var/can_autoclick_object = O.is_auto_clickable()
+		if(!can_autoclick_object)
+			return
+
+		// check if safety should block the shot
+		var/not_on_safety = mob.a_intent == I_HURT || (!G.safety())
+		if(!not_on_safety)
+			return
+
+		// check that we're not shooting anything on our person
+		var/object_not_on_us = O.loc != mob
+		if(!object_not_on_us)
+			return
+
+		// check whether we're putting it in a storage item / table / locker
+		var/object_not_storage_item = TRUE
+
+		var/is_adjacent_to_object = get_last_atom_before_turf(G) == mob
+		if(!is_adjacent_to_object)
+			var/distance_to_object = get_dist(mob, location)
+			is_adjacent_to_object = distance_to_object <= 1
+
+		if(is_adjacent_to_object) // if we're not next to it, blast it
+			var/list/storage_types = list(
+				/obj/item/storage,
+				/obj/structure/table,
+				/obj/structure/closet
+			)
+			var/is_storage_item = is_type_in_list(O, storage_types)
+			if(!is_storage_item)
+				is_storage_item = locate(/obj/item/storage) in O // some items will have storage within themselves
+			object_not_storage_item = !is_storage_item
+
+		if(!object_not_storage_item)
+			return
+
+		autofire_aiming_at[1] = O
+		autofire_aiming_at[2] = params
+
+		var/accuracy_dec = 0
+		while(autofire_aiming_at[1])
+			// stop shooting if we drop our gun
+			if(G.loc != mob)
+				break
+			G.Fire(autofire_aiming_at[1], mob, autofire_aiming_at[2], (get_dist(mob, location) <= 1), FALSE, accuracy_dec)
+			mob.set_dir(get_dir(mob, autofire_aiming_at[1]))
+			accuracy_dec = min(accuracy_dec + 0.25, 2)
+			sleep(G.fire_delay)
 
 /client/MouseUp(object, location, control, params)
+	if(SEND_SIGNAL(src, COMSIG_CLIENT_MOUSEUP, object, location, control, params) & COMPONENT_CLIENT_MOUSEUP_INTERCEPT)
+		src = src //This doesn't do shit, when you implement click interception change this
 	autofire_aiming_at[1] = null
 
 /atom/proc/is_auto_clickable()
 	return TRUE
 
-/obj/screen/is_auto_clickable()
+/atom/movable/screen/is_auto_clickable()
 	return FALSE
 
-/obj/screen/click_catcher/is_auto_clickable()
+/atom/movable/screen/click_catcher/is_auto_clickable()
 	return TRUE
 
 /**
@@ -899,4 +1095,17 @@ var/list/localhost_addresses = list(
 /client/proc/check_panel_loaded()
 	if(stat_panel.is_ready())
 		return
-	to_chat(src, SPAN_DANGER("Statpanel failed to load, click <a href='?src=[ref(src)];reload_statbrowser=1'>here</a> to reload the panel "))
+	to_chat(src, SPAN_DANGER("Statpanel failed to load, click <a href='byond://?src=[REF(src)];reload_statbrowser=1'>here</a> to reload the panel "))
+
+/// This grabs the DPI of the user per their skin
+/client/proc/acquire_dpi()
+	window_scaling = text2num(winget(src, null, "dpi"))
+
+/client/verb/set_icon_size()
+	set name = "Set View Zoom"
+	set desc = "Lets you zoom in."
+	set category = "OOC"
+
+	var/list/zoom_options = list("Default" = 0, "Low" = 3, "Medium" = 6, "High" = 10, "Extreme" = 15)
+	var/selected_zoom = tgui_input_list(usr, "Please select a zoom level for your view.", "Set View Zoom", zoom_options, zoom_options[1])
+	winset(src, "mapwindow.map", "zoom=[zoom_options[selected_zoom]]")

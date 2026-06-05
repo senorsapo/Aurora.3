@@ -1,22 +1,22 @@
-var/global/list/golem_types = list(
-									SPECIES_GOLEM_COAL,
-									SPECIES_GOLEM_IRON,
-									SPECIES_GOLEM_BRONZE,
-									SPECIES_GOLEM_STEEL,
-									SPECIES_GOLEM_PLASTEEL,
-									SPECIES_GOLEM_TITANIUM,
-									SPECIES_GOLEM_CLOTH,
-									SPECIES_GOLEM_CARDBOARD,
-									SPECIES_GOLEM_GLASS,
-									SPECIES_GOLEM_PHORON,
-									SPECIES_GOLEM_HYDROGEN,
-									SPECIES_GOLEM_WOOD,
-									SPECIES_GOLEM_DIAMOND,
-									SPECIES_GOLEM_SAND,
-									SPECIES_GOLEM_URANIUM,
-									SPECIES_GOLEM_MEAT,
-									SPECIES_GOLEM_ADAMANTINE
-								)
+GLOBAL_LIST_INIT(golem_types, list(
+	SPECIES_GOLEM_COAL,
+	SPECIES_GOLEM_IRON,
+	SPECIES_GOLEM_BRONZE,
+	SPECIES_GOLEM_STEEL,
+	SPECIES_GOLEM_PLASTEEL,
+	SPECIES_GOLEM_TITANIUM,
+	SPECIES_GOLEM_CLOTH,
+	SPECIES_GOLEM_CARDBOARD,
+	SPECIES_GOLEM_GLASS,
+	SPECIES_GOLEM_PHORON,
+	SPECIES_GOLEM_HYDROGEN,
+	SPECIES_GOLEM_WOOD,
+	SPECIES_GOLEM_DIAMOND,
+	SPECIES_GOLEM_SAND,
+	SPECIES_GOLEM_URANIUM,
+	SPECIES_GOLEM_MEAT,
+	SPECIES_GOLEM_ADAMANTINE
+))
 
 /datum/species/golem
 	name = SPECIES_GOLEM_COAL
@@ -320,7 +320,7 @@ var/global/list/golem_types = list(
 
 	bodytype = "Human"
 
-	slowdown = -2
+	slowdown = -0.6
 
 	brute_mod = 1.5
 	burn_mod = 3
@@ -345,7 +345,7 @@ var/global/list/golem_types = list(
 	icobase = 'icons/mob/human_races/golem/r_cardboard.dmi'
 	deform = 'icons/mob/human_races/golem/r_cardboard.dmi'
 
-	slowdown = -1
+	slowdown = -0.3
 
 	brute_mod = 1.5
 	burn_mod = 3
@@ -384,7 +384,7 @@ var/global/list/golem_types = list(
 	death_message = "shatters into many shards!"
 	death_message_range = 7
 
-	death_sound = /singleton/sound_category/glass_break_sound
+	death_sound = SFX_BREAK_GLASS
 
 	heat_level_1 = T0C+350
 	heat_level_2 = T0C+550
@@ -392,8 +392,8 @@ var/global/list/golem_types = list(
 
 	golem_designation = "Glass"
 
-/datum/species/golem/glass/bullet_act(var/obj/item/projectile/P, var/def_zone, var/mob/living/carbon/human/H)
-	if(istype(P, /obj/item/projectile/energy) || istype(P, /obj/item/projectile/beam))
+/datum/species/golem/glass/bullet_act(var/obj/projectile/P, var/def_zone, var/mob/living/carbon/human/H)
+	if(istype(P, /obj/projectile/energy) || istype(P, /obj/projectile/beam))
 		var/reflectchance = 50 - round(P.damage/3)
 		if(prob(reflectchance))
 			H.visible_message(SPAN_DANGER("The [P.name] gets reflected by [H]!"), \
@@ -408,7 +408,7 @@ var/global/list/golem_types = list(
 				P.firer = H
 				P.old_style_target(locate(new_x, new_y, P.z))
 
-			return -1 // complete projectile permutation
+			return BULLET_ACT_FORCE_PIERCE // complete projectile permutation
 
 /datum/species/golem/glass/handle_death(var/mob/living/carbon/human/H)
 	for(var/i in 1 to 5)
@@ -598,8 +598,8 @@ var/global/list/golem_types = list(
 	H.update_dna()
 	..()
 
-/datum/species/golem/diamond/bullet_act(var/obj/item/projectile/P, var/def_zone, var/mob/living/carbon/human/H)
-	if(istype(P, /obj/item/projectile/energy) || istype(P, /obj/item/projectile/beam))
+/datum/species/golem/diamond/bullet_act(var/obj/projectile/P, var/def_zone, var/mob/living/carbon/human/H)
+	if(istype(P, /obj/projectile/energy) || istype(P, /obj/projectile/beam))
 		var/reflectchance = 80 - round(P.damage/3)
 		if(prob(reflectchance))
 			H.visible_message(SPAN_DANGER("The [P.name] gets reflected by [H]!"), \
@@ -614,7 +614,7 @@ var/global/list/golem_types = list(
 				P.firer = H
 				P.old_style_target(locate(new_x, new_y, P.z))
 
-			return -1 // complete projectile permutation
+			return BULLET_ACT_FORCE_PIERCE // complete projectile permutation
 
 /datum/species/golem/marble
 	name = SPECIES_GOLEM_MARBLE
@@ -656,7 +656,7 @@ var/global/list/golem_types = list(
 
 	brute_mod = 1.2
 	burn_mod = 1
-	slowdown = -2
+	slowdown = -0.8
 
 	meat_type = /obj/item/ore/glass
 
@@ -691,7 +691,7 @@ var/global/list/golem_types = list(
 		glassify(H)
 		return
 
-	if(H.getFireLoss() >= (H.health - H.maxHealth))	//if the sand golem suffered enough burn damage it turns into a glass one
+	if(H.getFireLoss() >= (H.health - H.maxhealth))	//if the sand golem suffered enough burn damage it turns into a glass one
 		glassify(H)
 		return
 
@@ -711,7 +711,7 @@ var/global/list/golem_types = list(
 
 	brute_mod = 1.2
 	burn_mod = 1.3
-	slowdown = -1
+	slowdown = -0.3
 
 	meat_type = /obj/item/stack/material/plastic
 
@@ -762,9 +762,7 @@ var/global/list/golem_types = list(
 	..()
 
 /datum/species/golem/uranium/handle_environment_special(var/mob/living/carbon/human/H)
-	if(prob(25))
-		for(var/mob/living/L in view(7, H))
-			L.apply_damage(20, DAMAGE_RADIATION, damage_flags = DAMAGE_FLAG_DISPERSED)
+	SSradiation.radiate(src, RAD_LEVEL_LOW)
 
 /datum/species/golem/homunculus
 	name = SPECIES_GOLEM_MEAT
@@ -827,7 +825,7 @@ var/global/list/golem_types = list(
 	if(turn_into_materials)
 		//This is because otherwise the removal of vital organs in the gibbing will call death again, which calls this again, creating a neverending
 		//server death loop
-		addtimer(CALLBACK(H, TYPE_PROC_REF(/mob/living/carbon/human, gib)), 1 SECONDS)
+		addtimer(CALLBACK(H, TYPE_PROC_REF(/mob/living/carbon/human, gib)), 1 SECONDS, TIMER_STOPPABLE|TIMER_DELETE_ME)
 
 /datum/species/golem/homunculus/handle_environment_special(var/mob/living/carbon/human/H)
 	if(prob(25))
@@ -931,6 +929,6 @@ var/global/list/golem_types = list(
 		stance_damage += 3
 	return stance_damage
 
-/datum/species/golem/technomancer/handle_emp_act(mob/living/carbon/human/H, var/severity)
-	H.apply_damage(75 * (4 - severity)) // their brute_mod means damage needs to be high
-	return TRUE
+/datum/species/golem/technomancer/handle_emp_act(mob/living/carbon/human/hit_mob, severity)
+	hit_mob.apply_damage(75 * (4 - severity)) // their brute_mod means damage needs to be high
+	return EMP_PROTECT_ALL

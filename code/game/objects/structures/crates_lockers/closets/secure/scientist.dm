@@ -7,11 +7,24 @@
 	new /obj/item/clothing/under/rank/scientist(src)
 	new /obj/item/clothing/suit/storage/toggle/labcoat(src)
 	new /obj/item/clothing/shoes/sneakers/medsci(src)
-	new /obj/item/device/radio/headset/headset_sci(src)
-	new /obj/item/device/radio/headset/headset_sci/alt(src)
+	new /obj/item/radio/headset/headset_sci(src)
+	new /obj/item/radio/headset/headset_sci/alt(src)
 	new /obj/item/tank/air(src)
 	new /obj/item/clothing/mask/gas(src)
 	new /obj/item/taperoll/science(src)
+	new /obj/item/sampler(src)
+
+/obj/structure/closet/secure_closet/scientist/modlaser
+	name = "scientist's laser locker"
+
+/obj/structure/closet/secure_closet/scientist/modlaser/fill()
+	new /obj/item/laser_assembly(src)
+	new /obj/item/laser_assembly/medium(src)
+	new /obj/item/laser_assembly/large(src)
+	new /obj/item/storage/box/modlaser(src)
+	new /obj/item/storage/box/modlaser/modulators(src)
+	new /obj/item/storage/box/modlaser/lens(src)
+	new /obj/item/storage/box/modlaser/modifiers(src)
 
 /obj/structure/closet/secure_closet/RD
 	name = "research director's locker"
@@ -23,22 +36,40 @@
 	new /obj/item/clothing/head/hazmat/research(src)
 	new /obj/item/clothing/under/rank/research_director(src)
 	new /obj/item/clothing/suit/storage/toggle/labcoat(src)
+	new /obj/item/rig/hazmat/equipped(src)
+	new /obj/item/clothing/glasses/welding/superior(src)
 	new /obj/item/clothing/shoes/sneakers/brown(src)
 	new /obj/item/clothing/shoes/laceup/brown(src)
-	new /obj/item/clothing/gloves/latex/nitrile(src)
-	new /obj/item/device/radio/headset/heads/rd(src)
-	new /obj/item/device/radio/headset/heads/rd/alt(src)
+	new /obj/item/storage/box/gloves(src)
+	new /obj/item/radio/headset/heads/rd(src)
+	new /obj/item/radio/headset/heads/rd/alt(src)
 	new /obj/item/tank/air(src)
 	new /obj/item/clothing/mask/gas(src)
-	new /obj/item/device/flash(src)
+	new /obj/item/clothing/mask/gas/half(src)
+	new /obj/item/flash(src)
 	new /obj/item/storage/box/firingpinsRD(src)
-	new /obj/item/device/pin_extractor(src)
+	new /obj/item/pin_extractor(src)
 	new /obj/item/storage/box/fancy/keypouch/sci(src)
+	new /obj/item/aicard(src)
+	new /obj/item/paicard(src)
 	new /obj/item/storage/box/tethers(src)
 	new /obj/item/taperoll/science(src)
-	new /obj/item/gun/energy/disruptorpistol/miniature(src)
+	new /obj/item/gun/projectile/sec(src)
 	new /obj/item/clothing/accessory/holster/waist(src)
-	new /obj/item/device/memorywiper(src)
+	new /obj/item/storage/box/unique/freezer/organcooler/psireceiver(src)
+	new /obj/item/megaphone/sci(src)
+	new /obj/item/taperecorder(src)
+	new /obj/item/sampler(src)
+	new /obj/item/storage/box/shells/tranquilizer(src)
+	new /obj/item/modular_computer/laptop/preset/supply/robotics(src)
+
+/// Used for when we want to populate the contents of this locker ourself. Good for away sites
+/obj/structure/closet/secure_closet/RD/empty
+	name = "research director's locker"
+	req_access = list(ACCESS_RD)
+	icon_state = "rd"
+
+/obj/structure/closet/secure_closet/RD/empty/fill()
 
 /obj/structure/closet/secure_closet/RD2
 	name = "research director's attire"
@@ -51,6 +82,6 @@
 	new /obj/item/clothing/shoes/sneakers/brown(src)
 	new /obj/item/clothing/shoes/laceup/brown(src)
 	new /obj/item/clothing/gloves/latex/nitrile(src)
-	new /obj/item/device/radio/headset/heads/rd(src)
-	new /obj/item/device/radio/headset/heads/rd/alt(src)
-	new /obj/item/device/megaphone/sci(src)
+	new /obj/item/radio/headset/heads/rd(src)
+	new /obj/item/radio/headset/heads/rd/alt(src)
+	new /obj/item/megaphone/sci(src)

@@ -20,12 +20,14 @@
 	layer = ABOVE_HUMAN_LAYER
 	opacity = 0
 
-/obj/structure/curtain/bullet_act(obj/item/projectile/P, def_zone)
-	if(!P.nodamage)
-		visible_message(SPAN_WARNING("[P] tears [src] down!"))
+/obj/structure/curtain/bullet_act(obj/projectile/hitting_projectile, def_zone, piercing_hit)
+	. = ..()
+	if(. != BULLET_ACT_HIT)
+		return .
+
+	if(hitting_projectile.damage > 0)
+		visible_message(SPAN_WARNING("[hitting_projectile] tears [src] down!"))
 		qdel(src)
-	else
-		..(P, def_zone)
 
 /obj/structure/curtain/attack_hand(mob/user)
 	playsound(get_turf(loc), 'sound/effects/curtain.ogg', 15, 1, -5)
@@ -38,7 +40,7 @@
 
 /obj/structure/curtain/attackby(obj/item/attacking_item, mob/user)
 
-	if(attacking_item.iswirecutter() || attacking_item.sharp && !attacking_item.noslice)
+	if(attacking_item.tool_behaviour == TOOL_WIRECUTTER || attacking_item.sharp && !attacking_item.noslice)
 		if(manipulating)	return
 		manipulating = TRUE
 		visible_message(SPAN_NOTICE("[user] begins cutting down \the [src]."),
@@ -50,7 +52,7 @@
 					SPAN_NOTICE("You cut down \the [src]."))
 		dismantle()
 
-	if(attacking_item.isscrewdriver()) //You can anchor/unanchor curtains
+	if(attacking_item.tool_behaviour == TOOL_SCREWDRIVER) //You can anchor/unanchor curtains
 		anchored = !anchored
 		var/obj/structure/curtain/C
 		for(C in src.loc)
@@ -106,3 +108,17 @@
 
 /obj/structure/curtain/open/shower/security
 	color = "#AA0000"
+
+/obj/structure/curtain/open/bar
+	name = "curtain"
+	color = "#792f27"
+	icon_state = "open"
+
+/obj/structure/curtain/open/bar/toggle()
+	src.set_opacity(!src.opacity)
+	if(opacity)
+		icon_state = "closed"
+		layer = ABOVE_ABOVE_HUMAN_LAYER
+	else
+		icon_state = "open"
+		layer = ABOVE_ABOVE_HUMAN_LAYER

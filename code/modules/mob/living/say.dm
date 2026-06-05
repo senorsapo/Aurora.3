@@ -24,6 +24,7 @@ var/list/department_radio_keys = list(
 		":v" = "Service",		".v" = "Service",
 		":p" = "AI Private",	".p" = "AI Private",
 		":z" = "Entertainment",".z" = "Entertainment",
+		":d" = "Expeditionary",".d" = "Expeditionary",
 
 		":R" = "right ear",	".R" = "right ear",
 		":L" = "left ear",	".L" = "left ear",
@@ -49,6 +50,7 @@ var/list/department_radio_keys = list(
 		":V" = "Service",		".V" = "Service",
 		":P" = "AI Private",	".P" = "AI Private",
 		":Z" = "Entertainment",".Z" = "Entertainment",
+		":D" = "Expeditionary",".D" = "Expeditionary",
 
 		//kinda localization -- rastaf0
 		//same keys as above, but on russian keyboard layout. This file uses cp1251 as encoding.
@@ -145,12 +147,12 @@ var/list/channel_to_radio_key = new
 
 /mob/living/proc/handle_message_mode(message_mode, message, verb, speaking, used_radios, alt_name, whisper)
 	if(message_mode == "intercom")
-		for(var/obj/item/device/radio/intercom/I in view(1, src))
+		for(var/obj/item/radio/intercom/I in view(1, src))
 			used_radios += I
 			I.talk_into(src, message, verb, speaking)
 
 	if(message_mode == "whisper" && !whisper)
-		whisper(message, speaking)
+		whisper(message, speaking, say_verb = TRUE)
 		return TRUE
 
 	return FALSE
@@ -185,7 +187,7 @@ var/list/channel_to_radio_key = new
 	return "statement"
 
 
-/mob/living/say(var/message, var/datum/language/speaking = null, var/verb, var/alt_name="", var/ghost_hearing = GHOSTS_ALL_HEAR, var/whisper = FALSE)
+/mob/living/say(var/message, var/datum/language/speaking = null, var/verb, var/alt_name="", var/ghost_hearing = GHOSTS_ALL_HEAR, var/whisper = FALSE, var/skip_edit = FALSE)
 	if(stat)
 		if(stat == DEAD)
 			return say_dead(message)
@@ -246,13 +248,20 @@ var/list/channel_to_radio_key = new
 	if(!verb)
 		verb = say_quote(message, speaking, is_singing, whisper)
 
+	var/is_shouting = FALSE
+	if(speaking)
+		for(var/verb_to_check in speaking.shout_verb)
+			if(verb_to_check == verb)
+				is_shouting = TRUE
+				continue
+
 	if(is_muzzled())
 		to_chat(src, SPAN_DANGER("You're muzzled and cannot speak!"))
 		return
 
 	message = trim_left(message)
 	var/message_range = world.view
-	if(!(speaking && (speaking.flags & NO_STUTTER)))
+	if(!skip_edit && !(speaking && (speaking.flags & NO_STUTTER)))
 		message = handle_autohiss(message, speaking)
 		var/list/hsp_params = handle_speech_problems(message, verb, message_mode, message_range)
 		if(hsp_params)
@@ -311,7 +320,7 @@ var/list/channel_to_radio_key = new
 		if(!speaking || !(speaking.flags & PRESSUREPROOF))
 			//make sure the air can transmit speech - speaker's side
 			var/datum/gas_mixture/environment = T.return_air()
-			var/pressure = (environment)? environment.return_pressure() : 0
+			var/pressure = SAFE_XGM_PRESSURE(environment)
 			if(pressure < SOUND_MINIMUM_PRESSURE)
 				message_range = 1
 
@@ -352,7 +361,15 @@ var/list/channel_to_radio_key = new
 	speech_bubble.appearance_flags = RESET_COLOR|RESET_ALPHA
 	INVOKE_ASYNC(GLOBAL_PROC, GLOBAL_PROC_REF(animate_speechbubble), speech_bubble, hear_clients, 30)
 
-	animate_chat(message, speaking, italics, hear_clients, 30)
+	var/list/langchat_styles = list()
+	if(istype(speaking, /datum/language/noise))
+		langchat_styles = list("emote", "langchat_small")
+	if(whisper)
+		langchat_styles = list("langchat_italic")
+	if(is_shouting)
+		langchat_styles = list("langchat_yell")
+
+	langchat_speech(message, get_hearers_in_view(message_range, src), speaking, additional_styles = langchat_styles)
 
 	var/bypass_listen_obj = (speaking && (speaking.flags & PASSLISTENOBJ))
 	if(!bypass_listen_obj)
@@ -364,9 +381,9 @@ var/list/channel_to_radio_key = new
 		mind.last_words = message
 
 	if(whisper)
-		log_whisper("[key_name(src)] : ([get_lang_name(speaking)]) [message]",ckey=key_name(src))
+		log_whisper("[key_name(src)] : ([get_lang_name(speaking)]) [message]")
 	else
-		log_say("[key_name(src)] : ([get_lang_name(speaking)]) [message]",ckey=key_name(src))
+		log_say("[key_name(src)] : ([get_lang_name(speaking)]) [message]")
 
 	return TRUE
 
@@ -385,7 +402,7 @@ var/list/channel_to_radio_key = new
 		C.images -= I
 
 /mob/living/proc/say_signlang(var/message, var/verb="gestures", var/datum/language/language, var/list/sign_adv_length)
-	log_say("[key_name(src)] : ([get_lang_name(language)]) [message]",ckey=key_name(src))
+	log_say("[key_name(src)] : ([get_lang_name(language)]) [message]")
 
 	for (var/mob/O in viewers(src, null))
 		O.hear_signlang(message, verb, language, src, sign_adv_length)

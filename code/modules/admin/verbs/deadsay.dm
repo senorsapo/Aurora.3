@@ -1,5 +1,5 @@
 /client/proc/dsay(msg as text)
-	set category = "Special Verbs"
+	set category = "Admin.Chat"
 	set name = "Dsay" //Gave this shit a shorter name so you only have to time out "dsay" rather than "dead say" to use it --NeoFite
 	set hidden = 1
 	if(!src.holder)
@@ -20,7 +20,7 @@
 	var/stafftype = uppertext(holder.rank)
 
 	msg = sanitize(msg)
-	log_admin("DSAY: [key_name(src)] : [msg]",admin_key=key_name(src))
+	log_admin("DSAY: [key_name(src)] : [msg]")
 
 	msg = process_chat_markup(msg)
 

@@ -15,10 +15,10 @@
 	response_help  = "pets"
 	response_disarm = "gently pushes aside"
 	response_harm   = "kicks"
-	attacktext = "kicked"
+	attacktext = "kicks"
 	faction = "Moghes"
 
-	maxHealth = 100
+	maxhealth = 100
 	health = 100
 	mob_size = 12
 	pixel_x = -15
@@ -31,10 +31,12 @@
 	meat_amount = 20
 	vehicle_version = /obj/vehicle/animal/threshbeast
 	natural_armor = list(
-		melee = ARMOR_MELEE_MEDIUM,
-		bullet = ARMOR_BALLISTIC_MINOR,
-		bomb = ARMOR_BOMB_MINOR
+		MELEE = ARMOR_MELEE_MEDIUM,
+		BULLET = ARMOR_BALLISTIC_MINOR,
+		BOMB = ARMOR_BOMB_MINOR
 	)
+	resists_weather = TRUE
+	sample_data = list("Cellular biochemistry shows high metabolic capacity", "Tissue sample contains high muscle content", "Genetic biomarkers identified linked with passiveness and domestication")
 
 /mob/living/simple_animal/threshbeast/saddle
 	desc = "Large herbivorous reptiles native to Moghes, the azkrazal or 'threshbeast' is commonly used as a mount, beast of burden, or convenient food source by Unathi. They are highly valued for their speed and strength, capable of running at 30-42 miles per hour at top speed. This one has been fitted with a saddle."
@@ -59,10 +61,10 @@
 	response_help  = "pets"
 	response_disarm = "gently pushes aside"
 	response_harm   = "kicks"
-	attacktext = "gored"
+	attacktext = "gores"
 	faction = "Moghes"
 
-	maxHealth = 200
+	maxhealth = 200
 	health = 200
 	mob_size = 16
 	pixel_x = -14
@@ -79,11 +81,13 @@
 	meat_amount = 30
 	vehicle_version = /obj/vehicle/animal/hegeranzi
 	natural_armor = list( //big tough war beast, has some more armor particularly against bullets and melee
-		melee = ARMOR_MELEE_MAJOR,
-		bullet = ARMOR_BALLISTIC_MEDIUM,
-		laser = ARMOR_LASER_MINOR,
-		bomb = ARMOR_BOMB_MINOR
+		MELEE = ARMOR_MELEE_MAJOR,
+		BULLET = ARMOR_BALLISTIC_MEDIUM,
+		LASER = ARMOR_LASER_MINOR,
+		BOMB = ARMOR_BOMB_MINOR
 	)
+	resists_weather = TRUE
+	sample_data = list("Cellular biochemistry shows high metabolic capacity", "Tissue sample contains high muscle content", "Genetic biomarkers identified linked with domestication", "Intracellular keratin synthesis present")
 
 /mob/living/simple_animal/hostile/retaliate/hegeranzi/saddle
 	name = "warmount"
@@ -96,6 +100,7 @@
 	name = "orszi fish"
 	desc = "A small fish native to the rivers and seas of the planet Moghes, the orzsi or 'swarm fish' is a common food source for noble and common Unathi alike."
 	faction = "Moghes"
+	resists_weather = TRUE
 
 /mob/living/simple_animal/otzek
 	name = "otzek"
@@ -104,7 +109,7 @@
 	icon_state = "otzek"
 	icon_living = "otzek"
 	icon_dead = "otzek-dead"
-	maxHealth = 80
+	maxhealth = 80
 	health = 80
 	mob_size = 10
 	speak_emote = list("chuffs", "hisses", "bellows")
@@ -118,13 +123,15 @@
 	response_help  = "pets"
 	response_disarm = "gently pushes aside"
 	response_harm   = "kicks"
-	attacktext = "kicked"
+	attacktext = "kicks"
 	canbrush = TRUE
 	brush = /obj/item/reagent_containers/glass/rag
 	speed = -1
 	butchering_products = list(/obj/item/stack/material/animalhide/lizard = 4)
 	meat_type = /obj/item/reagent_containers/food/snacks/meat/moghes
 	meat_amount = 16
+	resists_weather = TRUE
+	sample_data = list("Cellular biochemistry geared towards the use of plant-based nutrition", "Genetic biomarkers identified linked with high reproductive rates", "Intracellular keratin synthesis present")
 
 /mob/living/simple_animal/miervesh
 	name = "miervesh"
@@ -134,7 +141,7 @@
 	icon_living = "miervesh-1"
 	icon_dead = "miervesh-1-dead"
 	speed = -2
-	maxHealth = 30
+	maxhealth = 30
 	health = 30
 	speak_emote = list("chirps", "hisses", "croons")
 	emote_hear = list("chirps", "hisses", "croons")
@@ -147,11 +154,13 @@
 	response_help  = "pets"
 	response_disarm = "gently pushes aside"
 	response_harm   = "swats"
-	attacktext = "swatted"
+	attacktext = "swats"
 	flying = TRUE
 	butchering_products = list(/obj/item/stack/material/animalhide = 1)
 	meat_type = /obj/item/reagent_containers/food/snacks/meat/moghes
 	meat_amount = 1
+	resists_weather = TRUE
+	sample_data = list("Cellular biochemistry shows signs of rapid respiration", "Genetic biomarkers identified linked with passiveness and domestication", "Extracellular gas detection present")
 	var/chosen_icon
 
 /mob/living/simple_animal/miervesh/Initialize()

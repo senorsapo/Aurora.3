@@ -73,7 +73,7 @@
 		else if(A?.is_prison() || (!A?.is_no_crew_expected() && C?.handcuffed))
 			// they are either imprisoned, or handcuffed in an area that can't be considered a hideout
 			text += "apprehended"
-		else if(isNotStationLevel(M.z))
+		else if(!is_station_level(M.z))
 			text += "fled the [SSatlas.current_map.station_type]"
 		else
 			text += "survived"
@@ -94,7 +94,7 @@
 	var/bluecrystal_uses = 0
 	var/uplink_true = 0
 	var/purchases = ""
-	for(var/obj/item/device/uplink/H in GLOB.world_uplinks)
+	for(var/obj/item/uplink/H in GLOB.world_uplinks)
 		if(H && H.uplink_owner && H.uplink_owner == ply)
 			telecrystal_uses += H.used_telecrystals
 			bluecrystal_uses += H.used_bluecrystals
@@ -109,7 +109,7 @@
 
 /proc/print_ownerless_uplinks()
 	var/has_printed = 0
-	for(var/obj/item/device/uplink/H in GLOB.world_uplinks)
+	for(var/obj/item/uplink/H in GLOB.world_uplinks)
 		if(isnull(H.uplink_owner) && (H.used_telecrystals || H.used_bluecrystals))
 			if(!has_printed)
 				has_printed = 1
@@ -117,7 +117,7 @@
 			to_world("[H.loc] (used [H.used_telecrystals] TC and [H.used_bluecrystals] BC)")
 			to_world(get_uplink_purchases(H))
 
-/proc/get_uplink_purchases(var/obj/item/device/uplink/H)
+/proc/get_uplink_purchases(var/obj/item/uplink/H)
 	var/list/refined_log = new()
 	for(var/datum/uplink_item/UI in H.purchase_log)
 		refined_log.Add("[H.purchase_log[UI]]x[UI.log_icon()][UI.name]")
@@ -134,8 +134,8 @@
 		if(ply.current)
 			if(ply.current.stat == DEAD)
 				text += "died"
-			else if(isNotStationLevel(ply.current.z))
-				text += "fled the station"
+			else if(!is_station_level(ply.current.z))
+				text += "fled the [station_name(TRUE)]"
 			else
 				text += "survived"
 			if(ply.current.real_name != ply.name)

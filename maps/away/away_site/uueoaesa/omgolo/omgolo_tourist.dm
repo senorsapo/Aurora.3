@@ -2,7 +2,7 @@
 	name = "Omgolo Relaxation Platform"
 	description = "A gas giant. Its planetary ring is home to several mining stations, hidden smuggler outposts, and tourist platforms."
 	prefix = "away_site/uueoaesa/omgolo/"
-	suffixes = list("omgolo_tourist.dmm")
+	suffix = "omgolo_tourist.dmm"
 	sectors = list(SECTOR_UUEOAESA)
 	spawn_weight = 1
 	spawn_cost = 2
@@ -54,7 +54,6 @@
 	name = "Abandoned Tourism Platform"
 	icon_state = "bluenew"
 	requires_power = TRUE
-	dynamic_lighting = TRUE
 	no_light_control = FALSE
 	base_turf = /turf/space
 	area_flags = AREA_FLAG_RAD_SHIELDED

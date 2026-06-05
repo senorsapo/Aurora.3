@@ -12,10 +12,10 @@
 	icon_state = "hivebotbeacon_active"
 	icon_living = "hivebotbeacon_active"
 	health = 300
-	maxHealth = 300
+	maxhealth = 300
 	blood_type = COLOR_OIL
 	projectilesound = 'sound/weapons/taser2.ogg'
-	projectiletype = /obj/item/projectile/beam/hivebot
+	projectiletype = /obj/projectile/beam/hivebot
 	wander = 0
 	stop_automated_movement = 1
 	status_flags = 0
@@ -36,6 +36,7 @@
 	destroy_surroundings = 0
 	attack_emote = "focuses on"
 	psi_pingable = FALSE
+	sample_data = null
 
 	/**
 	 * Number of total bots that are spawned before the beacon disappears completely
@@ -68,7 +69,7 @@
 	var/maximum_linked_and_alive_hivebots_to_playing_players_scaling_factor = 1
 
 	///A list of `/mob/living/simple_animal/hostile` hivebots that are linked to this beacon
-	var/list/mob/living/simple_animal/hostile/hivebot/linked_bots = list()
+	var/list/mob/living/simple_animal/hostile/linked_bots = list()
 
 	///Amount of hivebots spawned and alive linked to this beacon, guardian type
 	var/guard_amt = 0
@@ -108,7 +109,7 @@
 	. = ..()
 
 	//Calculate the actual values based on player population, but only if it's on the main map (most likely the Horizon)
-	if(isStationLevel(src.z))
+	if(is_station_level(src.z))
 		total_hivebots_to_spawn = total_hivebots_to_spawn + (length(GLOB.player_list) * total_hivebots_to_spawn_to_playing_players_scaling_factor)
 		maximum_linked_and_alive_hivebots = maximum_linked_and_alive_hivebots + (length(GLOB.player_list) * maximum_linked_and_alive_hivebots_to_playing_players_scaling_factor)
 
@@ -126,17 +127,12 @@
 	set_light(6,0.5,LIGHT_COLOR_GREEN)
 
 /mob/living/simple_animal/hostile/hivebotbeacon/Destroy()
-	//Remove the reference from all linked bots to us
-	for(var/mob/living/simple_animal/hostile/hivebot/latest_child in linked_bots)
-		latest_child.linked_parent = null
 	linked_bots.Cut()
+	destinations.Cut()
+	close_destinations.Cut()
+	latest_area = null
 
-	//Smoke effect, we disappear in a smoke
-	var/datum/effect/effect/system/smoke_spread/S = new /datum/effect/effect/system/smoke_spread()
-	S.set_up(5, 0, src.loc)
-	S.start()
-
-	. = ..()
+	return ..()
 
 /mob/living/simple_animal/hostile/hivebotbeacon/proc/generate_warp_destinations()
 
@@ -145,7 +141,7 @@
 		if(turf_clear(T))
 			destinations += T
 	var/area/A = get_area(src)
-	if(!isNotStationLevel(A.z))
+	if(!!is_station_level(A.z))
 		var/list/area_turfs = get_area_turfs(A)
 		var/list/floor_turfs = list()
 		for(var/turf/simulated/floor/T in (area_turfs))
@@ -169,7 +165,11 @@
 	var/T = get_turf(src)
 	new /obj/effect/gibspawner/robot(T)
 	spark(T, 3, GLOB.alldirs)
-	qdel(src)
+	//Smoke effect, we disappear in a smoke
+	var/datum/effect/effect/system/smoke_spread/S = new /datum/effect/effect/system/smoke_spread()
+	S.set_up(5, 0, src.loc)
+	S.start()
+	QDEL_IN(src, 0)
 	return
 
 /mob/living/simple_animal/hostile/hivebotbeacon/think()
@@ -182,14 +182,12 @@
 /mob/living/simple_animal/hostile/hivebotbeacon/MoveToTarget()
 	if(!stop_automated_movement)
 		stop_automated_movement = 1
-	if(QDELETED(target_mob) || SA_attackable(target_mob))
+	if(last_found_target && (QDELETED(last_found_target) || SA_attackable(last_found_target) || !see_target(last_found_target)))
 		LoseTarget()
-	if(!see_target())
-		LoseTarget()
-	if(target_mob in targets)
-		if(get_dist(src, target_mob) <= 6)
-			SSmove_manager.stop_looping(src)
-			OpenFire(target_mob)
+	if(last_found_target in targets)
+		if(get_dist(src, last_found_target) <= 6)
+			GLOB.move_manager.stop_looping(src)
+			OpenFire(last_found_target)
 
 /mob/living/simple_animal/hostile/hivebotbeacon/proc/activate_beacon()
 	if(activated != 1)
@@ -207,12 +205,11 @@
 /mob/living/simple_animal/hostile/hivebotbeacon/AirflowCanMove(n)
 	return 0
 
-/mob/living/simple_animal/hostile/hivebotbeacon/bullet_act(var/obj/item/projectile/Proj)
-	if(istype(Proj, /obj/item/projectile/bullet/pistol/hivebotspike) || istype(Proj, /obj/item/projectile/beam/hivebot))
-		Proj.no_attack_log = 1
-		return PROJECTILE_CONTINUE
+/mob/living/simple_animal/hostile/hivebotbeacon/bullet_act(obj/projectile/hitting_projectile, def_zone, piercing_hit)
+	if(istype(hitting_projectile, /obj/projectile/bullet/pistol/hivebotspike) || istype(hitting_projectile, /obj/projectile/beam/hivebot))
+		return BULLET_ACT_BLOCK
 	else
-		..(Proj)
+		. = ..()
 
 /mob/living/simple_animal/hostile/hivebotbeacon/emp_act(severity)
 	. = ..()
@@ -236,6 +233,9 @@
 		do_teleport(src, random_turf)
 
 /mob/living/simple_animal/hostile/hivebotbeacon/proc/wakeup()
+	if(QDELETED(src))
+		return
+
 	change_stance(HOSTILE_STANCE_IDLE)
 	activated = 0
 	activate_beacon()
@@ -245,7 +245,7 @@
 		visible_message(SPAN_DANGER("[src] disappears in a cloud of smoke!"))
 		playsound(src.loc, 'sound/effects/teleport.ogg', 25, 1)
 		new /obj/effect/decal/cleanable/greenglow(src.loc)
-		qdel(src)
+		QDEL_IN(src, 0)
 		return
 
 	if(activated == -1)
@@ -294,7 +294,7 @@
 				latest_child = new /mob/living/simple_animal/hostile/hivebot/bomber(Destination, src)
 			if(GUARDIAN)
 				Destination = null
-				for(var/check_dir in GLOB.cardinal)
+				for(var/check_dir in GLOB.cardinals)
 					var/turf/T = get_step(src, check_dir)
 					if(turf_clear(T))
 						Destination = T
@@ -320,12 +320,12 @@
 	spawn_delay = 80 * (1.085 ** (linked_bots.len + 1))
 
 	//Adapt the value based on player population, but only if it's on the main map (most likely the Horizon)
-	if(isStationLevel(src.z))
+	if(is_station_level(src.z))
 		spawn_delay = min(80, spawn_delay - (length(GLOB.player_list) * spawn_delay_to_playing_players_scaling_factor))
 
 	return
 
-/mob/living/simple_animal/hostile/hivebotbeacon/Life()
+/mob/living/simple_animal/hostile/hivebotbeacon/Life(seconds_per_tick, times_fired)
 	..()
 	if(wander)
 		wander = 0
@@ -340,7 +340,7 @@
 ################*/
 
 /mob/living/simple_animal/hostile/hivebotbeacon/incendiary
-	projectiletype = /obj/item/projectile/beam/hivebot/incendiary
+	projectiletype = /obj/projectile/beam/hivebot/incendiary
 	projectilesound = 'sound/weapons/plasma_cutter.ogg'
 	rapid = 0
 

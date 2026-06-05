@@ -6,7 +6,8 @@
 	revolution to the masses. With land reform, enfranchisement of women and peasantry, literacy initiatives, and the collectivization of farms and the means of production, the PRA is \
 	struggling to hold true to its radical ideals while an entrenched upper party stubbornly tries to hold onto power."
 	consular_outfit = /obj/outfit/job/representative/consular/pra
-	assistant_outfit = /obj/outfit/job/consular_assistant/pra
+	assistant_outfit = /obj/outfit/job/diplomatic_aide/pra
+	bodyguard_outfit = /obj/outfit/job/diplomatic_bodyguard/pra
 
 	job_species_blacklist = list(
 		"Consular Officer" = list(
@@ -27,10 +28,10 @@
 			SPECIES_UNATHI,
 			SPECIES_VAURCA_WORKER,
 			SPECIES_VAURCA_WARRIOR,
+			SPECIES_VAURCA_ATTENDANT,
 			SPECIES_VAURCA_BULWARK,
 			SPECIES_VAURCA_BREEDER,
-			SPECIES_TAJARA_ZHAN,
-			SPECIES_TAJARA_MSAI
+			SPECIES_TAJARA_ZHAN
 		),
 		"Diplomatic Aide" = list(
 			SPECIES_HUMAN,
@@ -50,9 +51,31 @@
 			SPECIES_UNATHI,
 			SPECIES_VAURCA_WORKER,
 			SPECIES_VAURCA_WARRIOR,
+			SPECIES_VAURCA_ATTENDANT,
 			SPECIES_VAURCA_BULWARK,
-			SPECIES_VAURCA_BREEDER,
-			SPECIES_TAJARA_ZHAN
+			SPECIES_VAURCA_BREEDER
+		),
+		"Diplomatic Bodyguard" = list(
+			SPECIES_HUMAN,
+			SPECIES_HUMAN_OFFWORLD,
+			SPECIES_IPC,
+			SPECIES_IPC_BISHOP,
+			SPECIES_IPC_G1,
+			SPECIES_IPC_G2,
+			SPECIES_IPC_SHELL,
+			SPECIES_IPC_UNBRANDED,
+			SPECIES_IPC_XION,
+			SPECIES_IPC_ZENGHU,
+			SPECIES_DIONA,
+			SPECIES_DIONA_COEUS,
+			SPECIES_SKRELL,
+			SPECIES_SKRELL_AXIORI,
+			SPECIES_UNATHI,
+			SPECIES_VAURCA_WORKER,
+			SPECIES_VAURCA_WARRIOR,
+			SPECIES_VAURCA_ATTENDANT,
+			SPECIES_VAURCA_BULWARK,
+			SPECIES_VAURCA_BREEDER
 		)
 	)
 
@@ -66,18 +89,19 @@
 
 	glasses = null
 	uniform = /obj/item/clothing/under/tajaran/consular
+	suit = /obj/item/clothing/suit/storage/toggle/tajaran/consular
 	head = /obj/item/clothing/head/tajaran/consular
 	backpack_contents = list(
 		/obj/item/storage/box/hadii_card = 1,
 		/obj/item/storage/box/hadii_manifesto = 1,
-		/obj/item/gun/projectile/pistol/adhomai = 1,
 		/obj/item/storage/field_ration = 1,
 		/obj/item/clothing/accessory/badge/hadii_card/member = 1,
 		/obj/item/storage/box/syndie_kit/spy/hidden = 1
 	)
 	accessory = /obj/item/clothing/accessory/hadii_pin
 
-/obj/outfit/job/consular_assistant/pra
+/obj/outfit/job/diplomatic_aide/pra
+	name = "PRA Diplomatic Aide"
 	glasses = null
 	uniform = /obj/item/clothing/under/tajaran/smart
 	backpack_contents = list(
@@ -88,6 +112,16 @@
 	)
 	accessory = /obj/item/clothing/accessory/hadii_pin
 
+/obj/outfit/job/diplomatic_bodyguard/pra
+	name = "PRA Diplomatic Bodyguard"
+	uniform = /obj/item/clothing/under/tajaran/pra_cop
+	suit = /obj/item/clothing/suit/storage/tajaran/pra_cop
+	head = /obj/item/clothing/head/tajaran/pra_cop
+	shoes = /obj/item/clothing/shoes/jackboots/tajara
+	backpack_contents = list(
+		/obj/item/gun/projectile/pistol/adhomai = 1
+	)
+
 /datum/citizenship/dpra
 	name = CITIZENSHIP_DPRA
 	description = "The most pervasive and successful rebellion came from a group calling themselves the Adhomai Liberation Army, a group made up of Tajara from almost every walk of life. \
@@ -97,7 +131,8 @@
 	insurgency movement, then an organized military, into a modern, democratic nation. With the help of Nated as a government minister going out to negotiate with ruling Juntas to \
 	voluntarily turn over power to civilian governments, the DPRA's future faces many fundamental changes."
 	consular_outfit = /obj/outfit/job/representative/consular/dpra
-	assistant_outfit = /obj/outfit/job/consular_assistant/dpra
+	assistant_outfit = /obj/outfit/job/diplomatic_aide/dpra
+	bodyguard_outfit = /obj/outfit/job/diplomatic_bodyguard/dpra
 
 	job_species_blacklist = list(
 		"Consular Officer" = list(
@@ -118,10 +153,10 @@
 			SPECIES_UNATHI,
 			SPECIES_VAURCA_WORKER,
 			SPECIES_VAURCA_WARRIOR,
+			SPECIES_VAURCA_ATTENDANT,
 			SPECIES_VAURCA_BULWARK,
 			SPECIES_VAURCA_BREEDER,
-			SPECIES_TAJARA_ZHAN,
-			SPECIES_TAJARA_MSAI
+			SPECIES_TAJARA_ZHAN
 		),
 		"Diplomatic Aide" = list(
 			SPECIES_HUMAN,
@@ -141,9 +176,31 @@
 			SPECIES_UNATHI,
 			SPECIES_VAURCA_WORKER,
 			SPECIES_VAURCA_WARRIOR,
+			SPECIES_VAURCA_ATTENDANT,
 			SPECIES_VAURCA_BULWARK,
-			SPECIES_VAURCA_BREEDER,
-			SPECIES_TAJARA_ZHAN
+			SPECIES_VAURCA_BREEDER
+		),
+		"Diplomatic Bodyguard" = list(
+			SPECIES_HUMAN,
+			SPECIES_HUMAN_OFFWORLD,
+			SPECIES_IPC,
+			SPECIES_IPC_BISHOP,
+			SPECIES_IPC_G1,
+			SPECIES_IPC_G2,
+			SPECIES_IPC_SHELL,
+			SPECIES_IPC_UNBRANDED,
+			SPECIES_IPC_XION,
+			SPECIES_IPC_ZENGHU,
+			SPECIES_DIONA,
+			SPECIES_DIONA_COEUS,
+			SPECIES_SKRELL,
+			SPECIES_SKRELL_AXIORI,
+			SPECIES_UNATHI,
+			SPECIES_VAURCA_WORKER,
+			SPECIES_VAURCA_WARRIOR,
+			SPECIES_VAURCA_ATTENDANT,
+			SPECIES_VAURCA_BULWARK,
+			SPECIES_VAURCA_BREEDER
 		)
 	)
 
@@ -157,6 +214,7 @@
 
 	glasses = null
 	uniform = /obj/item/clothing/under/tajaran/consular/dpra
+	suit = /obj/item/clothing/suit/storage/toggle/tajaran/consular/dpra
 	head = /obj/item/clothing/head/tajaran/consular/dpra
 	backpack_contents = list(
 		/obj/item/gun/projectile/silenced = 1,
@@ -166,7 +224,8 @@
 	)
 	accessory = /obj/item/clothing/accessory/dpra_pin
 
-/obj/outfit/job/consular_assistant/dpra
+/obj/outfit/job/diplomatic_aide/dpra
+	name = "DPRA Diplomatic Aide"
 	glasses = null
 	uniform = /obj/item/clothing/under/tajaran/smart
 	backpack_contents = list(
@@ -174,6 +233,15 @@
 		/obj/item/storage/field_ration/dpra = 1
 	)
 	accessory = /obj/item/clothing/accessory/dpra_pin
+
+/obj/outfit/job/diplomatic_bodyguard/dpra
+	name = "DPRA Diplomatic Bodyguard"
+	uniform = /obj/item/clothing/under/tajaran/ala/black/dress/ajic
+	shoes = /obj/item/clothing/shoes/jackboots/tajara
+	head = /obj/item/clothing/head/beret/tajaran/dpra/ajic
+	backpack_contents = list(
+		/obj/item/gun/projectile/silenced = 1,
+	)
 
 /datum/citizenship/nka
 	name = CITIZENSHIP_NKA
@@ -186,7 +254,8 @@
 	The lofty titles of the nobles disguise the fact that most of the nobility of this new kingdom remain in squalor only marginally better than the peasants. Life is difficult, and \
 	the Azunja dynasty finds itself struggling to function with their limited constitutional powers and factional in-fighting between the military and the civilian government."
 	consular_outfit = /obj/outfit/job/representative/consular/nka
-	assistant_outfit = /obj/outfit/job/consular_assistant/nka
+	assistant_outfit = /obj/outfit/job/diplomatic_aide/nka
+	bodyguard_outfit = /obj/outfit/job/diplomatic_bodyguard/nka
 
 	job_species_blacklist = list(
 		"Consular Officer" = list(
@@ -207,10 +276,10 @@
 			SPECIES_UNATHI,
 			SPECIES_VAURCA_WORKER,
 			SPECIES_VAURCA_WARRIOR,
+			SPECIES_VAURCA_ATTENDANT,
 			SPECIES_VAURCA_BULWARK,
 			SPECIES_VAURCA_BREEDER,
-			SPECIES_TAJARA_ZHAN,
-			SPECIES_TAJARA_MSAI
+			SPECIES_TAJARA_ZHAN
 		),
 		"Diplomatic Aide" = list(
 			SPECIES_HUMAN,
@@ -230,6 +299,31 @@
 			SPECIES_UNATHI,
 			SPECIES_VAURCA_WORKER,
 			SPECIES_VAURCA_WARRIOR,
+			SPECIES_VAURCA_ATTENDANT,
+			SPECIES_VAURCA_BULWARK,
+			SPECIES_VAURCA_BREEDER,
+			SPECIES_TAJARA_MSAI,
+			SPECIES_TAJARA_ZHAN
+		),
+		"Diplomatic Bodyguard" = list(
+			SPECIES_HUMAN,
+			SPECIES_HUMAN_OFFWORLD,
+			SPECIES_IPC,
+			SPECIES_IPC_BISHOP,
+			SPECIES_IPC_G1,
+			SPECIES_IPC_G2,
+			SPECIES_IPC_SHELL,
+			SPECIES_IPC_UNBRANDED,
+			SPECIES_IPC_XION,
+			SPECIES_IPC_ZENGHU,
+			SPECIES_DIONA,
+			SPECIES_DIONA_COEUS,
+			SPECIES_SKRELL,
+			SPECIES_SKRELL_AXIORI,
+			SPECIES_UNATHI,
+			SPECIES_VAURCA_WORKER,
+			SPECIES_VAURCA_WARRIOR,
+			SPECIES_VAURCA_ATTENDANT,
 			SPECIES_VAURCA_BULWARK,
 			SPECIES_VAURCA_BREEDER,
 			SPECIES_TAJARA_ZHAN
@@ -246,17 +340,18 @@
 
 	glasses = null
 	uniform = /obj/item/clothing/under/tajaran/consular/nka
+	suit = /obj/item/clothing/suit/storage/toggle/tajaran/consular/nka
 	head = /obj/item/clothing/head/tajaran/consular/nka
 	backpack_contents = list(
 		/obj/item/folder/blue/nka = 1,
-		/obj/item/gun/projectile/revolver/adhomian = 1,
 		/obj/item/storage/box/nka_manifesto = 1,
 		/obj/item/storage/field_ration/nka = 1,
 		/obj/item/storage/box/syndie_kit/spy/hidden = 1
 	)
 	accessory = /obj/item/clothing/accessory/nka_pin
 
-/obj/outfit/job/consular_assistant/nka
+/obj/outfit/job/diplomatic_aide/nka
+	name = "NKA Diplomatic Aide"
 	glasses = null
 	uniform = /obj/item/clothing/under/tajaran/fancy
 	backpack_contents = list(
@@ -264,7 +359,15 @@
 		/obj/item/storage/box/nka_manifesto = 1,
 		/obj/item/storage/field_ration/nka = 1
 	)
-	accessory = /obj/item/clothing/accessory/nka_pin
+
+/obj/outfit/job/diplomatic_bodyguard/nka
+	name = "NKA Diplomatic Bodyguard"
+	uniform = /obj/item/clothing/under/tajaran/nka_uniform/nosheath
+	head = /obj/item/clothing/head/tajaran/nka_cap
+	shoes = /obj/item/clothing/shoes/jackboots/tajara
+	backpack_contents = list(
+		/obj/item/gun/projectile/revolver/adhomian = 1
+	)
 
 /datum/citizenship/free_council
 	name = CITIZENSHIP_FREE_COUNCIL

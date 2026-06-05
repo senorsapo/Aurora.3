@@ -43,13 +43,14 @@
 	id = /obj/item/card/id/syndicate
 	accessory = /obj/item/clothing/accessory/badge/hadii_card
 	belt_contents = list(
-						/obj/item/ammo_magazine/boltaction = 3,
+						/obj/item/ammo_magazine/a68 = 3,
 						/obj/item/grenade/smokebomb = 2,
 						/obj/item/plastique = 1,
 						/obj/item/gun/projectile/pistol/adhomai = 1,
 						/obj/item/ammo_magazine/mc9mm = 2
 						)
 	r_hand = /obj/item/storage/field_ration
+	l_hand = /obj/item/martial_manual/tajara
 
 /obj/outfit/admin/pra_cosmonaut/commissar
 	name = "Party Commissar"
@@ -67,5 +68,5 @@
 						/obj/item/storage/box/hadii_manifesto = 1,
 						/obj/item/storage/box/hadii_card = 1
 						)
-	l_hand = /obj/item/device/megaphone
-	r_hand = null
+	l_hand = /obj/item/megaphone
+	r_hand = /obj/item/martial_manual/tajara

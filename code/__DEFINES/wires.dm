@@ -77,6 +77,8 @@
 #define WIRE_OUTPUT "Output"
 #define WIRE_GROUNDING "Grounding"
 #define WIRE_FAILSAFES "Failsafes"
+#define WIRE_RELEASE "Release"
+#define WIRE_LOCK "Lock"
 
 // Wire states for the AI
 #define AI_WIRE_NORMAL 0
@@ -86,7 +88,7 @@
 
 /*################################
 	Wires for the assembly
-	/obj/item/device/assembly
+	/obj/item/assembly
 ################################*/
 
 ///Allows Pulsed(0) to call Activate()

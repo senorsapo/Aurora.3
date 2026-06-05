@@ -19,6 +19,16 @@
 
 	can_hold_mob = TRUE
 
+/obj/vehicle/train/feedback_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	if(lead)
+		. += SPAN_NOTICE("It is being towed by \the [lead] in the [dir2text(get_dir(src, lead))].")
+	if(tow)
+		. += SPAN_NOTICE("It towing \the [tow] in the [dir2text(get_dir(src, tow))].")
+
+/obj/vehicle/train/cargo/engine/antagonist_hints(mob/user, distance, is_adjacent)
+	. = ..()
+	. += "When emagged, it can be used to run people over with."
 
 //-------------------------------------------
 // Standard procs
@@ -28,16 +38,10 @@
 	for(var/obj/vehicle/train/T in orange(1, src))
 		latch(T)
 
-/obj/vehicle/train/get_examine_text(mob/user, distance, is_adjacent, infix, suffix)
-	. = ..()
-	if(lead)
-		. += SPAN_NOTICE("It is being towed by \the [lead] in the [dir2text(get_dir(src, lead))].")
-	if(tow)
-		. += SPAN_NOTICE("It towing \the [tow] in the [dir2text(get_dir(src, tow))].")
-
 /obj/vehicle/train/Move()
 	var/old_loc = get_turf(src)
-	if(..())
+	. = ..()
+	if(.)
 		if(tow)
 			tow.Move(old_loc)
 		return 1
@@ -45,6 +49,26 @@
 		if(lead)
 			unattach()
 		return 0
+
+/// Trains need to recursively recalculate their glide size for all their towed objects.
+/obj/vehicle/train/recalculate_glide_size(old_move_delay, move_delay, direction)
+	var/new_glide_size = glide_size
+
+	if(old_move_delay + world.tick_lag > world.time)
+		new_glide_size = DELAY_TO_GLIDE_SIZE((move_delay - old_move_delay) * ( (NSCOMPONENT(direction) && EWCOMPONENT(direction)) ? sqrt(2) : 1 ) )
+	else
+		new_glide_size = DELAY_TO_GLIDE_SIZE((move_delay - world.time) * ( (NSCOMPONENT(direction) && EWCOMPONENT(direction)) ? sqrt(2) : 1 ) )
+
+	recurse_glide_size(new_glide_size) // set it now in case of pulled objects
+	return new_glide_size
+
+/// Sets the glide size of the entire train.
+/obj/vehicle/train/proc/recurse_glide_size(var/glide_size)
+	set_glide_size(glide_size)
+	if (!tow)
+		return
+
+	tow.recurse_glide_size(glide_size)
 
 /obj/vehicle/train/Collide(atom/Obstacle)
 	. = ..()
@@ -67,7 +91,7 @@
 			if(isliving(load))
 				var/mob/living/D = load
 				to_chat(D, SPAN_WARNING("You hit [M]!"))
-				msg_admin_attack("[D.name] ([D.ckey]) hit [M.name] ([M.ckey]) with [src]. (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[src.x];Y=[src.y];Z=[src.z]'>JMP</a>)",ckey=key_name(D),ckey_target=key_name(M))
+				msg_admin_attack("[D.name] ([D.ckey]) hit [M.name] ([M.ckey]) with [src]. (<A href='byond://?_src_=holder;adminplayerobservecoodjump=1;X=[src.x];Y=[src.y];Z=[src.z]'>JMP</a>)",ckey=key_name(D),ckey_target=key_name(M))
 
 
 //-------------------------------------------
@@ -84,14 +108,14 @@
 // Interaction procs
 //-------------------------------------------
 
-/obj/vehicle/train/MouseDrop_T(atom/dropping, mob/user)
+/obj/vehicle/train/mouse_drop_receive(atom/dropped, mob/user, params)
 	if(use_check_and_message(user))
 		return
-	if(istype(dropping, /obj/vehicle/train))
-		latch(dropping, user)
+	if(istype(dropped, /obj/vehicle/train))
+		latch(dropped, user)
 	else
-		if(!load(dropping))
-			to_chat(user, SPAN_WARNING("You were unable to load \the [dropping] on \the [src]."))
+		if(!load(dropped))
+			to_chat(user, SPAN_WARNING("You were unable to load \the [dropped] on \the [src]."))
 
 /obj/vehicle/train/attack_hand(mob/user as mob)
 	if(use_check_and_message(user))
@@ -103,7 +127,7 @@
 		unload(user)			//unload if loaded
 
 /obj/vehicle/train/attackby(obj/item/attacking_item, mob/user)
-	if(attacking_item.iswrench())
+	if(attacking_item.tool_behaviour == TOOL_WRENCH)
 		attacking_item.play_tool_sound(get_turf(src), 70)
 		unattach(user)
 		return
@@ -177,7 +201,7 @@
 
 		if(dir == T_dir) 	//if car is ahead
 			src.attach_to(T, user)
-		else if(reverse_direction(dir) == T_dir)	//else if car is behind
+		else if(REVERSE_DIR(dir) == T_dir)	//else if car is behind
 			T.attach_to(src, user)
 
 //returns 1 if this is the lead car of the train

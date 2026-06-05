@@ -4,7 +4,7 @@
 	icon_state = "odysseus"
 
 	e_head = /obj/item/mech_component/sensors/light
-	e_body = /obj/item/mech_component/chassis/light
+	e_body = /obj/item/mech_component/chassis/light/cell
 	e_arms = /obj/item/mech_component/manipulators/light
 	e_legs = /obj/item/mech_component/propulsion/light
 	e_color = COLOR_OFF_WHITE
@@ -18,7 +18,7 @@
 	icon_state = "light_arms"
 	melee_damage = 15
 	action_delay = 15
-	max_damage = 100
+	max_damage = 150
 	power_use = 1500
 	desc = "As flexible as they are fragile, these Bishop Cybernetics manipulators can follow a pilot's movements in close to real time."
 	punch_sound = 'sound/mecha/mech_punch_fast.ogg'
@@ -29,6 +29,7 @@
 	icon_state = "light_legs"
 	move_delay = 2
 	turn_delay = 2
+	damaged_delay = 4
 	max_damage = 100
 	power_use = 1500
 	desc = "The electrical systems driving these legs are almost totally silent. Unfortunately slamming a plate of metal against the ground is not."
@@ -42,7 +43,7 @@
 	power_use = 12000
 	desc = "A series of high resolution optical sensors."
 	vision_flags = SEE_TURFS
-	see_invisible = SEE_INVISIBLE_NOLIGHTING
+	lighting_alpha = LIGHTING_PLANE_ALPHA_SOMEWHAT_INVISIBLE
 
 /obj/item/mech_component/sensors/light/prebuild()
 	..()
@@ -76,12 +77,19 @@
 	)
 	. = ..()
 
+/obj/item/mech_component/chassis/light/nuclear
+	cell_type = /obj/item/cell/mecha/nuclear
+
+/obj/item/mech_component/chassis/light/cell
+	cell_type = /obj/item/cell/mecha
+
 /mob/living/heavy_vehicle/premade/light/legion
 	name = "legion support exosuit"
 	desc = "A light and agile exosuit painted in the colours of the Tau Ceti Foreign Legion."
 	icon_state = "odysseus"
 
 	e_color = COLOR_TCFL
+	e_body = /obj/item/mech_component/chassis/light/nuclear
 
 	h_head = /obj/item/mecha_equipment/light
 	h_back = /obj/item/mecha_equipment/sleeper
@@ -96,6 +104,7 @@
 	icon_state = "odysseus"
 
 	e_color = COLOR_IAC
+	e_body = /obj/item/mech_component/chassis/light/nuclear
 
 	h_head = /obj/item/mecha_equipment/light
 	h_back = /obj/item/mecha_equipment/sleeper
@@ -109,6 +118,7 @@
 	desc = "A light and nimble exosuit, bearing the colour scheme of the Unathi Kataphracts."
 
 	e_color = COLOR_CHESTNUT
+	e_body = /obj/item/mech_component/chassis/light/nuclear
 
 	h_back = /obj/item/mecha_equipment/quick_enter
 	h_l_hand = /obj/item/mecha_equipment/clamp
@@ -120,8 +130,9 @@
 	desc = "A light and nimble recon exosuit, bearing the colour scheme of the Solarian Armed Forces."
 
 	e_color = COLOR_DARK_GREEN_GRAY
-	e_arms = /obj/item/mech_component/manipulators/combat
 	e_head = /obj/item/mech_component/sensors/combat
+	e_body = /obj/item/mech_component/chassis/light/nuclear
+	e_arms = /obj/item/mech_component/manipulators/combat
 	e_legs = /obj/item/mech_component/propulsion/hover/light
 
 	h_back = /obj/item/mecha_equipment/quick_enter

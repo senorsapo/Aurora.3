@@ -1,16 +1,17 @@
 /datum/faction/pmc
 	name = "Private Military Contracting Group"
-	description = {"<p>
+	description = {"
 	The Private Military Contracting Group is a coalition of security and medical contractors;
-	borne from the necessity of protecting the Stellar Corporate Conglomerate and its holdings.
+	borne from the necessity of protecting the Stellar Corporate Conglomerate and its holdings.<br>
 	Following the ever-growing corporate empire, mercenaries and contractors from all across the spur are deployed accordingly;
-	from mere office buildings to outposts in the Corporate Reconstruction Zone.
+	from mere office buildings to outposts in the Corporate Reconstruction Zone.<br><br>
 	Unlike the other members of the Corporate Conglomerate, the Private Military Contracting Group has few employees of its own.
 	Only some liaisons and bureaucrats work behind the scenes to hire and manage the contractors;
 	the rest of its members are part of several organizations contracted to supply the PMCG.
-	</p>"}
-	departments = {"Medical<br>Security"}
+	"}
+	departments = list(DEPARTMENT_MEDICAL, DEPARTMENT_SECURITY)
 	title_suffix = "PMCG"
+	wiki_page = "Private_Military_Contracting_Group"
 
 	allowed_role_types = PMC_ROLES
 
@@ -21,6 +22,7 @@
 		/datum/species/unathi,
 		/datum/species/bug = TRUE,
 		/datum/species/bug/type_b = TRUE,
+		/datum/species/bug/type_b/type_bb = TRUE,
 		/datum/species/machine
 	)
 
@@ -29,7 +31,8 @@
 			SPECIES_DIONA,
 			SPECIES_DIONA_COEUS,
 			SPECIES_VAURCA_WORKER,
-			SPECIES_VAURCA_WARRIOR
+			SPECIES_VAURCA_WARRIOR,
+			SPECIES_VAURCA_ATTENDANT
 		)
 	)
 
@@ -44,13 +47,16 @@
 		"Pharmacist" = /obj/outfit/job/pharmacist/pmc,
 		"Psychiatrist" = /obj/outfit/job/psychiatrist/pmc,
 		"Psychologist" = /obj/outfit/job/psychiatrist/pmc,
-		"First Responder" = /obj/outfit/job/med_tech/pmc,
+		"Paramedic" = /obj/outfit/job/med_tech/pmc,
 		"Medical Intern" = /obj/outfit/job/intern_med/pmc,
 		"Corporate Reporter" = /obj/outfit/job/journalist/pmc,
 		"Corporate Liaison" = /obj/outfit/job/representative/pmc,
+		"Corporate Aide" = /obj/outfit/job/corporate_aide/pmc,
+		"Assistant" = /obj/outfit/job/assistant/pmc,
+		"Medical Orderly" = /obj/outfit/job/assistant/med_assistant/pmc,
 		"Off-Duty Crew Member" = /obj/outfit/job/visitor/pmc,
-		"Security Personnel" = /obj/outfit/job/officer/pmc,
-		"Medical Personnel" = /obj/outfit/job/med_tech/pmc
+		"Security Personnel" = /obj/outfit/job/officer/event/pmc,
+		"Medical Personnel" = /obj/outfit/job/med_tech/event/pmc
 	)
 
 /obj/outfit/job/officer/pmc
@@ -129,7 +135,7 @@
 	name = "Surgeon - PMC"
 
 	uniform = /obj/item/clothing/under/rank/medical/surgeon/pmc
-	suit = /obj/item/clothing/suit/storage/toggle/labcoat/pmc
+	suit = /obj/item/clothing/suit/storage/surgical_gown/pmc/alt
 	id = /obj/item/card/id/pmc
 	shoes = /obj/item/clothing/shoes/sneakers/medsci/pmc
 
@@ -168,11 +174,11 @@
 	messengerbag_faction = /obj/item/storage/backpack/messenger/pmcg
 
 /obj/outfit/job/med_tech/pmc
-	name = "First Responder - PMC"
+	name = "Paramedic - PMC"
 
 	head = /obj/item/clothing/head/softcap/pmc
-	uniform = /obj/item/clothing/under/rank/medical/first_responder/pmc
-	suit = /obj/item/clothing/suit/storage/toggle/fr_jacket/pmc
+	uniform = /obj/item/clothing/under/rank/medical/paramedic/pmc
+	suit = /obj/item/clothing/suit/storage/toggle/para_jacket/pmc
 	id = /obj/item/card/id/pmc
 
 	backpack_faction = /obj/item/storage/backpack/pmcg
@@ -207,6 +213,18 @@
 	dufflebag_faction = /obj/item/storage/backpack/duffel/pmcg
 	messengerbag_faction = /obj/item/storage/backpack/messenger/pmcg
 
+/obj/outfit/job/corporate_aide/pmc
+	name = "PMC Corporate Aide"
+
+	id = /obj/item/card/id/pmc
+	head = /obj/item/clothing/head/beret/corporate/pmc
+	suit = /obj/item/clothing/suit/storage/toggle/corp/pmc
+
+	backpack_faction = /obj/item/storage/backpack/pmcg
+	satchel_faction = /obj/item/storage/backpack/satchel/pmcg
+	dufflebag_faction = /obj/item/storage/backpack/duffel/pmcg
+	messengerbag_faction = /obj/item/storage/backpack/messenger/pmcg
+
 /obj/outfit/job/journalist/pmc
 	name = "Corporate Reporter - PMC"
 
@@ -218,9 +236,53 @@
 	dufflebag_faction = /obj/item/storage/backpack/duffel/pmcg
 	messengerbag_faction = /obj/item/storage/backpack/messenger/pmcg
 
+/obj/outfit/job/assistant/pmc
+	name = "Assistant - PMC"
+
+	id = /obj/item/card/id/pmc
+
+	backpack_faction = /obj/item/storage/backpack/pmcg
+	satchel_faction = /obj/item/storage/backpack/satchel/pmcg
+	dufflebag_faction = /obj/item/storage/backpack/duffel/pmcg
+	messengerbag_faction = /obj/item/storage/backpack/messenger/pmcg
+
+/obj/outfit/job/assistant/med_assistant/pmc
+	name = "Medical Orderly - PMC"
+
+	id = /obj/item/card/id/pmc
+
+	backpack_faction = /obj/item/storage/backpack/pmcg
+	satchel_faction = /obj/item/storage/backpack/satchel/pmcg
+	dufflebag_faction = /obj/item/storage/backpack/duffel/pmcg
+	messengerbag_faction = /obj/item/storage/backpack/messenger/pmcg
+
 /obj/outfit/job/visitor/pmc
 	name = "Off-Duty Crew Member - PMC"
 
+	id = /obj/item/card/id/pmc
+
+	backpack_faction = /obj/item/storage/backpack/pmcg
+	satchel_faction = /obj/item/storage/backpack/satchel/pmcg
+	dufflebag_faction = /obj/item/storage/backpack/duffel/pmcg
+	messengerbag_faction = /obj/item/storage/backpack/messenger/pmcg
+
+/obj/outfit/job/officer/event/pmc
+	name = "Security Personnel - PMC"
+
+	uniform = /obj/item/clothing/under/rank/security/pmc
+	id = /obj/item/card/id/pmc
+
+	backpack_faction = /obj/item/storage/backpack/pmcg
+	satchel_faction = /obj/item/storage/backpack/satchel/pmcg
+	dufflebag_faction = /obj/item/storage/backpack/duffel/pmcg
+	messengerbag_faction = /obj/item/storage/backpack/messenger/pmcg
+
+/obj/outfit/job/med_tech/event/pmc
+	name = "Medical Personnel - PMC"
+
+	head = /obj/item/clothing/head/softcap/pmc
+	uniform = /obj/item/clothing/under/rank/medical/paramedic/pmc
+	suit = /obj/item/clothing/suit/storage/toggle/para_jacket/pmc
 	id = /obj/item/card/id/pmc
 
 	backpack_faction = /obj/item/storage/backpack/pmcg

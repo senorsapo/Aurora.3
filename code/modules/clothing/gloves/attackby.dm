@@ -1,5 +1,5 @@
 /obj/item/clothing/gloves/attackby(obj/item/attacking_item, mob/user)
-	if(attacking_item.ismultitool())
+	if(attacking_item.tool_behaviour == TOOL_MULTITOOL)
 		var/siemens_percentage = 100 * siemens_coefficient
 		to_chat(user, SPAN_NOTICE("You probe \the [src] with \the [attacking_item]. The gloves will let [siemens_percentage]% of an electric shock through."))
 		return
@@ -33,7 +33,7 @@
 		return
 
 	//add wires
-	if(attacking_item.iscoil())
+	if(attacking_item.tool_behaviour == TOOL_CABLECOIL)
 		var/obj/item/stack/cable_coil/C = attacking_item
 		if (clipped)
 			to_chat(user, SPAN_NOTICE("The [src] are too badly mangled for wiring."))
@@ -61,12 +61,12 @@
 			return
 		user.drop_from_inventory(attacking_item, src)
 		cell = attacking_item
-		w_class = ITEMSIZE_NORMAL
+		w_class = WEIGHT_CLASS_NORMAL
 		to_chat(user, SPAN_NOTICE("You attach \the [cell] to the [src]."))
 		update_icon()
 		return
 
-	else if((cell || wired) && (attacking_item.iswirecutter() || istype(attacking_item, /obj/item/surgery/scalpel)))
+	else if((cell || wired) && (attacking_item.tool_behaviour == TOOL_WIRECUTTER || istype(attacking_item, /obj/item/surgery/scalpel)))
 
 		//stunglove stuff
 		if(cell)
@@ -74,7 +74,7 @@
 			to_chat(user, SPAN_NOTICE("You cut \the [cell] away from the [src]."))
 			cell.forceMove(get_turf(src.loc))
 			cell = null
-			w_class = ITEMSIZE_SMALL
+			w_class = WEIGHT_CLASS_SMALL
 			update_icon()
 			return
 		if(wired) //wires disappear into the void because fuck that shit

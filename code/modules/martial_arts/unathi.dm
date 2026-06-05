@@ -45,8 +45,21 @@
 	add_to_streak("D",D)
 	if(check_streak(A,D))
 		return 1
-	basic_hit(A,D)
+	if(istype(D, /mob/living/simple_animal))
+		simple_animal_basic_disarm(A,D)
+	else
+		basic_hit(A,D)
 	return 1
+
+/datum/martial_art/kis_khan/simple_animal_basic_disarm(var/mob/living/carbon/human/A, var/mob/living/simple_animal/D)
+	if(!D.paralysis)
+		A.visible_message("[SPAN_BOLD("[A]")] delivers a blow to \the [SPAN_BOLD("[D]")]'s head, making [D.get_pronoun("him")] fall unconscious!")
+		A.do_attack_animation(D)
+		playsound(D.loc, SFX_PUNCH, 25, TRUE, MEDIUM_RANGE_SOUND_EXTRARANGE+4)
+		D.AdjustParalysis(5)
+	else
+		to_chat(A, SPAN_WARNING("\The [SPAN_BOLD("[D]")] is already unconscious!"))
+		return
 
 /datum/martial_art/kis_khan/proc/tail_sweep(var/mob/living/carbon/human/A, var/mob/living/carbon/human/D)
 	if(D.stat || D.weakened)
@@ -55,7 +68,7 @@
 		return 0
 	TornadoAnimate(A)
 	A.visible_message(SPAN_WARNING("[A] sweeps [D] with their tail!"))
-	playsound(get_turf(A), /singleton/sound_category/swing_hit_sound, 50, 1, -1)
+	playsound(get_turf(A), SFX_SWING_HIT, 50, 1, -1)
 	D.apply_damage(5, DAMAGE_BRUTE)
 	D.Weaken(2)
 	return 1
@@ -77,7 +90,7 @@
 		playsound(D, 'sound/weapons/thudswoosh.ogg', 50, 1, -1)
 	else
 		D.visible_message(SPAN_DANGER("[A] attempted to disarm [D]!"))
-		playsound(D, /singleton/sound_category/punchmiss_sound, 25, 1, -1)
+		playsound(D, SFX_PUNCH_MISS, 25, 1, -1)
 	return 1
 
 /datum/martial_art/kis_khan/proc/hammering_strike(var/mob/living/carbon/human/A, var/mob/living/carbon/human/D)
@@ -97,6 +110,7 @@
 	to_chat(usr, "<span class='notice'>Tail Sweep</span>: Harm Harm Disarm. Trips the victim with your tail, rendering them prone and unable to move for a short time.")
 	to_chat(usr, "<span class='notice'>Swift Disarm</span>: Disarm Disarm Grab. Strikes your target's weapon, trying to disarm it from their hands.")
 	to_chat(usr, "<span class='notice'>Hammering Strike</span>: Disarm Harm Disarm. Delivers a strikes that will push the target away from you.")
+	to_chat(usr, "<span class='notice'>You can also deal a knockout blow to non-sapient animals by using disarm.</span>")
 
 /obj/item/martial_manual/unathi
 	name = "kis khan scroll"

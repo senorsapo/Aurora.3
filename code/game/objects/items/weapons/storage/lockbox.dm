@@ -7,9 +7,9 @@
 	icon_state = "lockbox+l"
 	item_state = "lockbox+l"
 	contained_sprite = TRUE
-	w_class = ITEMSIZE_LARGE
-	max_w_class = ITEMSIZE_NORMAL
-	max_storage_space = 14 //The sum of the w_classes of all the items in this storage item.
+	w_class = WEIGHT_CLASS_BULKY
+	max_w_class = WEIGHT_CLASS_NORMAL
+	max_storage_space = DEFAULT_BOX_STORAGE //The sum of the w_classes of all the items in this storage item.
 	req_access = list(ACCESS_ARMORY)
 	var/locked = 1
 	var/broken = 0
@@ -18,7 +18,7 @@
 	var/icon_broken = "lockbox+b"
 
 
-/obj/item/storage/lockbox/attackby(attacking_item, mob/user)
+/obj/item/storage/lockbox/attackby(obj/item/attacking_item, mob/user, params)
 	if(istype(attacking_item, /obj/item/card/id))
 		if(src.broken)
 			to_chat(user, SPAN_WARNING("It appears to be broken."))
@@ -36,13 +36,13 @@
 				to_chat(user, SPAN_NOTICE("You unlock \the [src]!"))
 				return
 		else
-			to_chat(user, SPAN_WARNING("Access Denied"))
+			to_chat(user, SPAN_WARNING("Access denied"))
 	else if(istype(attacking_item, /obj/item/melee/energy/blade))
 		if(emag_act(INFINITY, user, attacking_item, "The locker has been sliced open by [user] with an energy blade!", "You hear metal being sliced and sparks flying."))
 			var/obj/item/melee/energy/blade/blade = attacking_item
 			blade.spark_system.queue()
 			playsound(src.loc, 'sound/weapons/blade.ogg', 50, 1)
-			playsound(src.loc, /singleton/sound_category/spark_sound, 50, 1)
+			playsound(src.loc, SFX_SPARKS, 50, 1)
 	if(!locked)
 		..()
 	else
@@ -101,15 +101,15 @@
 	name = "weapons lockbox"
 	desc = "A high security weapons lockbox"
 	req_access = list(ACCESS_ARMORY)
-	starts_with = list(/obj/item/gun/energy/lawgiver = 1)
+	starts_with = list(/obj/item/gun/energy/acp = 1)
 
 /obj/item/storage/lockbox/medal
 	name = "medal box"
 	desc = "A locked box used to store medals."
 	icon_state = "medalbox+l"
 	item_state = "briefcase"
-	w_class = ITEMSIZE_NORMAL
-	max_w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_NORMAL
+	max_w_class = WEIGHT_CLASS_SMALL
 	req_access = list(ACCESS_CAPTAIN)
 	icon_locked = "medalbox+l"
 	icon_closed = "medalbox"

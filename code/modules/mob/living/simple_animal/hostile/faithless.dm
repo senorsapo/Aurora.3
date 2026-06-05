@@ -12,7 +12,7 @@
 	response_disarm = "shoves"
 	response_harm = "hits"
 	speed = 4
-	maxHealth = 80
+	maxhealth = 80
 	health = 80
 	environment_smash = 2
 
@@ -20,7 +20,7 @@
 
 	melee_damage_lower = 15
 	melee_damage_upper = 15
-	attacktext = "gripped"
+	attacktext = "grips"
 	attack_sound = 'sound/hallucinations/growl1.ogg'
 
 	min_oxy = 0
@@ -38,12 +38,13 @@
 	flying = TRUE
 
 	psi_pingable = FALSE
+	sample_data = null
 
 /mob/living/simple_animal/hostile/faithless/Allow_Spacemove(var/check_drift = 0)
 	return 1
 
 /mob/living/simple_animal/hostile/faithless/FindTarget()
-	var/my_target = target_mob
+	var/my_target = last_found_target
 	. = ..()
 	if(. && (prob(30) || (. != my_target)))
 		audible_emote("wails at [.]")
@@ -62,10 +63,6 @@
 
 /mob/living/simple_animal/hostile/faithless/cult/cultify()
 	return
-
-/mob/living/simple_animal/hostile/faithless/cult/Life()
-	..()
-	check_horde()
 
 /mob/living/simple_animal/hostile/faithless/can_fall()
 	return FALSE

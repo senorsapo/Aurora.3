@@ -7,18 +7,188 @@
 	density = TRUE
 	layer = 7
 
-/obj/structure/automobile/random/Initialize(mapload)
-	. = ..()
-	ClearOverlays()
-	name = "[pick("deluxe Shibata Sport automotive","beat-up Poplar Auto Group automotive","weathered Shibata Sport automotive","beat-up Langenfeld automotive","deluxe Langenfeld automotive","weathered Langenfeld automotive")]"
-	desc = "A [name] vehicle of working condition."
-	icon_state = "car[rand(1, 10)]"
-	return
+/obj/random/automobile
+	name = "random civilian automobile"
+	desc = "A random make/model/color of a civilian vehicle"
+	icon = 'icons/obj/structure/urban/cars.dmi'
+	icon_state = "random_car"
+	spawnlist = list(
+		/obj/structure/automobile/poplar_boxvan_blue/deluxe = 1,
+		/obj/structure/automobile/poplar_boxvan_blue/weathered = 3,
+		/obj/structure/automobile/poplar_boxvan_blue/beat_up = 2,
+		/obj/structure/automobile/poplar_boxvan_green/deluxe = 1,
+		/obj/structure/automobile/poplar_boxvan_green/weathered = 3,
+		/obj/structure/automobile/poplar_boxvan_green/beat_up = 2,
+		/obj/structure/automobile/shibata_compact_white/deluxe = 1,
+		/obj/structure/automobile/shibata_compact_white/weathered = 3,
+		/obj/structure/automobile/shibata_compact_white/beat_up = 2,
+		/obj/structure/automobile/shibata_compact_teal/deluxe = 1,
+		/obj/structure/automobile/shibata_compact_teal/weathered = 3,
+		/obj/structure/automobile/shibata_compact_teal/beat_up = 2,
+		/obj/structure/automobile/shibata_compact_cyan/deluxe = 1,
+		/obj/structure/automobile/shibata_compact_cyan/weathered = 3,
+		/obj/structure/automobile/shibata_compact_cyan/beat_up = 2,
+		/obj/structure/automobile/shibata_compact_yellow/deluxe = 1,
+		/obj/structure/automobile/shibata_compact_yellow/weathered = 3,
+		/obj/structure/automobile/shibata_compact_yellow/beat_up = 2,
+		/obj/structure/automobile/langenfeld_hybrid_green/deluxe = 1,
+		/obj/structure/automobile/langenfeld_hybrid_green/weathered = 3,
+		/obj/structure/automobile/langenfeld_hybrid_green/beat_up = 2,
+		/obj/structure/automobile/langenfeld_hybrid_red/deluxe = 1,
+		/obj/structure/automobile/langenfeld_hybrid_red/weathered = 3,
+		/obj/structure/automobile/langenfeld_hybrid_red/beat_up = 2,
+		/obj/structure/automobile/langenfeld_hybrid_purple/deluxe = 1,
+		/obj/structure/automobile/langenfeld_hybrid_purple/weathered = 3,
+		/obj/structure/automobile/langenfeld_hybrid_purple/beat_up = 2,
+		/obj/structure/automobile/langenfeld_hybrid_white/deluxe = 1,
+		/obj/structure/automobile/langenfeld_hybrid_white/weathered = 3,
+		/obj/structure/automobile/langenfeld_hybrid_white/beat_up = 2
+	)
 
 /obj/structure/automobile/police
 	name = "police cruiser"
 	desc = "A police vehicle with all the bells and whistles you'd expect from a decently-funded agency."
 	icon_state = "copcar"
+
+/obj/structure/automobile/poplar_boxvan_blue
+	name = "blue poplar auto group van"
+	desc = "A boxy blue van. Cars in this style are found everywhere in the spur."
+	icon_state = "car1"
+
+/obj/structure/automobile/poplar_boxvan_blue/deluxe
+	name = "deluxe poplar auto group van"
+
+/obj/structure/automobile/poplar_boxvan_blue/weathered
+	name = "weathered poplar auto group van"
+
+/obj/structure/automobile/poplar_boxvan_blue/beat_up
+	name = "beat-up poplar auto group van"
+
+/obj/structure/automobile/poplar_boxvan_green
+	name = "green poplar auto group van"
+	desc = "A boxy green van. Cars in this style are found everywhere in the spur."
+	icon_state = "car2"
+
+/obj/structure/automobile/poplar_boxvan_green/deluxe
+	name = "deluxe poplar auto group van"
+
+/obj/structure/automobile/poplar_boxvan_green/weathered
+	name = "weathered poplar auto group van"
+
+/obj/structure/automobile/poplar_boxvan_green/beat_up
+	name = "beat-up poplar auto group van"
+
+/obj/structure/automobile/shibata_compact_white
+	name = "white shibata sport compact"
+	desc = "A compact electric car with a light cream paint job."
+	icon_state = "car3"
+
+/obj/structure/automobile/shibata_compact_white/deluxe
+	name = "deluxe shibata sport compact"
+
+/obj/structure/automobile/shibata_compact_white/weathered
+	name = "weathered shibata sport compact"
+
+/obj/structure/automobile/shibata_compact_white/beat_up
+	name = "beat-up shibata sport compact"
+
+/obj/structure/automobile/shibata_compact_teal
+	name = "teal shibata sport compact"
+	desc = "A compact electric car with a teal paint job."
+	icon_state = "car4"
+
+/obj/structure/automobile/shibata_compact_teal/deluxe
+	name = "deluxe shibata sport compact"
+
+/obj/structure/automobile/shibata_compact_teal/weathered
+	name = "weathered shibata sport compact"
+
+/obj/structure/automobile/shibata_compact_teal/beat_up
+	name = "beat-up shibata sport compact"
+
+/obj/structure/automobile/shibata_compact_cyan
+	name = "cyan shibata sport compact"
+	desc = "A compact electric car with a cyan paint job."
+	icon_state = "car5"
+
+/obj/structure/automobile/shibata_compact_cyan/deluxe
+	name = "deluxe shibata sport compact"
+
+/obj/structure/automobile/shibata_compact_cyan/weathered
+	name = "weathered shibata sport compact"
+
+/obj/structure/automobile/shibata_compact_cyan/beat_up
+	name = "beat-up shibata sport compact"
+
+/obj/structure/automobile/shibata_compact_yellow
+	name = "yellow shibata sport compact"
+	desc = "A compact electric car with a yellow paint job."
+	icon_state = "car6"
+
+/obj/structure/automobile/shibata_compact_yellow/deluxe
+	name = "deluxe shibata sport compact"
+
+/obj/structure/automobile/shibata_compact_yellow/weathered
+	name = "weathered shibata sport compact"
+
+/obj/structure/automobile/shibata_compact_yellow/beat_up
+	name = "beat-up shibata sport compact"
+
+/obj/structure/automobile/langenfeld_hybrid_green
+	name = "green langenfeld hybrid"
+	desc = "A hybrid combustion-electric car. Popular anywhere where electricity is expensive. This one has an olive green paint job."
+	icon_state = "car7"
+
+/obj/structure/automobile/langenfeld_hybrid_green/deluxe
+	name = "deluxe langenfeld compact"
+
+/obj/structure/automobile/langenfeld_hybrid_green/weathered
+	name = "weathered langenfeld compact"
+
+/obj/structure/automobile/langenfeld_hybrid_green/beat_up
+	name = "beat-up langenfeld compact"
+
+/obj/structure/automobile/langenfeld_hybrid_red
+	name = "red langenfeld hybrid"
+	desc = "A hybrid combustion-electric car. Popular anywhere where electricity is expensive. This one has a darker red paint job."
+	icon_state = "car8"
+
+/obj/structure/automobile/langenfeld_hybrid_red/deluxe
+	name = "deluxe langenfeld compact"
+
+/obj/structure/automobile/langenfeld_hybrid_red/weathered
+	name = "weathered langenfeld compact"
+
+/obj/structure/automobile/langenfeld_hybrid_red/beat_up
+	name = "beat-up langenfeld compact"
+
+/obj/structure/automobile/langenfeld_hybrid_purple
+	name = "purple langenfeld hybrid"
+	desc = "A hybrid combustion-electric car. Popular anywhere where electricity is expensive. This one has a midnight purple paint job."
+	icon_state = "car9"
+
+/obj/structure/automobile/langenfeld_hybrid_purple/deluxe
+	name = "deluxe langenfeld compact"
+
+/obj/structure/automobile/langenfeld_hybrid_purple/weathered
+	name = "weathered langenfeld compact"
+
+/obj/structure/automobile/langenfeld_hybrid_purple/beat_up
+	name = "beat-up langenfeld compact"
+
+/obj/structure/automobile/langenfeld_hybrid_white
+	name = "white langenfeld hybrid"
+	desc = "A hybrid combustion-electric car. Popular anywhere where electricity is expensive. This one has a light cream paint job."
+	icon_state = "car10"
+
+/obj/structure/automobile/langenfeld_hybrid_white/deluxe
+	name = "deluxe langenfeld compact"
+
+/obj/structure/automobile/langenfeld_hybrid_white/weathered
+	name = "weathered langenfeld compact"
+
+/obj/structure/automobile/langenfeld_hybrid_white/beat_up
+	name = "beat-up langenfeld compact"
 
 /obj/structure/automobile_filler
 	name = "vehicle"
@@ -33,7 +203,7 @@
 	desc = "A stop sign to direct traffic. Sometimes a demand."
 	icon = 'icons/obj/structure/urban/road_signs.dmi'
 	icon_state = "stop"
-	layer = 9
+	layer = STRUCTURE_LAYER
 	anchored = TRUE
 
 /obj/structure/road_sign/yield
@@ -67,12 +237,11 @@
 	name = "[street_name]"
 	desc = "This sign indicates this crossing street is called [street_name]."
 
-/obj/structure/stairs/urban
-	abstract_type = /obj/structure/stairs/urban
+ABSTRACT_TYPE(/obj/structure/stairs/urban)
 	icon = 'icons/obj/structure/urban/ledges.dmi'
 	icon_state = "stairs-single"
 	layer = 2.01
-	opacity = 1
+	opacity = TRUE
 
 /obj/structure/stairs/urban/right
 	dir = EAST
@@ -92,12 +261,11 @@
 	dir = SOUTH
 	bound_height = 64
 
-/obj/structure/stairs/urban/road_ramp
+ABSTRACT_TYPE(/obj/structure/stairs/urban/road_ramp)
 	name = "inclined asphalt ramp"
 	desc = "A solid asphalt ramp to allow your vehicle to traverse inclines with ease."
 	icon_state = "road-ramp-center"
 	layer = 2.02
-	abstract_type = /obj/structure/stairs/urban/road_ramp
 
 /obj/structure/stairs/urban/road_ramp/right
 	dir = EAST
@@ -114,6 +282,31 @@
 	bound_y = -32
 
 /obj/structure/stairs/urban/road_ramp/south
+	dir = SOUTH
+	bound_height = 64
+
+ABSTRACT_TYPE(/obj/structure/stairs/urban/road_ramp_assun)
+	icon = 'icons/obj/structure/urban/ledges_assun.dmi'
+	name = "inclined asphalt ramp"
+	desc = "A solid asphalt ramp to allow your vehicle to traverse inclines with ease."
+	icon_state = "road-ramp-center"
+	layer = 2.02
+
+/obj/structure/stairs/urban/road_ramp_assun/right
+	dir = EAST
+	bound_width = 64
+	bound_x = -32
+
+/obj/structure/stairs/urban/road_ramp_assun/left
+	dir = WEST
+	bound_width = 64
+
+/obj/structure/stairs/urban/road_ramp_assun/north
+	dir = NORTH
+	bound_height = 64
+	bound_y = -32
+
+/obj/structure/stairs/urban/road_ramp_assun/south
 	dir = SOUTH
 	bound_height = 64
 
@@ -164,7 +357,7 @@
 	var/open = 0
 
 /obj/structure/manhole/attackby(obj/item/attacking_item, mob/user)
-	if(attacking_item.iscrowbar())
+	if(attacking_item.tool_behaviour == TOOL_CROWBAR)
 		playsound(src.loc, 'sound/effects/stonedoor_openclose.ogg', 50, 1)
 		to_chat(user, "You forcibly relocate the manhole, hopefully in the right way.")
 	if(!open)
@@ -213,12 +406,23 @@
 	icon_state = "television"
 	anchored = TRUE
 
+/obj/structure/television/adhomai
+	name = "adhomaian television"
+	desc = "A classic box television, manufactured on Adhomai."
+	icon = 'icons/obj/computer.dmi'
+
 /obj/structure/dressing_divider
 	name = "wardrobe dressing divider"
 	desc = "A divider for an environment where you're probably swapping clothes, made with your privacy in mind."
 	icon = 'icons/obj/structure/urban/tailoring.dmi'
 	icon_state = "divider1"
 	anchored = TRUE
+
+/obj/structure/dressing_divider/hospital
+	name = "hospital curtain"
+	desc = "Usually comes with hospital beds."
+	icon_state = "hospitalcurtain"
+	layer = ABOVE_HUMAN_LAYER
 
 /obj/structure/neon_sign
 	name = "large neon sign"
@@ -228,18 +432,81 @@
 	anchored = TRUE
 	layer = ABOVE_HUMAN_LAYER
 
-/obj/structure/shipping_container
+/obj/structure/neon_sign/assunzione/music_shop
+	name = "\improper PV AV"
+	desc = "The PV AV (Port Volturno Audio / Visual), a trendy hang-out spot for the music-conscious. Local radio DJ, Livia Sabatino, is said to be a regular."
+	icon = 'icons/obj/structure/urban/assunzione_neon.dmi'
+	icon_state = "PV_AV"
+	layer = 5.16 // in the biz, we call this the above above ABOVE human layer
+
+/obj/structure/neon_sign/assunzione/music_shop/Initialize()
+	. = ..()
+	AddComponent(/datum/component/large_transparency)
+
+/obj/structure/neon_sign/assunzione/liquor_shop
+	name = "\improper Assunzione Duty-Free Libations"
+	desc = "Spaceports are fine places to make a tidy profit selling alcohol. Don't drink and pilot."
+	icon = 'icons/obj/structure/urban/assunzione_neon.dmi'
+	icon_state = "duty_free"
+	layer = 5.16 // in the biz, we call this the above above ABOVE human layer
+
+/obj/structure/neon_sign/assunzione/repair_shop
+	name = "\improper Sybdari Electromechanics"
+	desc = "A hybrid mechanics' bay and electronics shop that will fix just anything, from mopeds to laptops. Though not built for serious IPC work, they can help out in a pinch. A subsidiary of Iraklio Shipworks, as it happens."
+	icon = 'icons/obj/structure/urban/assunzione_neon.dmi'
+	icon_state = "repair_shop_r"
+	layer = 5.16 // in the biz, we call this the above above ABOVE human layer
+
+/obj/structure/neon_sign/assunzione/hotel
+	name = "\improper H O T E L sign"
+	desc = "A design five-hundred years old and still seen all across human space."
+	icon = 'icons/obj/structure/urban/assunzione_neon.dmi'
+	icon_state = "hotel"
+
+/obj/structure/neon_sign/assunzione/chapel
+	name = "\improper Saint Alvisiol Chapel"
+	desc = "A local chapel consecrated by the Luceist Church, dedicated to spreading the Light of Ennoia."
+	icon = 'icons/obj/structure/urban/assunzione_neon.dmi'
+	icon_state = "assunzione"
+
+/obj/structure/neon_sign/assunzione/witch_hand
+	name = "\improper WITCH HAND"
+	desc = "A massive neon sign for Port Volturno's best underground nightclub. Not for the pious, and <i>especially</i> not for the photosensitive. Like, seriously. They make you sign a waiver."
+	icon = 'icons/obj/structure/urban/assunzione_96x160.dmi'
+	icon_state = "wh_sign"
+	layer = 5.16 // in the biz, we call this the above above ABOVE human layer
+	pixel_x = -32
+	pixel_y = -32
+	light_range = 3.8
+	light_power = 0.5
+	light_color = LIGHT_COLOR_VIOLET
+
+/obj/structure/neon_sign/assunzione/witch_hand/Initialize()
+	. = ..()
+	AddComponent(/datum/component/large_transparency)
+	AddOverlays(emissive_appearance(icon, "[icon_state]-em", src, alpha = src.alpha))
+	set_light_range_power_color(light_range, light_power, light_color)
+	set_light_on(TRUE)
+	bound_width = 96
+	bound_height = 96
+	return INITIALIZE_HINT_NORMAL
+
+/obj/structure/shipping_container_old
 	name = "freight container"
 	desc = "A hulking industrial shipping container, bound for who knows where."
-	icon = 'icons/obj/structure/industrial/shipping_containers.dmi'
+	icon = 'icons/obj/structure/industrial/shipping_containers_old.dmi'
 	icon_state = "blue1"
 	anchored = TRUE
 	density = TRUE
 	layer = ABOVE_HUMAN_LAYER
 
+/obj/structure/shipping_container_old/Initialize()
+	. = ..()
+	AddComponent(/datum/component/large_transparency)
+
 /obj/effect/overlay/container_logo
 	name = "Hephaestus Industries emblem"
-	icon = 'icons/obj/structure/industrial/shipping_containers.dmi'
+	icon = 'icons/obj/structure/industrial/shipping_containers_old.dmi'
 	icon_state = "heph1"
 	layer = ABOVE_HUMAN_LAYER + 0.01
 
@@ -258,14 +525,16 @@
 	icon = 'icons/obj/structure/urban/blockers.dmi'
 	icon_state = "rod_railing"
 	density = TRUE
-	throwpass = TRUE
-	climbable = TRUE
 	anchored = TRUE
+	pass_flags_self = PASSSTRUCTURE | LETPASSTHROW
+	climbable = TRUE
 
 /obj/structure/rod_railing/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
-	if(istype(mover,/obj/item/projectile))
+	if(mover?.movement_type & PHASING)
 		return TRUE
-	if(!istype(mover) || mover.checkpass(PASSRAILING))
+	if(istype(mover,/obj/projectile))
+		return TRUE
+	if(!istype(mover) || mover.pass_flags & PASSRAILING)
 		return TRUE
 	if(mover.throwing)
 		return TRUE
@@ -282,14 +551,18 @@
 		return FALSE
 	return TRUE
 
+/obj/structure/rod_railing/bar
+	layer = ABOVE_ABOVE_HUMAN_LAYER
+
+
 /obj/structure/dam
 	name = "concrete dam"
 	desc = "A hulking mass of concrete meant to hold in a large reservoir of water from passing downwards."
 	icon = 'icons/obj/structure/urban/blockers.dmi'
 	icon_state = "dam1"
 	density = TRUE
-	throwpass = TRUE
 	anchored = TRUE
+	pass_flags_self = PASSSTRUCTURE | LETPASSTHROW
 
 /obj/structure/road_barrier
 	name = "roadway barrier"
@@ -297,7 +570,7 @@
 	icon = 'icons/obj/structure/urban/road_edges.dmi'
 	icon_state = "guard"
 	density = TRUE
-	throwpass = TRUE
+	pass_flags_self = PASSSTRUCTURE | LETPASSTHROW
 	climbable = TRUE
 	anchored = TRUE
 
@@ -315,9 +588,11 @@
 	icon_state = "guard_top_end"
 
 /obj/structure/road_barrier/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
-	if(istype(mover,/obj/item/projectile))
+	if(mover?.movement_type & PHASING)
 		return TRUE
-	if(!istype(mover) || mover.checkpass(PASSRAILING))
+	if(istype(mover,/obj/projectile))
+		return TRUE
+	if(!istype(mover) || mover.pass_flags & PASSRAILING)
 		return TRUE
 	if(mover.throwing)
 		return TRUE
@@ -334,6 +609,26 @@
 		return FALSE
 	return TRUE
 
+/obj/structure/bunk_bed
+	name = "bunk bed"
+	desc = "A space-saving solution for living space problems. A symbol of roommate concept."
+	icon = 'icons/obj/structure/urban/bunk_beds.dmi'
+	icon_state = "zbunkbed"
+	density = TRUE
+	anchored = TRUE
+
+/obj/structure/bunk_bed/blue
+	icon_state = "zbunkbed2"
+
+/obj/structure/bunk_bed/green
+	icon_state = "zbunkbed3"
+
+/obj/structure/bunk_bed/black
+	icon_state = "zbunkbed4"
+
+/obj/structure/bunk_bed/prison
+	icon_state = "prisonbed"
+
 /obj/structure/chainlink_fence
 	name = "chainlink industrial fencing"
 	desc = "A tall, imposing metal fence. Not to be confused with the slightly more popular Chainlink of recent years."
@@ -343,22 +638,21 @@
 	color = null
 	anchored = TRUE
 	can_be_unanchored = FALSE
+	atom_flags = ATOM_FLAG_CHECKS_BORDER
+	layer = ABOVE_HUMAN_LAYER //The sprite will be in front of players when positioned correctly.
 
 /obj/structure/chainlink_fence/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)//So bullets will fly over and stuff.
-	if(air_group || (height==0))
+	if(mover?.movement_type & PHASING)
 		return TRUE
-	if(istype(mover, /obj/item/projectile))
-		var/obj/item/projectile/P = mover
-		if(P.original == src)
+	if(istype(mover, /obj/projectile))
+		if(isliving(mover))
 			return FALSE
-		if(P.firer && Adjacent(P.firer))
-			return TRUE
 		return prob(35)
-	if(isliving(mover))
-		return FALSE
-	if(istype(mover) && mover.checkpass(PASSTABLE))
+	if(!istype(mover) || mover.pass_flags & PASSGRILLE)
 		return TRUE
-	return FALSE
+	if(get_dir(loc, target) == dir)
+		return !density
+	return TRUE
 
 /obj/structure/chainlink_fence/CheckExit(var/atom/movable/O, var/turf/target)
 	if(istype(O) && CanPass(O, target))
@@ -380,9 +674,11 @@
 	can_be_unanchored = FALSE
 
 /obj/structure/rope_railing/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
-	if(istype(mover,/obj/item/projectile))
+	if(mover?.movement_type & PHASING)
 		return TRUE
-	if(!istype(mover) || mover.checkpass(PASSRAILING))
+	if(istype(mover,/obj/projectile))
+		return TRUE
+	if(!istype(mover) || mover.pass_flags & PASSRAILING)
 		return TRUE
 	if(mover.throwing)
 		return TRUE
@@ -415,7 +711,6 @@
 	density = TRUE
 	anchored = TRUE
 
-
 /obj/structure/statue/buddha
 	name = "buddha statue"
 	desc = "A bronze statue of the Amitabha Buddha, the Buddha of Limitless Light."
@@ -425,6 +720,38 @@
 	name = "gusoku"
 	desc = "A set of armor modelled after historical designs. Pieces replicating ancient artifacts are common on Konyang and viewed as favored pieces of art."
 	icon_state = "gusoku"
+
+/obj/structure/statue/aec/small
+	name = "\improper AEC memorial statue"
+	desc = "A bronze statue of the Amitabha Buddha, the Buddha of Limitless Light."
+	icon_state = "aec_small"
+
+/obj/structure/statue/aec/large
+	name = "\improper AEC memorial statue"
+	desc = "A towering memorial to all the fatalities incurred over the AEC's operations. Beneath the towering ranger in bronze, a plaque reads:<br>\
+			<b>FOR ALL HEROES FALLEN;</b><br>\
+			<b>INTREPID AND PIOUS,</b><br>\
+			<b>IN THAT HOLIEST OF MISSIONS:</b><br>\
+			<b>THE SEARCH OF LIGHT IN DARKNESS.</b><br>\
+			The list of names below is terribly long, the font so small as to be barely readable at all."
+	icon = 'icons/obj/structure/urban/assunzione_96x160.dmi'
+	icon_state = "aec_large"
+	layer = 5.16 // in the biz, we call this the above above ABOVE human layer
+	pixel_x = -32
+	pixel_y = -32
+	light_range = 3.8
+	light_power = 0.7
+	light_color = LIGHT_COLOR_VIOLET
+
+/obj/structure/statue/aec/large/Initialize()
+	. = ..()
+	AddComponent(/datum/component/large_transparency)
+	AddOverlays(emissive_appearance(icon, "[icon_state]-em", src, alpha = src.alpha))
+	set_light_range_power_color(light_range, light_power, light_color)
+	set_light_on(TRUE)
+	bound_width = 32
+	bound_height = 64
+	return INITIALIZE_HINT_NORMAL
 
 /obj/structure/sign/urban
 	name = "exit sign"
@@ -441,16 +768,58 @@
 	density = TRUE
 	layer = ABOVE_HUMAN_LAYER
 
+/obj/structure/sign/billboard/Initialize()
+	. = ..()
+	AddComponent(/datum/component/large_transparency)
+
+/obj/structure/sign/billboard/nolegs
+	name = "commercial billboard"
+	desc = "A large billboard rented out for advertisement space."
+	icon = 'icons/obj/structure/urban/billboard.dmi'
+	icon_state = "board_nolegs-l"
+	density = TRUE
+	layer = ABOVE_HUMAN_LAYER
+
 /obj/structure/sign/billboard/advert
 	name = "billboard advertisement"
 	desc = null
 	icon_state = "sign"
 	density = TRUE
+	/**
+	 * Billboard adverts have icon_states named for whether they're generic or location-specific. These variable records the # of a given type for the purpose of populating appropriate adverts.
+	 * When new adverts are added to a pool, or a new pool is added, the XYZ_adverts variables should be updated so that billboards at a given location populate their adverts randomly.
+	 */
+	var/list/advert_pool = list()
+	var/generic_adverts = 8
+	var/konyang_adverts = 11
+	var/assunzione_adverts = 3
 
-/obj/structure/sign/billboard/advert/random/Initialize(mapload)
+/obj/structure/sign/billboard/advert/random/generic/Initialize(mapload)
 	. = ..()
 	ClearOverlays()
-	icon_state = "sign[rand(1, 14)]"
+	for(var/x = 1 to generic_adverts)
+		advert_pool += "sign_generic[x]"
+	icon_state = pick(advert_pool)
+	return
+
+/obj/structure/sign/billboard/advert/random/konyang/Initialize(mapload)
+	. = ..()
+	ClearOverlays()
+	for(var/x = 1 to generic_adverts)
+		advert_pool += "sign_generic[x]"
+	for(var/y = 1 to konyang_adverts)
+		advert_pool += "sign_konyang[y]"
+	icon_state = pick(advert_pool)
+	return
+
+/obj/structure/sign/billboard/advert/random/assunzione/Initialize(mapload)
+	. = ..()
+	ClearOverlays()
+	for(var/x = 1 to generic_adverts)
+		advert_pool += "sign_generic[x]"
+	for(var/y = 1 to assunzione_adverts)
+		advert_pool += "sign_assunzione[y]"
+	icon_state = pick(advert_pool)
 	return
 
 /obj/structure/sign/urban/drive_thru
@@ -479,14 +848,21 @@
 	light_color = LIGHT_COLOR_CYAN
 	light_range = 1.8
 	var/menu_text = ""
+	/// Whether or not the menu text can be updated.
+	var/static_menu = FALSE
 
 /obj/structure/restaurant_menu/attack_hand(mob/user)
+	if(static_menu)
+		to_chat(user, SPAN_WARNING("This menu sign's text is not configurable."))
 	var/new_text = sanitize(input(user, "Enter new text for the hologram to display.", "Hologram Display", html2pencode(menu_text, TRUE)) as null|message)
 	if(!isnull(new_text))
 		menu_text = pencode2html(new_text)
 		update_icon()
 
 /obj/structure/restaurant_menu/attackby(obj/item/attacking_item, mob/user)
+	if(static_menu)
+		to_chat(user, SPAN_WARNING("This menu sign's text is not configurable."))
+		return ..()
 	if(istype(attacking_item, /obj/item/paper))
 		var/obj/item/paper/P = attacking_item
 		to_chat(user, SPAN_NOTICE("You scan \the [attacking_item.name] into \the [name]."))
@@ -496,6 +872,30 @@
 		update_icon()
 		return TRUE
 	return ..()
+
+/obj/structure/restaurant_menu/stafylia
+	name = "\improper Stafýlia menu"
+	icon_state = "menu_gyro"
+	desc = "Welcome to Stafýlia! The real taste of Assunzione!\
+	<br><br>\
+	<br><b>Mains</b>\
+	<br>Signature Stafýlia Gyro - 6电\
+	<br>Doner Kebab - 6电\
+	<br>Falafel Pita - 6电\
+	<br><br>\
+	<br><b>Sides</b>\
+	<br>Salad - 3电\
+	<br>Fries - 3电\
+	<br>Chocolate Pita - 4电\
+	<br><br>\
+	<br><b>Drinks</b>\
+	<br>Drosiá Grape - 2电\
+	<br>Drosiá Cherry - 2电\
+	<br>Comet Cola - 2电\
+	<br>Xanu Rush - 2电\
+	<br><br>\
+	<br>Get the Stafýlia meal combo! Your choice of main, side and drink for only 9.50电!"
+	static_menu = TRUE
 
 /obj/structure/sign/urban/konyang
 	name = "convenience store sign"
@@ -528,11 +928,27 @@
 	desc = "A sign labeling the structure as a Konyang health and supply pharmacy."
 	icon_state = "pharmacy_sign"
 
+/obj/structure/sign/urban/assunzione
+	name = "convenience store sign"
+	desc = "A sign labeling the structure as a 24-7 MINI MART. Convenient!"
+	icon = 'icons/obj/structure/urban/assunzione_signs.dmi'
+	icon_state = "shop_sign"
+
+/obj/structure/sign/urban/assunzione/police
+	name = "police station sign"
+	desc = "A sign labeling the structure as an Volturno Spaceport security facility; while the spaceport is administered by the government of Triesto, internal security is Zeng-Hu corporate."
+	icon_state = "police_sign"
+
+/obj/structure/sign/urban/assunzione/pharmacy
+	name = "pharmacy & clinic sign"
+	desc = "A sign labeling the structure as a Zeng-Hu pharmaceutical distributor and medical clinic."
+	icon_state = "pharmacy_sign"
+
 /obj/structure/window/urban
 	icon = 'icons/obj/structure/urban/windows_tall.dmi'
 	icon_state = "wood"
 	basestate = "wood"
-	maxhealth = 60
+	maxhealth = OBJECT_HEALTH_VERY_LOW
 	alpha = 255
 
 /obj/structure/window/urban/framed
@@ -579,8 +995,7 @@
 	icon = 'icons/obj/structure/urban/building_external.dmi'
 	icon_state = "wall_half"
 	//basestate = "wall_half"
-	health = 200
-	maxhealth = 200
+	maxhealth = OBJECT_HEALTH_HIGH
 	layer = ABOVE_HUMAN_LAYER
 
 /obj/structure/blocker/exterior_wall/red
@@ -592,7 +1007,6 @@
 /obj/structure/cash_register
 	name = "cash register machine"
 	desc = "A retail nightmare object."
-	desc_info = "Drag this onto yourself to open the cash compartment."
 	icon = 'icons/obj/structure/urban/infrastructure.dmi'
 	icon_state = "cashier"
 	layer = 2.99
@@ -601,16 +1015,24 @@
 	var/storage_type = /obj/item/storage/toolbox/cash_register_storage
 	var/obj/item/storage/storage_compartment
 
+/obj/structure/cash_register/mechanics_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "Drag this onto yourself to open the cash compartment."
+
 /obj/structure/cash_register/Initialize(mapload)
 	. = ..()
 	if(storage_type)
 		storage_compartment = new storage_type(src)
 
+/obj/structure/cash_register/Destroy()
+	QDEL_NULL(storage_compartment)
+	return ..()
+
 /obj/item/storage/toolbox/cash_register_storage
 	name = "cash compartment"
 
-/obj/structure/cash_register/MouseDrop(atom/over)
-	if(usr == over && ishuman(over))
+/obj/structure/cash_register/mouse_drop_dragged(atom/over, mob/user, src_location, over_location, params)
+	if(user == over && ishuman(over) && storage_compartment)
 		var/mob/living/carbon/human/H = over
 		storage_compartment.open(H)
 
@@ -691,6 +1113,7 @@
 					balloon_alert_to_viewers("*unlocks*")
 					to_chat(user, SPAN_NOTICE("You unlock \the [src]."))
 
+				playsound(src.loc, hatch_open_sound, 40, TRUE, extrarange = SILENCED_SOUND_EXTRARANGE)
 				open()
 
 				//Save the list of accesses and empty them up
@@ -709,6 +1132,7 @@
 					balloon_alert_to_viewers("*locks*")
 					to_chat(user, SPAN_NOTICE("You lock \the [src]."))
 
+				playsound(src.loc, hatch_close_sound, 30, TRUE, extrarange = SILENCED_SOUND_EXTRARANGE)
 				close()
 
 				//Readd the list of accesses, and empty up the previous access lists
@@ -745,7 +1169,7 @@
 	autoclose = TRUE
 	support_ids = TRUE
 	glass = TRUE
-	opacity = 0 //otherwise it is opaque until opened/closed for the first time.
+	opacity = FALSE //otherwise it is opaque until opened/closed for the first time.
 
 /obj/machinery/door/urban/glass_sliding/double //use north state for left side and south state for right side
 	icon_state = "double_glass_sliding_closed"
@@ -788,3 +1212,39 @@
 
 /obj/item/key/door_key/GetAccess()
 	return access_list
+
+// Overhead structural arches. Cool as hell.
+ABSTRACT_TYPE(/obj/structure/arch)
+	icon = 'icons/obj/structure/urban/arches.dmi'
+	icon_state = "gothic_arch_single"
+	layer = ABOVE_ABOVE_HUMAN_LAYER
+	name = "arch"
+	anchored = TRUE
+
+/obj/structure/arch/Initialize()
+	. = ..()
+	AddComponent(/datum/component/large_transparency, 0, 0, 0, 0)
+
+// East/west arch pieces
+/obj/structure/arch/gothic/eastwest/_single
+	dir = 4
+/obj/structure/arch/gothic/eastwest/left
+	icon_state = "gothic_arch_end"
+	dir = 4
+/obj/structure/arch/gothic/eastwest/middle
+	icon_state = "gothic_arch_middle"
+	dir = 4
+/obj/structure/arch/gothic/eastwest/right
+	icon_state = "gothic_arch_end"
+	dir = 8
+
+// North/south arch pieces
+/obj/structure/arch/gothic/northsouth/_single
+/obj/structure/arch/gothic/northsouth/upper
+	icon_state = "gothic_arch_end"
+/obj/structure/arch/gothic/northsouth/center
+	icon_state = "gothic_arch_middle"
+/obj/structure/arch/gothic/northsouth/lower
+	icon_state = "gothic_arch_end"
+	dir = 1
+

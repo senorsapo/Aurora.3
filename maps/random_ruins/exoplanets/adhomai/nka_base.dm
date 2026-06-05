@@ -9,7 +9,7 @@
 	sectors = list(SECTOR_SRANDMARR)
 
 	prefix = "adhomai/"
-	suffixes = list("nka_base.dmm")
+	suffix = "nka_base.dmm"
 
 	unit_test_groups = list(3)
 
@@ -17,7 +17,6 @@
 	name = "NKA Military Outpost"
 	icon_state = "bluenew"
 	requires_power = FALSE
-	dynamic_lighting = TRUE
 	no_light_control = FALSE
 	base_turf = /turf/simulated/floor/exoplanet/mineral/adhomai
 	area_flags = AREA_FLAG_RAD_SHIELDED
@@ -58,7 +57,7 @@
 
 	id = /obj/item/card/id
 	r_pocket = /obj/item/storage/wallet/random
-	l_pocket = /obj/item/device/radio
+	l_pocket = /obj/item/radio
 
 /obj/outfit/admin/nka_base/get_id_access()
 	return list(ACCESS_NKA)

@@ -1,22 +1,22 @@
-/mob/living/MouseDrop(atom/over)
-	if(usr == src && usr != over)
+/mob/living/mouse_drop_dragged(atom/over, mob/user, src_location, over_location, params)
+	if(user == src && user != over)
 		if(istype(over, /mob/living/heavy_vehicle))
-			if(usr.mob_size >= MOB_SMALL && usr.mob_size <= 14)
+			if(user.mob_size >= MOB_SMALL && user.mob_size <= 14)
 				var/mob/living/heavy_vehicle/M = over
 				if(M.enter(src))
 					return
 			else
-				to_chat(usr, SPAN_WARNING("You cannot pilot a mech of this size."))
+				to_chat(user, SPAN_WARNING("You cannot pilot a mech of this size."))
 				return
 	return ..()
 
-/mob/living/heavy_vehicle/MouseDrop_T(atom/dropping, mob/user)
-	var/obj/machinery/portable_atmospherics/canister/C = dropping
+/mob/living/heavy_vehicle/mouse_drop_receive(atom/dropped, mob/user, params)
+	var/obj/machinery/portable_atmospherics/canister/C = dropped
 	if(istype(C))
-		body.MouseDrop_T(dropping, user)
+		body.mouse_drop_receive(arglist(args))
 	else . = ..()
 
-/mob/living/heavy_vehicle/ClickOn(var/atom/A, params, var/mob/user)
+/mob/living/heavy_vehicle/ClickOn(atom/A, params, mob/user)
 
 	if(!user || incapacitated() || user.incapacitated() || lockdown)
 		return
@@ -43,24 +43,29 @@
 			setClickCooldown(5)
 			return
 
-	if(!(user in pilots) && user != src)
+	if(/* Do we have a pilot? */\
+		!(user in pilots) && user != src \
+		/* Are we facing the target? */\
+		|| !(get_dir(src, A) & dir) \
+		/* Can we click on them? */\
+		|| !canClick())
 		return
 
-	// Are we facing the target?
-	if(!(get_dir(src, A) & dir))
-		return
-
-	if(!canClick())
-		return
-
+	// Check if the arms were completely destroyed.
 	if(!arms)
 		to_chat(user, SPAN_WARNING("\The [src] has no manipulators!"))
 		setClickCooldown(3)
+		// Give some visible feedback for the mech damage preventing this.
+		spark(src, 2, GLOB.alldirs)
 		return
 
-	if(!arms.motivator || !arms.motivator.is_functional())
+	var/obj/item/robot_parts/robot_component/actuator/motivator = arms.motivator
+	// Check if the motivators were broken.
+	if(!motivator || !motivator.is_functional())
 		to_chat(user, SPAN_WARNING("Your motivators are damaged! You can't use your manipulators!"))
 		setClickCooldown(15)
+		// Give some visible feedback for the mech damage preventing this.
+		spark(src, 2, GLOB.alldirs)
 		return
 
 	if(!checked_use_cell(arms.power_use * CELLRATE))
@@ -74,10 +79,18 @@
 		else
 			zone_sel.set_selected_zone("chest", user)
 
+	// Get the ratio of damage over max damage
+	var/spark_chance = (motivator.total_dam / motivator.max_dam + arms.total_damage / arms.max_damage) \
+		/* Multiply by the spark chance */\
+		* arms.spark_chance_ratio \
+		/* Then add the contribution from EMP damage. */\
+		+ emp_damage
+
 	// You may attack the target with your exosuit FIST if you're malfunctioning.
 	var/failed = FALSE
-	if(emp_damage > EMP_ATTACK_DISRUPT && prob(emp_damage*2))
-		to_chat(user, SPAN_WARNING("The wiring sparks as you attempt to control the exosuit!"))
+	if(prob(spark_chance))
+		to_chat(user, SPAN_WARNING("Your exosuit's manipulators spark as you attempt to control them!"))
+		spark(src, 3, GLOB.alldirs)
 		failed = TRUE
 
 	if(!failed)
@@ -127,7 +140,7 @@
 					ruser = user
 				temp_system.afterattack(A,ruser,adj,params)
 			if(system_moved) //We are using a proxy system that may not have logging like mech equipment does
-				log_and_message_admins("used [temp_system] targetting [A]", user, src.loc)
+				log_admin("used [temp_system] targetting [A]", user, src.loc)
 			//Mech equipment subtypes can add further click delays
 			var/extra_delay = 0
 			if(ME != null)
@@ -146,14 +159,14 @@
 		D.TryToSwitchState(user)
 		return
 	else if(adj)
-		setClickCooldown(arms ? arms.action_delay : 15)
+		setClickCooldown(arms.action_delay)
 		playsound(src.loc, arms.punch_sound, 45 + 25 * (arms.melee_damage / 50), -1 )
 		if(ismob(A))
 			var/mob/target = A
 			user.attack_log += "\[[time_stamp()]\]<span class='warning'> Attacked [target.name] ([target.ckey]) with [arms] (INTENT: [uppertext(user.a_intent)]) (DAMTYE: [uppertext(arms.damagetype)])</span>"
 			src.attack_log += "\[[time_stamp()]\]<span class='warning'> [user] ([user.ckey]) attacked [target.name] ([target.ckey]) with [arms] (INTENT: [uppertext(user.a_intent)]) (DAMTYE: [uppertext(arms.damagetype)])</span>"
 			target.attack_log += "\[[time_stamp()]\]<font color='orange'> Attacked by [user.name] ([user.ckey]) with [arms] (INTENT: [uppertext(user.a_intent)]) (DAMTYE: [uppertext(arms.damagetype)])</font>"
-			msg_admin_attack("[key_name(user, highlight_special = 1)] attacked [key_name(target, highlight_special = 1)] with [arms] (INTENT: [uppertext(user.a_intent)]) (DAMTYE: [uppertext(arms.damagetype)]) (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user),ckey_target=key_name(target) )
+			msg_admin_attack("[key_name(user, highlight_special = 1)] attacked [key_name(target, highlight_special = 1)] with [arms] (INTENT: [uppertext(user.a_intent)]) (DAMTYE: [uppertext(arms.damagetype)]) (<A href='byond://?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user),ckey_target=key_name(target) )
 		return A.attack_generic(src, arms.melee_damage, "attacked")
 	return
 
@@ -161,7 +174,7 @@
 	var/old_next_move = next_move
 	next_move = max(world.time + timeout, next_move)
 	for(var/hardpoint in hardpoint_hud_elements)
-		var/obj/screen/mecha/hardpoint/H = hardpoint_hud_elements[hardpoint]
+		var/atom/movable/screen/mecha/hardpoint/H = hardpoint_hud_elements[hardpoint]
 		if(H)
 			H.color = "#FF0000"
 	if(next_move > old_next_move) // TIMER_OVERRIDE would not work here, because the smaller delays tend to be called after the longer ones
@@ -169,7 +182,7 @@
 
 /mob/living/heavy_vehicle/proc/reset_hardpoint_color()
 	for(var/hardpoint in hardpoint_hud_elements)
-		var/obj/screen/mecha/hardpoint/H = hardpoint_hud_elements[hardpoint]
+		var/atom/movable/screen/mecha/hardpoint/H = hardpoint_hud_elements[hardpoint]
 		if(H)
 			H.color = null
 
@@ -188,7 +201,7 @@
 		for(var/hardpoint in hardpoints)
 			if(hardpoint != selected_hardpoint)
 				continue
-			var/obj/screen/mecha/hardpoint/H = hardpoint_hud_elements[hardpoint]
+			var/atom/movable/screen/mecha/hardpoint/H = hardpoint_hud_elements[hardpoint]
 			if(istype(H))
 				H.icon_state = "hardpoint"
 				break
@@ -228,21 +241,26 @@
 	user.forceMove(src)
 	LAZYDISTINCTADD(pilots, user)
 	RegisterSignal(user, COMSIG_MOB_FACEDIR, PROC_REF(handle_user_turn))
+	RegisterSignal(user, COMSIG_INPUT_KEY_QUICK_EQUIP, PROC_REF(strafe_left))
+	RegisterSignal(user, COMSIG_INPUT_KEY_DROP, PROC_REF(strafe_right))
 	playsound(src, 'sound/machines/windowdoor.ogg', 50, 1)
 	if(user.client) user.client.screen |= hud_elements
 	LAZYDISTINCTADD(user.additional_vision_handlers, src)
 	update_icon()
-	SSmove_manager.stop_looping(src) // stop it from auto moving when the pilot gets in
-	return 1
+	GLOB.move_manager.stop_looping(src) // stop it from auto moving when the pilot gets in
+	return TRUE
 
 /mob/living/heavy_vehicle/proc/eject(var/mob/user, var/silent)
 	if(!user || !(user in src.contents))
 		return
+	if(remote)
+		usr.body_return()
 	if(hatch_closed)
 		if(hatch_locked)
 			if(!silent) to_chat(user, SPAN_WARNING("The [body.hatch_descriptor] is locked."))
 			return
-		hud_open.toggled(FALSE)
+		if(!hud_open.toggled(FALSE))
+			return
 		if(!silent)
 			to_chat(user, SPAN_NOTICE("You open the hatch and climb out of \the [src]."))
 	else
@@ -258,59 +276,139 @@
 		set_intent(I_HURT)
 		LAZYREMOVE(pilots, user)
 		UnregisterSignal(user, COMSIG_MOB_FACEDIR)
+		UnregisterSignal(user, COMSIG_INPUT_KEY_QUICK_EQUIP)
+		UnregisterSignal(user, COMSIG_INPUT_KEY_DROP)
 		UNSETEMPTY(pilots)
 
 /mob/living/heavy_vehicle/proc/handle_user_turn(var/mob/living/user, var/direction)
 	SIGNAL_HANDLER
 	INVOKE_ASYNC(src, TYPE_PROC_REF(/atom, relaymove), user, direction, TRUE)
 
-/mob/living/heavy_vehicle/relaymove(var/mob/living/user, var/direction, var/turn_only = FALSE)
-	if(!can_move(user))
-		return
+/mob/living/heavy_vehicle/proc/strafe_left(var/mob/user, var/cancelled)
+	SIGNAL_HANDLER
+	// Stop the pilot from attempting to drop the item in their hands, we're replacing it with a strafe input.
+	*cancelled = TRUE
+	strafe_move(user, angle2dir(dir2angle(dir) + 90))
+
+/mob/living/heavy_vehicle/proc/strafe_right(var/mob/user, var/cancelled)
+	SIGNAL_HANDLER
+	// Stop the pilot from attempting to drop the item in their hands, we're replacing it with a strafe input.
+	*cancelled = TRUE
+	strafe_move(user, angle2dir(dir2angle(dir) + 270))
+
+/mob/living/heavy_vehicle/relaymove(mob/living/user, direction, var/turn_only = FALSE)
+	. = ..()
+
+	var/delay_modifier = 0
+	SEND_SIGNAL(user, COMSIG_MECH_MOVE_WASD, &direction, &delay_modifier)
 
 	if(hallucination >= EMP_MOVE_DISRUPT && prob(30))
-		direction = pick(GLOB.cardinal)
+		direction = pick(GLOB.cardinals)
 
-	var/do_strafe = !isnull(user.facing_dir) && (legs.turn_delay <= legs.move_delay)
-	if(!do_strafe && dir != direction)
+	// Convert keyboard inputs to Battletech-style controls.
+	switch (direction)
+		if (NORTH) // "Throttle Forwards"
+			throttle_move(user, dir, FALSE, delay_modifier)
+		if (SOUTH) // "Throttle Reverse"
+			throttle_move(user, angle2dir(dir2angle(dir) + 180), TRUE, delay_modifier)
+		if (EAST) // "Turn Right"
+			rotate_by_angle(user, angle2dir(dir2angle(dir) + 90), delay_modifier)
+		if (WEST) // "Turn Left"
+			rotate_by_angle(user, angle2dir(dir2angle(dir) + 270), delay_modifier)
+
+/mob/living/heavy_vehicle/proc/throttle_move(mob/living/user, direction, reverse, delay_modifier)
+	if (!legs || !can_move(user, delay_modifier))
+		return
+
+	// Get the tile in the direction.
+	var/turf/target_loc = get_step(src, direction)
+	if(!legs.can_move_on(loc, target_loc))
+		return
+
+	if (reverse)
+		next_mecha_move += legs.reverse_delay
+
+	// Then send a move command
+	if(incorporeal_move)
+		if(legs.mech_step_sound)
+			playsound(src.loc,legs.mech_step_sound,40,1)
 		use_cell_power(legs.power_use * CELLRATE)
-		if(legs && legs.mech_turn_sound)
-			playsound(src.loc,legs.mech_turn_sound,40,1)
-		if(world.time + legs.turn_delay > next_mecha_move)
-			next_mecha_move = world.time + legs.turn_delay
-		set_dir(direction)
-		for(var/mob/pilot in pilots)
-			pilot.set_dir(direction)
-		if(istype(hardpoints[HARDPOINT_BACK], /obj/item/mecha_equipment/shield))
-			var/obj/item/mecha_equipment/shield/S = hardpoints[HARDPOINT_BACK]
-			if(S.aura)
-				S.aura.dir = direction
-				if(S.aura.dir == NORTH)
-					S.aura.layer = MOB_LAYER
-				else
-					S.aura.layer = ABOVE_HUMAN_LAYER
-		update_icon()
+		user.client.Process_Incorpmove(direction, src)
+	else
+		Move(target_loc, direction, 0, FALSE)
 
-	if(!turn_only)
-		var/turf/target_loc = get_step(src, direction)
-		if(!legs.can_move_on(loc, target_loc))
-			return
-		if(incorporeal_move)
-			if(legs && legs.mech_step_sound)
-				playsound(src.loc,legs.mech_step_sound,40,1)
-			use_cell_power(legs.power_use * CELLRATE)
-			user.client.Process_Incorpmove(direction, src)
-		else
-			var/new_direction = do_strafe ? user.facing_dir || direction : direction
-			Move(target_loc, new_direction)
+/mob/living/heavy_vehicle/proc/strafe_move(mob/user, direction)
+	if (!legs)
+		return
 
-/mob/living/heavy_vehicle/Move()
-	if(..() && !istype(loc, /turf/space))
-		if(legs)
-			if(legs.mech_step_sound)
-				playsound(src.loc, legs.mech_step_sound, 40, TRUE)
-			use_cell_power(legs.power_use * CELLRATE)
+	var/delay_modifier = 0
+	SEND_SIGNAL(user, COMSIG_MECH_MOVE_STRAFE, &direction, &delay_modifier)
+
+	if (!can_strafe(user, delay_modifier))
+		return
+
+	// Get the tile in the direction.
+	var/turf/target_loc = get_step(src, direction)
+	if(!legs.can_move_on(loc, target_loc))
+		return
+
+	// Then send a move command
+	if(incorporeal_move)
+		if(legs.mech_step_sound)
+			playsound(src.loc,legs.mech_step_sound,40,1)
+		use_cell_power(legs.power_use * CELLRATE)
+		user.client.Process_Incorpmove(direction, src)
+	else
+		Move(target_loc, direction, 0, FALSE)
+
+/mob/living/heavy_vehicle/proc/rotate_by_angle(mob/living/user, direction, delay_modifier)
+	if (!legs || !can_turn(user, delay_modifier))
+		return
+
+	use_cell_power(legs.power_use * CELLRATE)
+	if(legs && legs.mech_turn_sound)
+		playsound(src.loc,legs.mech_turn_sound,40,1)
+
+	set_dir(direction)
+	for(var/mob/pilot in pilots)
+		pilot.set_dir(direction)
+	if(istype(hardpoints[HARDPOINT_BACK], /obj/item/mecha_equipment/shield))
+		var/obj/item/mecha_equipment/shield/S = hardpoints[HARDPOINT_BACK]
+		if(S.aura)
+			S.aura.dir = direction
+			if(S.aura.dir == NORTH)
+				S.aura.layer = MOB_LAYER
+			else
+				S.aura.layer = ABOVE_HUMAN_LAYER
 	update_icon()
+	Move(src.loc, direction, 0, TRUE)
+
+/mob/living/heavy_vehicle/Move(atom/newloc, direct, glide_size_override = 0, update_dir = TRUE)
+	// They shouldn't get to this proc without legs in the first place, but its okay to guard here.
+	if (!legs || !legs.motivator)
+		return
+	. = ..()
+	set_glide_size(DELAY_TO_GLIDE_SIZE(next_mecha_move - world.time))
+	if(. && !istype(loc, /turf/space))
+		if(legs.mech_step_sound)
+			playsound(src.loc, legs.mech_step_sound, 40, TRUE)
+		use_cell_power(legs.power_use * CELLRATE)
+	update_icon()
+
+	// Handling for leg damage feedback on movement.
+	var/obj/item/robot_parts/robot_component/actuator/motivator = legs.motivator
+
+	// Get the ratio of damage over max damage.
+	var/spark_chance = (motivator.total_dam / motivator.max_dam + legs.total_damage / legs.max_damage) \
+		/* Then multiply by the spark chance. */\
+		* legs.spark_chance_ratio \
+		/* And finally add the contribution from EMP damage. */\
+		+ emp_damage
+
+	if(prob(spark_chance))
+		for (var/mob/pilot in pilots)
+			to_chat(pilot, SPAN_WARNING("Your exosuit's legs spark as you attempt to control them!"))
+		spark(src, 3, GLOB.alldirs)
 
 /mob/living/heavy_vehicle/Post_Incorpmove()
 	if(istype(hardpoints[HARDPOINT_BACK], /obj/item/mecha_equipment/phazon))
@@ -363,7 +461,8 @@
 					remote_type = RM.type
 					become_remote()
 					qdel(attacking_item)
-			else if(attacking_item.ismultitool())
+				return
+			else if(attacking_item.tool_behaviour == TOOL_MULTITOOL)
 				if(hardpoints_locked)
 					to_chat(user, SPAN_WARNING("Hardpoint system access is disabled."))
 					return
@@ -380,7 +479,7 @@
 				to_chat(user, SPAN_WARNING("\The [src] has no hardpoint systems to remove."))
 				return
 
-			else if(attacking_item.iswrench())
+			else if(attacking_item.tool_behaviour == TOOL_WRENCH)
 				if(!remote && length(pilots))
 					to_chat(user, SPAN_WARNING("You can't disassemble \the [src] while it has a pilot!"))
 					return
@@ -405,8 +504,8 @@
 							qdel(pilot)
 							new remote_type(get_turf(src))
 					dismantle()
-					return
-			else if(attacking_item.iswelder())
+				return
+			else if(attacking_item.tool_behaviour == TOOL_WELDER)
 				if(!getBruteLoss())
 					return
 				var/list/damaged_parts = list()
@@ -417,7 +516,7 @@
 				if(CanInteract(user, GLOB.physical_state) && !QDELETED(to_fix) && (to_fix in src) && to_fix.brute_damage)
 					to_fix.repair_brute_generic(attacking_item, user)
 				return
-			else if(attacking_item.iscoil())
+			else if(attacking_item.tool_behaviour == TOOL_CABLECOIL)
 				if(!getFireLoss())
 					return
 				var/list/damaged_parts = list()
@@ -428,7 +527,7 @@
 				if(CanInteract(user, GLOB.physical_state) && !QDELETED(to_fix) && (to_fix in src) && to_fix.burn_damage)
 					to_fix.repair_burn_generic(attacking_item, user)
 				return
-			else if(attacking_item.iscrowbar())
+			else if(attacking_item.tool_behaviour == TOOL_CROWBAR)
 				if(!maintenance_protocols)
 					to_chat(user, SPAN_WARNING("The cell compartment remains locked while maintenance protocols are disabled."))
 					return
@@ -445,9 +544,13 @@
 				visible_message(SPAN_NOTICE("\The [user] pries out \the [body.cell] using the \the [attacking_item]."))
 				power = MECH_POWER_OFF
 				hud_power_control.update_icon()
+				UnregisterSignal(body.cell, COMSIG_CELL_CHARGE)
 				body.cell = null
 				return
 			else if(istype(attacking_item, /obj/item/cell))
+				if(!istype(attacking_item, /obj/item/cell/mecha))
+					to_chat(user, SPAN_WARNING("You can only use power cores in \the [src]!"))
+					return
 				if(!maintenance_protocols)
 					to_chat(user, SPAN_WARNING("The cell compartment remains locked while maintenance protocols are disabled."))
 					return
@@ -458,11 +561,11 @@
 				if(user.unEquip(attacking_item))
 					attacking_item.forceMove(body)
 					body.cell = attacking_item
-					to_chat(user, SPAN_NOTICE("You install \the [body.cell] into \the [src]."))
+					RegisterSignal(body.cell, COMSIG_CELL_CHARGE, PROC_REF(handle_cell_charge))
 					playsound(user.loc, 'sound/items/Screwdriver.ogg', 50, 1)
-					visible_message(SPAN_NOTICE("\The [user] installs \the [body.cell] into \the [src]."))
+					user.visible_message(SPAN_NOTICE("\The [user] installs \the [body.cell] into \the [src]."), SPAN_NOTICE("You install \the [body.cell] into \the [src]."))
 				return
-			else if(istype(attacking_item, /obj/item/device/robotanalyzer))
+			else if(istype(attacking_item, /obj/item/robotanalyzer))
 				to_chat(user, SPAN_NOTICE("Diagnostic Report for \the [src]:"))
 				for(var/obj/item/mech_component/limb in list (head, body, arms, legs))
 					if(limb)
@@ -472,34 +575,47 @@
 	return ..()
 
 /mob/living/heavy_vehicle/attack_hand(var/mob/user)
-	// Drag the pilot out if possible.
-	if(user.a_intent == I_GRAB)
-		if(!LAZYLEN(pilots))
-			to_chat(user, SPAN_WARNING("There is nobody inside \the [src]."))
-		else if(!hatch_closed)
+	// Try to attack on harm intent.
+	if(user.a_intent == I_HURT)
+		attack_generic(user)
+		return
+
+	// Otherwise try to toggle the hatch.
+	if(!body) // Edge case for the mech SOMEHOW not having a body. Players shouldn't ever see this. A mech without a body should be in the process of exploding.
+		to_chat(user, SPAN_WARNING("What hatch? There's nothing left to open. If you're seeing this, please submit a bug report to our github issue tracker and tell us how!"))
+		return
+
+	if(hatch_locked)
+		to_chat(user, SPAN_WARNING("The [body.hatch_descriptor] is locked."))
+		return
+
+	if(!hatch_closed)
+		// Drag the pilot out if possible.
+		if(user.a_intent == I_GRAB)
+			if(!LAZYLEN(pilots))
+				to_chat(user, SPAN_WARNING("There is nobody inside \the [src]."))
+				return
+
 			var/mob/pilot = pick(pilots)
 			user.visible_message(SPAN_DANGER("\The [user] is trying to pull \the [pilot] out of \the [src]!"))
 			if(do_after(user, 30) && user.Adjacent(src) && (pilot in pilots) && !hatch_closed)
 				user.visible_message(SPAN_DANGER("\The [user] drags \the [pilot] out of \the [src]!"))
 				eject(pilot, silent=1)
-
+			return
+	else if (body.total_damage > 1 && prob((body.total_damage / body.max_damage) * body.ejection_fail_chance))
+		to_chat(user, SPAN_WARNING("You pull the hatch release. The hatch bolts hiss and clang with a deafening screech, but the hatch fails to open!"))
+		spark(src, 6, GLOB.alldirs)
+		playsound(loc, 'sound/effects/metalhit.ogg', 75, 1)
 		return
 
-	if(user.a_intent == I_HURT)
-		attack_generic(user)
-		return
-
-	// Otherwise toggle the hatch.
-	if(hatch_locked)
-		to_chat(user, SPAN_WARNING("The [body.hatch_descriptor] is locked."))
-		return
 	hatch_closed = !hatch_closed
+	playsound(loc, hatch_closed ? 'sound/effects/metal_close.ogg' : 'sound/effects/air_seal.ogg', 75, 1)
 	to_chat(user, SPAN_NOTICE("You [hatch_closed ? "close" : "open"] the [body.hatch_descriptor]."))
 	hud_open.update_icon()
 	update_icon()
 	return
 
-/mob/living/heavy_vehicle/attack_generic(var/mob/user, var/damage, var/attack_message, var/armor_penetration, var/attack_flags, var/damage_type = DAMAGE_BRUTE)
+/mob/living/heavy_vehicle/attack_generic(mob/user, damage, attack_message, environment_smash, armor_penetration, attack_flags, damage_type)
 	if(!(user in pilots))
 		. = ..()
 
@@ -523,7 +639,7 @@
 			return h
 	return 0
 
-/var/global/datum/ui_state/default/mech_state = new()
+GLOBAL_DATUM_INIT(mech_state, /datum/ui_state/default, new())
 
 /datum/ui_state/default/mech/can_use_topic(var/mob/living/heavy_vehicle/src_object, var/mob/user)
 	if(istype(src_object))
@@ -546,14 +662,16 @@
 		return
 	if(!isliving(H))
 		return
+	if(src == H)
+		return
 
 	if(legs?.trample_damage)
 		if(ishuman(H))
 			var/mob/living/carbon/human/D = H
 			if(D.lying)
 				D.attack_log += "\[[time_stamp()]\]<font color='orange'> Was trampled by [src]</font>"
-				attack_log += text("\[[time_stamp()]\] <span class='warning'>trampled [D.name] ([D.ckey]) with \the [src].</span>")
-				msg_admin_attack("[src] trampled [key_name(D)] at (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[D.x];Y=[D.y];Z=[D.z]'>JMP</a>)" )
+				attack_log += "\[[time_stamp()]\] <span class='warning'>trampled [D.name] ([D.ckey]) with \the [src].</span>"
+				msg_admin_attack("[src] trampled [key_name(D)] at (<A href='byond://?_src_=holder;adminplayerobservecoodjump=1;X=[D.x];Y=[D.y];Z=[D.z]'>JMP</a>)" )
 				src.visible_message(SPAN_DANGER("\The [src] runs over \the [D]!"))
 				D.apply_damage(legs.trample_damage, DAMAGE_BRUTE)
 				return TRUE
@@ -577,6 +695,9 @@
 
 /mob/living/heavy_vehicle/get_floating_chat_x_offset()
 	return -offset_x // reverse the offset
+
+/mob/living/heavy_vehicle/get_floating_chat_y_offset()
+	return 20
 
 /mob/living/heavy_vehicle/hear_say(var/message, var/verb = "says", var/datum/language/language = null, var/alt_name = "", var/italics = 0, var/mob/speaker = null, var/sound/speech_sound, var/sound_vol)
 	if(can_listen())
@@ -616,6 +737,13 @@
 
 		// Checking whether we have a leader or not
 		if(!leader)
+			if(findtext(text, "toggle maintenance protocols")) // Allow for engaging maintenance protocols if no pilot
+				if(pilots)
+					say("Unlinked toggling of maintenance protocols requires no active pilots.")
+					return
+				if(toggle_maintenance_protocols())
+					say("Maintenance protocols toggled [maintenance_protocols ? "on" : "off"].")
+				return
 			if(!maintenance_protocols) // don't select a leader unless we have maintenance protocols set
 				say("Maintenance protocols must be enabled to link.")
 				return
@@ -672,6 +800,18 @@
 					say("Hatch [hatch_closed ? "closed" : "opened"].")
 				return
 
+			// simply toggle on or off the power
+			if(findtext(text, "toggle power"))
+				if(power == MECH_POWER_TRANSITION)
+					say("Power transition in progress. Please wait.")
+					return
+				else if(power == MECH_POWER_OFF && !get_cell(TRUE))
+					say("Insufficent power to power systems.")
+					return
+				if(toggle_power_remote())
+					say("Systems [power == MECH_POWER_ON ? "online" : "offline"].")
+				return
+
 			// simply toggle the lock status
 			if(findtext(text, "toggle lock"))
 				if(!hatch_closed)
@@ -697,7 +837,7 @@
 			// stop following who you were assigned to follow
 			if(findtext(text, "stop"))
 				unassign_following()
-				SSmove_manager.stop_looping(src)
+				GLOB.move_manager.stop_looping(src)
 				say("Holding position.")
 				return
 
@@ -730,3 +870,8 @@
 							say("Following [ID.registered_name].")
 							break
 				return
+
+/mob/living/heavy_vehicle/proc/handle_cell_charge(var/obj/item/cell/cell, var/new_charge)
+	SIGNAL_HANDLER
+
+	handle_power_hud()

@@ -18,7 +18,7 @@
 	use_power = POWER_USE_IDLE
 	idle_power_usage = 20
 	layer = BELOW_OBJ_LAYER
-	clicksound = /singleton/sound_category/button_sound
+	clicksound = SFX_BUTTON
 
 	var/obj/item/reagent_containers/glass/beaker = null
 	var/obj/item/storage/pill_bottle/loaded_pill_bottle = null
@@ -92,7 +92,7 @@
 		user.drop_from_inventory(attacking_item, src)
 		to_chat(user, "You add the pill bottle into the dispenser slot!")
 		src.updateUsrDialog()
-	else if(attacking_item.iswrench())
+	else if(attacking_item.tool_behaviour == TOOL_WRENCH)
 		anchored = !anchored
 		to_chat(user, "You [anchored ? "attach" : "detach"] the [src] [anchored ? "to" : "from"] the ground")
 		attacking_item.play_tool_sound(get_turf(src), 75)
@@ -123,7 +123,7 @@
 
 	// Process the beaker
 	if(beaker)
-		var/datum/reagents/beaker_reagents = beaker:reagents
+		var/datum/reagents/beaker_reagents = beaker.reagents
 		for(var/reagent in beaker_reagents.reagent_volumes)
 
 			var/singleton/reagent/reagent_singleton = GET_SINGLETON(reagent)
@@ -141,6 +141,7 @@
 	return data
 
 /obj/machinery/chem_master/LateInitialize()
+	. = ..()
 	if(!chem_asset)
 		chem_asset = get_asset_datum(/datum/asset/spritesheet/chem_master)
 
@@ -199,7 +200,7 @@
 	// These actions makes sense only if there's a beaker in
 	if(beaker)
 		if(action == "analyze")
-			var/datum/reagents/R = beaker:reagents
+			var/datum/reagents/R = beaker.reagents
 			if(!condi)
 				if(params["name"] == "Blood")
 					var/singleton/reagent/blood/G = GET_SINGLETON(/singleton/reagent/blood)
@@ -215,14 +216,14 @@
 		else if(action == "add")
 			if(params["amount"])
 				var/rtype = text2path(params["add"])
-				var/amount = Clamp((text2num(params["amount"])), 0, 200)
+				var/amount = clamp((text2num(params["amount"])), 0, 200)
 				beaker.reagents.trans_type_to(src, rtype, amount)
 			return TRUE
 
 		else if (action == "remove")
 			if(params["amount"])
 				var/rtype = text2path(params["remove"])
-				var/amount = Clamp((text2num(params["amount"])), 0, 200)
+				var/amount = clamp((text2num(params["amount"])), 0, 200)
 				if(mode)
 					reagents.trans_type_to(beaker, rtype, amount)
 				else
@@ -263,7 +264,7 @@
 
 		if (action == "createpill_multiple")
 			count = tgui_input_number(usr, "Select the number of pills to make.", src.name, pillamount, max_pill_count, 1)
-			count = Clamp(count, 1, max_pill_count)
+			count = clamp(count, 1, max_pill_count)
 
 		if(reagents.total_volume/count < 1) //Sanity checking.
 			return TRUE
@@ -299,6 +300,11 @@
 		return TRUE
 	return TRUE
 
+/obj/machinery/chem_master/ui_status(mob/user, datum/ui_state/state)
+	if(!operable())
+		return UI_DISABLED
+
+	. = ..()
 
 
 /obj/machinery/chem_master/Topic(href, href_list)
@@ -462,11 +468,11 @@
 	[beaker_contents]<hr>
 	"}
 		if (is_beaker_ready && !is_chamber_empty && !(stat & (NOPOWER|BROKEN)))
-			dat += "<A href='?src=\ref[src];action=grind'>Process the reagents</a><BR>"
+			dat += "<A href='byond://?src=[REF(src)];action=grind'>Process the reagents</a><BR>"
 		if(holdingitems && holdingitems.len > 0)
-			dat += "<A href='?src=\ref[src];action=eject'>Eject the reagents</a><BR>"
+			dat += "<A href='byond://?src=[REF(src)];action=eject'>Eject the reagents</a><BR>"
 		if (beaker)
-			dat += "<A href='?src=\ref[src];action=detach'>Detach the beaker</a><BR>"
+			dat += "<A href='byond://?src=[REF(src)];action=detach'>Detach the beaker</a><BR>"
 	else
 		dat += "Please wait..."
 
@@ -573,8 +579,8 @@
 	updateUsrDialog()
 
 
-/obj/machinery/reagentgrinder/MouseDrop_T(atom/dropping, mob/user)
-	var/mob/living/carbon/human/target = dropping
+/obj/machinery/reagentgrinder/mouse_drop_receive(atom/dropped, mob/user, params)
+	var/mob/living/carbon/human/target = dropped
 	if (!istype(target) || target.buckled_to || get_dist(user, src) > 1 || get_dist(user, target) > 1 || user.stat || istype(user, /mob/living/silicon/ai))
 		return
 	if(target == user)
@@ -599,9 +605,9 @@
 			target.apply_damage(25, DAMAGE_PAIN)
 			target.say("*scream")
 
-			user.attack_log += text("\[[time_stamp()]\] <span class='warning'>Has fed [target.name]'s ([target.ckey]) hair into a [src].</span>")
-			target.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has had their hair fed into [src] by [user.name] ([user.ckey])</font>")
-			msg_admin_attack("[key_name_admin(user)] fed [key_name_admin(target)] in a [src]. (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user),ckey_target=key_name(target))
+			user.attack_log += "\[[time_stamp()]\] <span class='warning'>Has fed [target.name]'s ([target.ckey]) hair into a [src].</span>"
+			target.attack_log += "\[[time_stamp()]\] <font color='orange'>Has had their hair fed into [src] by [user.name] ([user.ckey])</font>"
+			msg_admin_attack("[key_name_admin(user)] fed [key_name_admin(target)] in a [src]. (<A href='byond://?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)",ckey=key_name(user),ckey_target=key_name(target))
 		else
 			return
 		if(!do_after(usr, 35))

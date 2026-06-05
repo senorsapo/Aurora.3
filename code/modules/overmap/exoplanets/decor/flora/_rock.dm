@@ -3,6 +3,8 @@
 	desc = "A rock."
 	icon = 'icons/obj/flora/rocks_grey.dmi'
 	icon_state = "basalt"
+	is_rock = TRUE
+	sample_data = list("Sample contains igneous rock dust")
 
 /obj/structure/flora/rock/random/Initialize(mapload)
 	. = ..()
@@ -17,11 +19,28 @@
 	. = ..()
 	icon_state = "lavarocks[rand(1,3)]"
 
+/obj/structure/flora/rock/stalagmite
+	name = "stalagmite"
+	desc = "A pointy pile of rocks."
+	icon_state = "stalagmite1"
+
+/obj/structure/flora/rock/stalagmite/random/Initialize(mapload)
+	. = ..()
+	icon_state = "stalagmite[rand(1,4)]"
+
+/obj/structure/flora/rock/stalagmite/brown
+	icon = 'icons/obj/flora/rocks_brown.dmi'
+
+/obj/structure/flora/rock/stalagmite/brown/random/Initialize(mapload)
+	. = ..()
+	icon_state = "stalagmite[rand(1,6)]"
+
 /obj/structure/flora/rock/ice
 	name = "ice"
 	desc = "A large formation made of ice."
 	icon = 'icons/obj/flora/ice_rocks.dmi'
 	icon_state = "rock_1"
+	sample_data = list("Sample contains ice crystals")
 
 /obj/structure/flora/rock/ice/Initialize(mapload)
 	. = ..()

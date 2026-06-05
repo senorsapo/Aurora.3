@@ -1,9 +1,9 @@
 /* Library Items
  *
  * Contains:
- *		Bookcase
- *		Book
- *		Barcode Scanner
+ * * Bookcase
+ * * Book
+ * * Barcode Scanner
  */
 
 
@@ -17,7 +17,6 @@
 	icon_state = "book-0"
 	anchored = 1
 	density = 1
-	opacity = 1
 	build_amt = 5
 
 /obj/structure/bookcase/Initialize()
@@ -31,17 +30,17 @@
 	if(istype(attacking_item, /obj/item/book))
 		user.drop_from_inventory(attacking_item,src)
 		update_icon()
-	else if(attacking_item.ispen())
+	else if(attacking_item.tool_behaviour == TOOL_PEN)
 		var/newname = sanitizeSafe(input("What would you like to title this bookshelf?"), MAX_NAME_LEN)
 		if(!newname)
 			return
 		else
 			name = ("bookcase ([newname])")
-	else if(attacking_item.iswrench())
+	else if(attacking_item.tool_behaviour == TOOL_WRENCH)
 		attacking_item.play_tool_sound(get_turf(src), 100)
 		to_chat(user, (anchored ? SPAN_NOTICE("You unfasten \the [src] from the floor.") : SPAN_NOTICE("You secure \the [src] to the floor.")))
 		anchored = !anchored
-	else if(attacking_item.isscrewdriver())
+	else if(attacking_item.tool_behaviour == TOOL_SCREWDRIVER)
 		to_chat(user, SPAN_NOTICE("You begin dismantling \the [src]."))
 		if(attacking_item.use_tool(src, user, 25, volume = 50))
 			to_chat(user, SPAN_NOTICE("You dismantle \the [src]."))
@@ -134,15 +133,19 @@
 	update_icon()
 
 /obj/structure/bookcase/libraryspawn/fiction
+	name = "bookcase" //Because SDMM doesn't recognise the name otherwise, for some reason
 	spawn_category = "Fiction"
 
 /obj/structure/bookcase/libraryspawn/nonfiction
+	name = "bookcase" //Because SDMM doesn't recognise the name otherwise, for some reason
 	spawn_category = "Non-Fiction"
 
 /obj/structure/bookcase/libraryspawn/reference
+	name = "bookcase" //Because SDMM doesn't recognise the name otherwise, for some reason
 	spawn_category = "Reference"
 
 /obj/structure/bookcase/libraryspawn/religion
+	name = "bookcase" //Because SDMM doesn't recognise the name otherwise, for some reason
 	spawn_category = "Religion"
 
 /obj/structure/bookcase/manuals/medical
@@ -181,20 +184,24 @@
 
 
 /*
+ * Barcode Scanner mode defines — used in book/attackby and barcodescanner/attack_self
+ */
+#define BARCODE_SCAN_BUFFER_ONLY    0
+#define BARCODE_SCAN_BUFFER_COMPUTER 1
+#define BARCODE_SCAN_CHECKIN        2
+#define BARCODE_SCAN_ADD_INVENTORY  3
+
+/*
  * Book
  */
 /obj/item/book
 	name = "book"
 	icon = 'icons/obj/library.dmi'
-	item_icons = list(
-		slot_l_hand_str = 'icons/mob/items/lefthand_books.dmi',
-		slot_r_hand_str = 'icons/mob/items/righthand_books.dmi'
-		)
+	contained_sprite = TRUE
 	icon_state = "book"
-	desc_antag = "As a Cultist, this item can be reforged to become a cult tome."
 	throw_speed = 1
 	throw_range = 5
-	w_class = ITEMSIZE_NORMAL		 //upped to three because books are, y'know, pretty big. (and you could hide them inside eachother recursively forever)
+	w_class = WEIGHT_CLASS_NORMAL		 //upped to three because books are, y'know, pretty big. (and you could hide them inside eachother recursively forever)
 	attack_verb = list("bashed", "whacked", "educated")
 	var/dat			 // Actual page content
 	var/due_date = 0 // Game time in 1/10th seconds
@@ -205,6 +212,10 @@
 	var/obj/item/store	//What's in the book?
 	drop_sound = 'sound/items/drop/book.ogg'
 	pickup_sound = 'sound/items/pickup/book.ogg'
+
+/obj/item/book/antagonist_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "As a Cultist, this item can be reforged to become a cult tome."
 
 /obj/item/book/attack_self(var/mob/user as mob)
 	if(carved)
@@ -217,11 +228,10 @@
 			to_chat(user, SPAN_NOTICE("The pages of [title] have been cut out!"))
 			return
 	if(src.dat)
-		user << browse("<TT><I>Penned by [author].</I></TT> <BR>" + "[dat]", "window=book")
+		user << browse(HTML_SKELETON("<TT><I>Penned by [author].</I></TT> <BR>" + "[dat]"), "window=book")
 		user.visible_message("[user] opens a book titled \"[src.title]\" and begins reading intently.")
-		playsound(loc, 'sound/bureaucracy/bookopen.ogg', 50, 1)
+		playsound(loc, 'sound/items/bureaucracy/bookopen.ogg', 50, TRUE)
 		onclose(user, "book")
-		onclose(playsound(loc, 'sound/bureaucracy/bookclose.ogg', 50, 1))
 	else
 		to_chat(user, "This book is completely blank!")
 
@@ -239,7 +249,7 @@
 		else
 			to_chat(user, SPAN_NOTICE("There's already something in [title]!"))
 			return
-	if(attacking_item.ispen())
+	if(attacking_item.tool_behaviour == TOOL_PEN)
 		if(unique)
 			to_chat(user, "These pages don't seem to take the ink well. Looks like you can't modify it.")
 			return
@@ -271,50 +281,52 @@
 				return
 	else if(istype(attacking_item, /obj/item/barcodescanner))
 		var/obj/item/barcodescanner/scanner = attacking_item
-		if(!scanner.computer)
+		var/obj/machinery/librarycomp/comp = locate(scanner.computer_ref)
+		if(!comp || QDELETED(comp))
 			to_chat(user, "[attacking_item]'s screen flashes: 'No associated computer found!'")
 		else
 			switch(scanner.mode)
-				if(0)
-					scanner.book = src
+				if(BARCODE_SCAN_BUFFER_ONLY)
+					scanner.book_ref = REF(src)
 					to_chat(user, "[attacking_item]'s screen flashes: 'Book stored in buffer.'")
-				if(1)
-					scanner.book = src
-					scanner.computer.buffer_book = src.name
+				if(BARCODE_SCAN_BUFFER_COMPUTER)
+					scanner.book_ref = REF(src)
+					comp.buffer_book = src.name
 					to_chat(user, "[attacking_item]'s screen flashes: 'Book stored in buffer. Book title stored in associated computer buffer.'")
-				if(2)
-					scanner.book = src
-					for(var/datum/borrowbook/b in scanner.computer.checkouts)
-						if(b.bookname == src.name)
-							scanner.computer.checkouts.Remove(b)
+				if(BARCODE_SCAN_CHECKIN)
+					scanner.book_ref = REF(src)
+					for(var/datum/borrowbook/checkout in comp.checkouts)
+						if(checkout.book_name == src.name)
+							comp.checkouts.Remove(checkout)
 							to_chat(user, "[attacking_item]'s screen flashes: 'Book stored in buffer. Book has been checked in.'")
 							return
 					to_chat(user, "[attacking_item]'s screen flashes: 'Book stored in buffer. No active check-out record found for current title.'")
-				if(3)
-					scanner.book = src
-					for(var/obj/item/book in scanner.computer.inventory)
-						if(book == src)
-							to_chat(user, "[attacking_item]'s screen flashes: 'Book stored in buffer. Title already present in inventory, aborting to avoid duplicate entry.'")
-							return
-					scanner.computer.inventory.Add(src)
+				if(BARCODE_SCAN_ADD_INVENTORY)
+					scanner.book_ref = REF(src)
+					var/datum/weakref/src_wref = WEAKREF(src)
+					if(src_wref in comp.inventory)
+						to_chat(user, "[attacking_item]'s screen flashes: 'Book stored in buffer. Title already present in inventory, aborting to avoid duplicate entry.'")
+						return
+					comp.inventory.Add(src_wref)
 					to_chat(user, "[attacking_item]'s screen flashes: 'Book stored in buffer. Title added to general inventory.'")
-	else if(istype(attacking_item, /obj/item/material/knife) || attacking_item.iswirecutter())
-		if(carved)	return
+	else if(istype(attacking_item, /obj/item/material/knife) || attacking_item.tool_behaviour == TOOL_WIRECUTTER)
+		if(carved)
+			return
 		to_chat(user, SPAN_NOTICE("You begin to carve out [title]."))
 		if(attacking_item.use_tool(src, user, 30, volume = 50))
 			to_chat(user, SPAN_NOTICE("You carve out the pages from [title]! You didn't want to read it anyway."))
-			playsound(loc, 'sound/bureaucracy/papercrumple.ogg', 50, 1)
+			playsound(loc, 'sound/items/bureaucracy/papercrumple.ogg', 50, 1)
 			new /obj/item/shreddedp(get_turf(src))
 			carved = 1
 			return
 	else
 		..()
 
-/obj/item/book/attack(mob/living/carbon/M as mob, mob/living/carbon/user as mob, var/target_zone)
+/obj/item/book/attack(mob/living/target_mob, mob/living/user, target_zone)
 	if(target_zone == BP_EYES)
-		user.visible_message(SPAN_NOTICE("You open up the book and show it to [M]. "), \
-			SPAN_NOTICE(" [user] opens up a book and shows it to [M]. "))
-		M << browse("<TT><I>Penned by [author].</I></TT> <BR>" + "[dat]", "window=book")
+		user.visible_message(SPAN_NOTICE("You open up the book and show it to [target_mob]. "), \
+			SPAN_NOTICE(" [user] opens up a book and shows it to [target_mob]. "))
+		target_mob << browse(HTML_SKELETON("<TT><I>Penned by [author].</I></TT> <BR>" + "[dat]"), "window=book")
 		user.setClickCooldown(DEFAULT_QUICK_COOLDOWN) //to prevent spam
 
 
@@ -324,34 +336,40 @@
 /obj/item/barcodescanner
 	name = "book scanner"
 	icon = 'icons/obj/library.dmi'
-	icon_state ="scanner"
+	icon_state = "scanner"
 	throw_speed = 1
 	throw_range = 5
-	w_class = ITEMSIZE_SMALL
-	var/obj/machinery/librarycomp/computer // Associated computer - Modes 1 to 3 use this
-	var/obj/item/book/book //  Currently scanned book
-	var/mode = 0 // 0 - Scan only, 1 - Scan and Set Buffer, 2 - Scan and Attempt to Check In, 3 - Scan and Attempt to Add to Inventory
+	w_class = WEIGHT_CLASS_SMALL
+	var/computer_ref // REF string of the associated library computer
+	var/book_ref // REF string of the currently scanned book
+	var/mode = BARCODE_SCAN_BUFFER_ONLY
 
-/obj/item/barcodescanner/attack_self(mob/user as mob)
+/obj/item/barcodescanner/attack_self(mob/user)
 	mode += 1
-	if(mode > 3)
-		mode = 0
+	if(mode > BARCODE_SCAN_ADD_INVENTORY)
+		mode = BARCODE_SCAN_BUFFER_ONLY
 	to_chat(user, "[src] Status Display:")
-	var/modedesc
+	var/mode_desc
 	switch(mode)
-		if(0)
-			modedesc = "Scan book to local buffer."
-		if(1)
-			modedesc = "Scan book to local buffer and set associated computer buffer to match."
-		if(2)
-			modedesc = "Scan book to local buffer, attempt to check in scanned book."
-		if(3)
-			modedesc = "Scan book to local buffer, attempt to add book to general inventory."
+		if(BARCODE_SCAN_BUFFER_ONLY)
+			mode_desc = "Scan book to local buffer."
+		if(BARCODE_SCAN_BUFFER_COMPUTER)
+			mode_desc = "Scan book to local buffer and set associated computer buffer to match."
+		if(BARCODE_SCAN_CHECKIN)
+			mode_desc = "Scan book to local buffer, attempt to check in scanned book."
+		if(BARCODE_SCAN_ADD_INVENTORY)
+			mode_desc = "Scan book to local buffer, attempt to add book to general inventory."
 		else
-			modedesc = "ERROR"
-	to_chat(user, " - Mode [mode] : [modedesc]")
-	if(src.computer)
+			mode_desc = "ERROR"
+	to_chat(user, " - Mode [mode] : [mode_desc]")
+	var/obj/machinery/librarycomp/comp = locate(src.computer_ref)
+	if(comp && !QDELETED(comp))
 		to_chat(user, SPAN_NOTICE("Computer has been associated with this unit."))
 	else
 		to_chat(user, SPAN_WARNING("No associated computer found. Only local scans will function properly."))
 	to_chat(user, "\n")
+
+#undef BARCODE_SCAN_BUFFER_ONLY
+#undef BARCODE_SCAN_BUFFER_COMPUTER
+#undef BARCODE_SCAN_CHECKIN
+#undef BARCODE_SCAN_ADD_INVENTORY

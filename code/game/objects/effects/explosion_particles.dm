@@ -12,12 +12,8 @@
 	return
 
 /obj/effect/expl_particles/Move()
-	..()
-	return
-
-/obj/effect/expl_particles/Destroy()
 	. = ..()
-	GC_TEMPORARY_HARDDEL
+	return
 
 /datum/effect/system/expl_particles
 	var/number = 10

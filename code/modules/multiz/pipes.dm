@@ -4,7 +4,8 @@
 /obj/machinery/atmospherics/pipe/zpipe
 	icon = 'icons/atmos/pipes.dmi'
 	icon_state = "up"
-	var/ptype	// What direction of pipe this is. Used for icons.
+	/// What direction of pipe this is. Used for icons.
+	var/ptype
 
 	name = "upwards pipe"
 	desc = "A pipe segment to connect upwards."
@@ -15,7 +16,8 @@
 	initialize_directions = SOUTH
 
 	var/minimum_temperature_difference = 300
-	var/thermal_conductivity = 0 //WALL_HEAT_TRANSFER_COEFFICIENT No
+	// WALL_HEAT_TRANSFER_COEFFICIENT
+	var/thermal_conductivity = 0
 
 	var/maximum_pressure = ATMOS_DEFAULT_MAX_PRESSURE
 	var/fatigue_pressure = ATMOS_DEFAULT_FATIGUE_PRESSURE
@@ -72,7 +74,7 @@
 	if(!loc) return FALSE
 	var/datum/gas_mixture/environment = loc.return_air()
 
-	var/pressure_difference = pressure - environment.return_pressure()
+	var/pressure_difference = pressure - XGM_PRESSURE(environment)
 
 	if(pressure_difference > maximum_pressure)
 		burst()
@@ -156,7 +158,7 @@
 	normalize_dir()
 	var/node1_dir
 
-	for(var/direction in GLOB.cardinal)
+	for(var/direction in GLOB.cardinals)
 		if(direction&initialize_directions)
 			if (!node1_dir)
 				node1_dir = direction
@@ -167,7 +169,8 @@
 				node1 = target
 				break
 
-	var/turf/above = GetAbove(src)
+	var/turf/current_turf = get_turf(src)
+	var/turf/above = GET_TURF_ABOVE(current_turf)
 	if(above)
 		for(var/obj/machinery/atmospherics/target in above)
 			if(target.initialize_directions && istype(target, /obj/machinery/atmospherics/pipe/zpipe/down))
@@ -199,7 +202,7 @@
 	normalize_dir()
 	var/node1_dir
 
-	for(var/direction in GLOB.cardinal)
+	for(var/direction in GLOB.cardinals)
 		if(direction&initialize_directions)
 			if (!node1_dir)
 				node1_dir = direction
@@ -210,7 +213,8 @@
 				node1 = target
 				break
 
-	var/turf/below = GetBelow(src)
+	var/turf/T = get_turf(src)
+	var/turf/below = GET_TURF_BELOW(T)
 	if(below)
 		for(var/obj/machinery/atmospherics/target in below)
 			if(target.initialize_directions && istype(target, /obj/machinery/atmospherics/pipe/zpipe/up))
@@ -219,7 +223,6 @@
 					break
 
 
-	var/turf/T = src.loc			// hide if turf is not intact
 	hide(!T.is_plating())
 
 ////////////////////////////////

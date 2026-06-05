@@ -30,16 +30,16 @@
 					step_rand(W)
 
 			var/area/A = get_area(M)
-			if(A.requires_power && !A.always_unpowered && A.power_light && isPlayerLevel(A.z))
+			if(A.requires_power && !A.always_unpowered && A.power_light && !is_centcom_level(A.z) && !is_reserved_level(A.z))
 				affected_areas |= get_area(M)
 
 	affected_mobs |= user
 	for(var/area/AffectedArea in affected_areas)
 		AffectedArea.power_light = 0
-		AffectedArea.power_change()
+		SEND_SIGNAL(AffectedArea, COMSIG_AREA_POWER_CHANGE)
 		spawn(rand(25,50))
 			AffectedArea.power_light = 1
-			AffectedArea.power_change()
+			SEND_SIGNAL(AffectedArea, COMSIG_AREA_POWER_CHANGE)
 
 	sleep(100)
 	for(var/mob/M in affected_mobs)

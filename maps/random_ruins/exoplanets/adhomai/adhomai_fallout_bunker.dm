@@ -6,7 +6,7 @@
 	sectors = list(SECTOR_SRANDMARR)
 
 	prefix = "adhomai/"
-	suffixes = list("adhomai_fallout_bunker.dmm")
+	suffix = "adhomai_fallout_bunker.dmm"
 
 	unit_test_groups = list(2)
 
@@ -14,7 +14,6 @@
 	name = "Fallout Bunker"
 	icon_state = "bluenew"
 	requires_power = FALSE
-	dynamic_lighting = TRUE
 	no_light_control = FALSE
 	base_turf = /turf/simulated/floor/exoplanet/mineral/adhomai
 	area_flags = AREA_FLAG_RAD_SHIELDED

@@ -53,7 +53,7 @@
 
 	if(!A || !src) return
 
-	var/list/turfs_src = get_area_turfs("\ref[src]")
+	var/list/turfs_src = get_area_turfs("[REF(src)]")
 
 	if(!turfs_src.len)
 		return
@@ -110,8 +110,7 @@
 
 		for (var/thing in ST)
 			var/atom/movable/AM = thing
-			var/atom/movable/copy = DuplicateObject(AM, 1)
-			copy.forceMove(TT)
+			var/atom/movable/copy = duplicate_object(AM, TT)
 			. += copy
 
 		SSair.mark_for_update(TT)

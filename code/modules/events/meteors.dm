@@ -21,22 +21,26 @@
 	for(var/n in 1 to severity)
 		waves += rand(5,15)
 
-	start_side = pick(GLOB.cardinal)
+	start_side = pick(GLOB.cardinals)
 	endWhen = worst_case_end()
 
 /datum/event/meteor_wave/announce()
 	command_announcement.Announce(SSatlas.current_map.meteors_detected_message, "Meteor Alert", new_sound = 'sound/AI/meteors_detected_message.ogg', zlevels = affecting_z)
 
 /datum/event/meteor_wave/announce_start()
-	. = ..()
-	if(.)
+	if(announce_to_sensor_console)
+		send_sensor_message("Entering [ic_name].")
+		return FALSE
+	else
 		command_announcement.Announce(SSatlas.current_map.meteor_contact_message, "Meteor Alert", zlevels = affecting_z)
 
 /datum/event/meteor_wave/announce_end(var/faked)
 	if(faked)
 		return
-	. = ..()
-	if(.)
+	if(announce_to_sensor_console)
+		send_sensor_message("Exiting [ic_name].")
+		return FALSE
+	else
 		spawn(100)//We give 10 seconds before announcing, for the last wave of meteors to hit the station
 			command_announcement.Announce(SSatlas.current_map.meteor_end_message, "Meteor Alert", zlevels = affecting_z)
 
@@ -105,17 +109,21 @@
 	command_announcement.Announce(SSatlas.current_map.dust_detected_message, "Dust Belt Alert", new_sound = 'sound/AI/dust_detected_message.ogg', zlevels = affecting_z)
 
 /datum/event/meteor_wave/dust/announce_start()
-	. = ..()
-	if(.)
+	if(announce_to_sensor_console)
+		send_sensor_message("Entering [ic_name].")
+		return FALSE
+	else
 		command_announcement.Announce(SSatlas.current_map.dust_contact_message, "Dust Belt Alert", new_sound = 'sound/AI/dust_contact_message.ogg', zlevels = affecting_z)
 
 /datum/event/meteor_wave/dust/announce_end(var/faked)
 	if(faked)
 		return
-	. = ..()
-	if(.)
+	if(announce_to_sensor_console)
+		send_sensor_message("Exiting [ic_name].")
+		return FALSE
+	else
 		spawn(100)//We give 10 seconds before announcing, for the last wave of meteors to hit the station
-			command_announcement.Announce(SSatlas.current_map.dust_end_message, "Dust Belt Alert", , new_sound = 'sound/AI/dust_end_message.ogg', zlevels = affecting_z)
+			command_announcement.Announce(SSatlas.current_map.dust_end_message, "Dust Belt Alert", new_sound = 'sound/AI/dust_end_message.ogg', zlevels = affecting_z)
 
 /datum/event/meteor_wave/dust/get_meteors()
 	return SSatlas.current_sector.meteors_dust

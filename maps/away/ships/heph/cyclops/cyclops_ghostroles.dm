@@ -27,7 +27,7 @@
 
 	id = /obj/item/card/id/hephaestus
 
-	l_ear = /obj/item/device/radio/headset/ship
+	l_ear = /obj/item/radio/headset/ship
 
 	backpack_contents = list(/obj/item/storage/box/survival = 1)
 	species_shoes = list(
@@ -37,7 +37,8 @@
 		SPECIES_TAJARA_ZHAN = /obj/item/clothing/shoes/workboots/toeless,
 		SPECIES_VAURCA_WARRIOR = /obj/item/clothing/shoes/vaurca,
 		SPECIES_VAURCA_WORKER = /obj/item/clothing/shoes/vaurca,
-		SPECIES_VAURCA_BULWARK = /obj/item/clothing/shoes/vaurca
+		SPECIES_VAURCA_BULWARK = /obj/item/clothing/shoes/vaurca,
+		SPECIES_VAURCA_ATTENDANT = /obj/item/clothing/shoes/vaurca
 	)
 
 /obj/outfit/admin/cyclops_crew/miner/post_equip(mob/living/carbon/human/H, visualsOnly = FALSE)
@@ -51,7 +52,7 @@
 		H.internals.icon_state = "internal1"
 		H.update_body()
 	if(isipc(H))
-		var/obj/item/organ/internal/ipc_tag/tag = H.internal_organs_by_name[BP_IPCTAG]
+		var/obj/item/organ/internal/machine/ipc_tag/tag = H.internal_organs_by_name[BP_IPCTAG]
 		if(istype(tag))
 			tag.modify_tag_data()
 
@@ -68,7 +69,7 @@
 	max_count = 1
 
 	outfit = /obj/outfit/admin/cyclops_crew/security
-	possible_species = list(SPECIES_HUMAN, SPECIES_HUMAN_OFFWORLD, SPECIES_TAJARA, SPECIES_TAJARA_MSAI, SPECIES_TAJARA_ZHAN, SPECIES_SKRELL, SPECIES_SKRELL_AXIORI, SPECIES_UNATHI, SPECIES_VAURCA_WARRIOR)
+	possible_species = list(SPECIES_HUMAN, SPECIES_HUMAN_OFFWORLD, SPECIES_TAJARA, SPECIES_TAJARA_MSAI, SPECIES_TAJARA_ZHAN, SPECIES_SKRELL, SPECIES_SKRELL_AXIORI, SPECIES_UNATHI, SPECIES_VAURCA_WARRIOR, SPECIES_VAURCA_ATTENDANT)
 	allow_appearance_change = APPEARANCE_PLASTICSURGERY
 
 	assigned_role = "Hephaestus Security Officer"
@@ -100,6 +101,8 @@
 	name = "Cyclops Crew Captain"
 
 	uniform = /obj/item/clothing/under/rank/captain/hephaestus
+	head = /obj/item/clothing/head/caphat/cap/hephaestus
+	gloves = /obj/item/clothing/gloves/captain/hephaestus
 	back = /obj/item/storage/backpack/satchel/leather
 
 /datum/ghostspawner/human/cyclops_crew/engineer

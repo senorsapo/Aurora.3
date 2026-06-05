@@ -97,6 +97,13 @@
 #define ui_health_east_template "EAST-1:" // ditto
 #define ui_internal "EAST-1:28,CENTER+1:17"
 
+//Upper-middle right (alerts)
+#define ui_alert1 "EAST-1:28,CENTER+5:27"
+#define ui_alert2 "EAST-1:28,CENTER+4:25"
+#define ui_alert3 "EAST-1:28,CENTER+3:23"
+#define ui_alert4 "EAST-1:28,CENTER+2:21"
+#define ui_alert5 "EAST-1:28,CENTER+1:19"
+
 //borgs
 #define ui_borg_health "EAST-1:28,CENTER-1:13" //borgs have the health display where humans have the pressure damage indicator.
 #define ui_alien_health "EAST-1:28,CENTER-1:13" //aliens have the health display where humans have the pressure damage indicator.
@@ -104,18 +111,21 @@
 //Pop-up inventory
 #define ui_shoes "WEST+1:8,SOUTH:5"
 
-#define ui_iclothing "WEST:6,SOUTH+1:7"
-#define ui_oclothing "WEST+1:8,SOUTH+1:7"
-#define ui_gloves "WEST+2:10,SOUTH+1:7"
+#define ui_gloves "WEST:6,SOUTH+1:7"
+#define ui_pants "WEST+1:8,SOUTH+1:7"
+// "WEST+2:10,SOUTH+1:7"
 
-#define ui_glasses "WEST:6,SOUTH+2:9"
-#define ui_mask "WEST+1:8,SOUTH+2:9"
-#define ui_l_ear "WEST+2:10,SOUTH+3:11"
-#define ui_r_ear "WEST:6,SOUTH+3:11"
+#define ui_wrists "WEST:6,SOUTH+2:9"
+#define ui_iclothing "WEST+1:8,SOUTH+2:9"
+#define ui_oclothing "WEST+2:10,SOUTH+2:9"
 
-#define ui_head "WEST+1:8,SOUTH+3:11"
+// "WEST+2:10,SOUTH+3:11"
+#define ui_mask "WEST+1:8,SOUTH+3:11"
+#define ui_glasses "WEST:6,SOUTH+3:11"
 
-#define ui_wrists "WEST+2:10,SOUTH+2:9"
+#define ui_r_ear "WEST:6,SOUTH+4:13"
+#define ui_head "WEST+1:8,SOUTH+4:13"
+#define ui_l_ear "WEST+2:10,SOUTH+4:13"
 
 //Intent small buttons
 #define ui_help_small "EAST-3:8,SOUTH:1"

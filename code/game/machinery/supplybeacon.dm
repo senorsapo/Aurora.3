@@ -44,7 +44,7 @@
 	drop_type = "supermatter"
 
 /obj/machinery/power/supply_beacon/attackby(obj/item/attacking_item, mob/user)
-	if(!use_power && attacking_item.iswrench())
+	if(!use_power && attacking_item.tool_behaviour == TOOL_WRENCH)
 		if(!anchored && !connect_to_network())
 			to_chat(user, SPAN_WARNING("This device must be placed over an exposed cable."))
 			return TRUE
@@ -74,7 +74,7 @@
 /obj/machinery/power/supply_beacon/proc/activate(var/mob/user)
 	if(expended)
 		return
-	if(surplus() < 500)
+	if(POWER_SURPLUS(src) < 500)
 		if(user) to_chat(user, SPAN_NOTICE("The connected wire doesn't have enough current."))
 		return
 	set_light(3, 3, "#00CCAA")
@@ -102,7 +102,9 @@
 		return PROCESS_KILL
 	if(!use_power)
 		return
-	if(draw_power(500) < 500)
+	var/can_draw = (POWER_DRAW(src, 500) >= 500)
+	DRAW_POWER(src, can_draw)
+	if(!can_draw)
 		deactivate()
 		return
 	if(!target_drop_time)
@@ -113,5 +115,7 @@
 		var/drop_y = src.y-2
 		var/drop_z = src.z
 		command_announcement.Announce("Tau Ceti Rapid Fabrication priority supply request #[rand(1000,9999)]-[rand(100,999)] received. Shipment dispatched via ballistic supply pod for immediate delivery. Have a nice day.", "Thank You For Your Patronage")
-		spawn(rand(100,300))
-			new /datum/random_map/droppod/supply(null, drop_x, drop_y, drop_z, supplied_drop = drop_type) // Splat.
+		addtimer(CALLBACK(src, PROC_REF(make_supply_beacon), drop_x, drop_y, drop_z), rand(10, 30) SECONDS)
+
+/obj/machinery/power/supply_beacon/proc/make_supply_beacon(drop_x, drop_y, drop_z)
+	new /datum/random_map/droppod/supply(null, drop_x, drop_y, drop_z, supplied_drop = drop_type) // Splat.

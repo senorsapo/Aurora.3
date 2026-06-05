@@ -70,27 +70,32 @@
 	var/datum/species/S = GLOB.all_species[pref.species]
 	if(!istext(pref.culture) || !ispath(text2path(pref.culture), /singleton/origin_item/culture))
 		var/singleton/origin_item/culture/CI = S.possible_cultures[1]
-		pref.culture = "[CI]"
+		pref.culture = "[CI.type]"
+
 	var/singleton/origin_item/culture/our_culture = GET_SINGLETON(text2path(pref.culture))
 	if(!istext(pref.origin) || !ispath(text2path(pref.origin), /singleton/origin_item/origin))
 		var/singleton/origin_item/origin/OI = pick(our_culture.possible_origins)
-		pref.origin = "[OI]"
+		pref.origin = "[OI.type]"
 	else
 		var/singleton/origin_item/origin/origin_check = text2path(pref.origin)
 		if(!(origin_check in our_culture.possible_origins))
 			to_client_chat(SPAN_WARNING("Your origin has been reset due to it being incompatible with your culture!"))
 			var/singleton/origin_item/origin/OI = pick(our_culture.possible_origins)
-			pref.origin = "[OI]"
+			pref.origin = "[OI.type]"
+
 	var/singleton/origin_item/origin/our_origin = GET_SINGLETON(text2path(pref.origin))
 	if(!(pref.citizenship in our_origin.possible_citizenships))
 		to_client_chat(SPAN_WARNING("Your previous citizenship is invalid for this origin! Resetting."))
 		pref.citizenship = our_origin.possible_citizenships[1]
+
 	if(!(pref.religion in our_origin.possible_religions))
 		to_client_chat(SPAN_WARNING("Your previous religion is invalid for this origin! Resetting."))
 		pref.religion = our_origin.possible_religions[1]
+
 	if(!(pref.accent in our_origin.possible_accents))
 		to_client_chat(SPAN_WARNING("Your previous accent is invalid for this origin! Resetting."))
 		pref.accent	= our_origin.possible_accents[1]
+
 	pref.economic_status = sanitize_inlist(pref.economic_status, ECONOMIC_POSITIONS, initial(pref.economic_status))
 
 /datum/category_item/player_setup_item/origin/content(var/mob/user)
@@ -99,14 +104,14 @@
 	var/list/dat = list()
 	var/singleton/origin_item/culture/CL = GET_SINGLETON(text2path(pref.culture))
 	var/singleton/origin_item/origin/OR = GET_SINGLETON(text2path(pref.origin))
-	dat += "<b>Culture: </b><a href='?src=\ref[src];open_culture_menu=1'>[CL.name]</a><br>"
+	dat += "<b>Culture: </b><a href='byond://?src=[REF(src)];open_culture_menu=1'>[CL.name]</a><br>"
 	dat += "<i>- [CL.desc]</i><br><br>"
 	if(length(CL.origin_traits_descriptions))
 		dat += "- Characters from this culture "
 		dat += "<b>[english_list(CL.origin_traits_descriptions)]</b>."
 	if(CL.important_information)
 		dat += "<br><i>- <font color=red>[CL.important_information]</font></i>"
-	dat += "<hr><b>Origin: </b><a href='?src=\ref[src];open_origin_menu=1'>[OR.name]</a><br>"
+	dat += "<hr><b>Origin: </b><a href='byond://?src=[REF(src)];open_origin_menu=1'>[OR.name]</a><br>"
 	dat += "<i>- [OR.desc]</i><br>"
 	if(length(OR.origin_traits_descriptions))
 		dat += "- Characters from this origin "
@@ -114,37 +119,38 @@
 	if(OR.important_information)
 		dat += "<br><i>- <font color=red>[OR.important_information]</font></i>"
 	dat += "<hr>"
-	dat += "<b>Economic Status:</b> <a href='?src=\ref[src];economic_status=1'>[pref.economic_status]</a><br/>"
-	dat += "<b>Citizenship:</b> <a href='?src=\ref[src];citizenship=1'>[pref.citizenship]</a><br/>"
-	dat += "<b>Religion:</b> <a href='?src=\ref[src];religion=1'>[pref.religion]</a><br/>"
-	dat += "<b>Accent:</b> <a href='?src=\ref[src];accent=1'>[pref.accent]</a><br/>"
+
+	dat += "<b>Economic Status:</b> <a href='?src=[REF(src)];economic_status=1'>[pref.economic_status]</a><br/>"
+	dat += "<b>Citizenship:</b> <a href='?src=[REF(src)];citizenship=1'>[pref.citizenship]</a><br/>"
+	dat += "<b>Religion:</b> <a href='?src=[REF(src)];religion=1'>[pref.religion]</a><br/>"
+	dat += "<b>Accent:</b> <a href='?src=[REF(src)];accent=1'>[pref.accent]</a><br/>"
 	. = dat.Join()
 
 /datum/category_item/player_setup_item/origin/OnTopic(href, href_list, user)
 	var/datum/species/S = GLOB.all_species[pref.species]
 	if(href_list["open_culture_menu"])
 		var/list/options = list()
-		var/list/possible_cultures = Singletons.GetMap(S.possible_cultures)
+		var/list/possible_cultures = GLOB.Singletons.GetMap(S.possible_cultures)
 		for(var/decl_type in possible_cultures)
 			var/singleton/origin_item/culture/CL = possible_cultures[decl_type]
 			options[CL.name] = CL
 		var/result = tgui_input_list(user, "Choose your character's culture.", "Culture", options)
 		var/singleton/origin_item/culture/chosen_culture = options[result]
 		if(chosen_culture)
-			show_window(chosen_culture, "set_culture_data", user)
+			show_origin_window(chosen_culture, "set_culture_data", user)
 		return TOPIC_HANDLED
 
 	if(href_list["open_origin_menu"])
 		var/list/options = list()
 		var/singleton/origin_item/culture/our_culture = GET_SINGLETON(text2path(pref.culture)) //plutonians be like
-		var/list/singleton/origin_item/origin/origins_list = Singletons.GetMap(our_culture.possible_origins)
+		var/list/singleton/origin_item/origin/origins_list = GLOB.Singletons.GetMap(our_culture.possible_origins)
 		for(var/decl_type in origins_list)
 			var/singleton/origin_item/origin/OR = origins_list[decl_type]
 			options[OR.name] = OR
 		var/result = tgui_input_list(user, "Choose your character's origin.", "Origins", options)
 		var/singleton/origin_item/origin/chosen_origin = options[result]
 		if(chosen_origin)
-			show_window(chosen_origin, "set_origin_data", user)
+			show_origin_window(chosen_origin, "set_origin_data", user)
 		return TOPIC_HANDLED
 
 	if(href_list["set_culture_data"])
@@ -207,13 +213,13 @@
 		sanitize_character()
 		return TOPIC_REFRESH
 
-/datum/category_item/player_setup_item/origin/proc/show_window(var/singleton/origin_item/OI, var/topic_data, var/mob/user)
+/datum/category_item/player_setup_item/origin/proc/show_origin_window(var/singleton/origin_item/OI, var/topic_data, var/mob/user)
 	var/datum/browser/origin_win = new(user, topic_data, "Origins Selection")
 	var/dat = "<html><center><b>[OI.name]</center></b>"
 	dat += "<hr>[OI.desc]<br>"
 	if(OI.important_information)
 		dat += "<font color=red><i>[OI.important_information]</i></font>"
-	dat += "<br><center>\[<a href='?src=\ref[src];[topic_data]=[html_encode(OI.type)]'>Select</a>\]</center>"
+	dat += "<br><center>\[<a href='byond://?src=[REF(src)];[topic_data]=[html_encode(OI.type)]'>Select</a>\]</center>"
 	dat += "</html>"
 	origin_win.set_content(dat)
 	origin_win.open()
@@ -223,9 +229,9 @@
 	if(citizenship)
 		var/datum/browser/citizen_win = new(user, "citizen_win", "Citizenship")
 		var/dat = "<html><center><b>[citizenship.name]</center></b>"
-		dat += "<br><br><center><a href='?src=\ref[user.client];JSlink=wiki;wiki_page=[replacetext(citizenship.name, " ", "_")]'>Read the Wiki</a></center>"
+		dat += "<br><br><center><a href='byond://?src=[REF(user.client)];JSlink=wiki;wiki_page=[replacetext(citizenship.name, " ", "_")]'>Read the Wiki</a></center>"
 		dat += "<br>[citizenship.description]"
-		dat += "<br><center>\[<a href='?src=\ref[src];set_citizenship=[html_encode(citizenship.name)]'>Select</a>\]</center>"
+		dat += "<br><center>\[<a href='byond://?src=[REF(src)];set_citizenship=[html_encode(citizenship.name)]'>Select</a>\]</center>"
 		dat += "</html>"
 		citizen_win.set_content(dat)
 		citizen_win.open()
@@ -236,7 +242,7 @@
 		var/datum/browser/rel_win = new(user, "rel_win", "Religion")
 		var/dat = "<center><b>[religion.name]</center></b>"
 		dat += "<br>[religion.description]"
-		dat += "<br><center>\[<a href='?src=\ref[src];set_religion=[html_encode(religion.name)]'>Select</a>\]</center>"
+		dat += "<br><center>\[<a href='byond://?src=[REF(src)];set_religion=[html_encode(religion.name)]'>Select</a>\]</center>"
 		dat += "</html>"
 		rel_win.set_content(dat)
 		rel_win.open()
@@ -247,7 +253,7 @@
 		var/datum/browser/acc_win = new(user, "acc_win", "Accent")
 		var/dat = "<html><center><b>[accent.name]</center></b>"
 		dat += "<br>[accent.description]"
-		dat += "<br><center>\[<a href='?src=\ref[src];set_accent=[html_encode(accent.name)]'>Select</a>\]</center>"
+		dat += "<br><center>\[<a href='byond://?src=[REF(src)];set_accent=[html_encode(accent.name)]'>Select</a>\]</center>"
 		dat += "</html>"
 		acc_win.set_content(dat)
 		acc_win.open()

@@ -2,10 +2,17 @@
 	name = "Scarab Salvage Ship"
 	description = "Scarab salvage ship."
 
-	prefix = "ships/coc/coc_scarab/"
-	suffixes = list("coc_scarab_deck_1.dmm", "coc_scarab_deck_2.dmm")
+	traits = list(
+		//Z1
+		list(ZTRAIT_AWAY = TRUE, ZTRAIT_UP = TRUE, ZTRAIT_DOWN = FALSE),
+		//Z2
+		list(ZTRAIT_AWAY = TRUE, ZTRAIT_UP = FALSE, ZTRAIT_DOWN = TRUE),
+	)
 
-	sectors = list(SECTOR_COALITION, SECTOR_WEEPING_STARS, SECTOR_ARUSHA, SECTOR_LIBERTYS_CRADLE, SECTOR_VALLEY_HALE, SECTOR_BADLANDS)
+	prefix = "ships/coc/coc_scarab/"
+	suffix = "coc_scarab.dmm"
+
+	sectors = list(SECTOR_COALITION, SECTOR_WEEPING_STARS, SECTOR_ARUSHA, SECTOR_LIBERTYS_CRADLE, SECTOR_VALLEY_HALE, SECTOR_BADLANDS, SECTOR_CRESCENT_EXPANSE_EAST)
 	spawn_weight = 1
 	ship_cost = 1
 	id = "coc_scarab"
@@ -191,15 +198,6 @@
 	shuttle_tag = "Scarab Lift"
 
 // CUSTOM STUFF
-// Dimmed yellow lights
-/obj/machinery/light/floor/decayed
-	brightness_color = "#fabd6d"
-	randomize_color = FALSE
-	brightness_power = 0.3
-
-/obj/machinery/light/colored/decayed/dimmed
-	brightness_power = 0.2
-
 // Guide to the combustion engine
 /obj/item/paper/fluff/scarabengine
 	name = "Burrow-class Freighter Engine Field Guide"

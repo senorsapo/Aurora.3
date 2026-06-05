@@ -33,22 +33,24 @@ If d1 = dir1 and d2 = dir2, it's a full X-X cable, getting from dir1 to dir2
 By design, d1 is the smallest direction and d2 is the highest
 */
 /obj/structure/cable
-	level = 1
-	anchored =1
-	var/datum/powernet/powernet
 	name = "power cable"
 	desc = "A flexible superconducting cable for heavy-duty power transfer."
 	icon = 'icons/obj/power_cond_white.dmi'
 	icon_state = "0-1"
+	level = 1
+	anchored = TRUE
+	maxhealth = null //why is this even a structure?
 	obj_flags = OBJ_FLAG_MOVES_UNSUPPORTED
-	var/d1 = 0
-	var/d2 = 1
 	layer = EXPOSED_WIRE_LAYER
 	color = COLOR_RED
-	var/obj/machinery/power/breakerbox/breaker_box
 
-/obj/structure/cable/get_examine_text(mob/user, distance, is_adjacent, infix, suffix)
-	. = ..()
+	var/datum/powernet/powernet
+	var/obj/machinery/power/breakerbox/breaker_box
+	var/d1 = 0
+	var/d2 = 1
+
+/obj/structure/cable/feedback_hints(mob/user, distance, is_adjacent)
+	. += ..()
 	var/found_color_name = "Unknown"
 	for(var/color_name in GLOB.cable_coil_colours)
 		var/color_value = GLOB.cable_coil_colours[color_name]
@@ -62,10 +64,9 @@ By design, d1 is the smallest direction and d2 is the highest
 	if(drain_check)
 		return TRUE
 
-	var/datum/powernet/PN = powernet
-	if(!PN) return FALSE
+	. = POWERNET_POWER_DRAW(powernet, amount)
 
-	return PN.draw_power(amount)
+	DRAW_FROM_POWERNET(powernet, .)
 
 /obj/structure/cable/yellow
 	color = COLOR_YELLOW
@@ -107,7 +108,7 @@ By design, d1 is the smallest direction and d2 is the highest
 
 	if(mapload)
 		var/image/I = image(icon, T, icon_state, dir, pixel_x, pixel_y)
-		I.plane = EFFECTS_ABOVE_LIGHTING_PLANE
+		I.plane = ABOVE_LIGHTING_PLANE
 		I.alpha = 125
 		I.color = color
 		LAZYADD(T.blueprints, I)
@@ -150,9 +151,9 @@ By design, d1 is the smallest direction and d2 is the highest
 	if(!T.can_have_cabling())
 		return
 
-	if(attacking_item.iswirecutter() || (attacking_item.sharp || attacking_item.edge))
+	if(attacking_item.tool_behaviour == TOOL_WIRECUTTER || (attacking_item.sharp || attacking_item.edge))
 
-		if(!attacking_item.iswirecutter())
+		if(attacking_item.tool_behaviour != TOOL_WIRECUTTER)
 			if(user.a_intent != I_HELP)
 				return
 
@@ -180,7 +181,7 @@ By design, d1 is the smallest direction and d2 is the highest
 			playsound(src.loc, 'sound/items/Wirecutter.ogg', 50, 1)
 
 		if(d1 == 11 || d2 == 11)
-			var/turf/turf = GetBelow(src)
+			var/turf/turf = GET_TURF_BELOW(T)
 			if(turf)
 				for(var/obj/structure/cable/c in turf)
 					if(c.d1 == 12 || c.d2 == 12)
@@ -192,14 +193,14 @@ By design, d1 is the smallest direction and d2 is the highest
 		return
 
 
-	else if(attacking_item.iscoil())
+	else if(attacking_item.tool_behaviour == TOOL_CABLECOIL)
 		var/obj/item/stack/cable_coil/coil = attacking_item
 		if (coil.get_amount() < 1)
 			to_chat(user, "You don't have enough cable.")
 			return
 		coil.cable_join(src, user)
 
-	else if(attacking_item.ismultitool())
+	else if(attacking_item.tool_behaviour == TOOL_MULTITOOL)
 
 		if(powernet && (powernet.avail > 0))		// is it powered?
 			to_chat(user, SPAN_WARNING("[powernet.avail]W in power network."))
@@ -221,7 +222,7 @@ By design, d1 is the smallest direction and d2 is the highest
 			return TRUE
 	return FALSE
 
-/obj/structure/cable/attack_generic(var/mob/user)
+/obj/structure/cable/attack_generic(mob/user, damage, attack_message, environment_smash, armor_penetration, attack_flags, damage_type)
 	//Let those rats (and other small things) nibble the cables
 	if (issmall(user) && !isDrone(user))
 		to_chat(user, SPAN_DANGER("You bite into \the [src]."))
@@ -382,12 +383,14 @@ By design, d1 is the smallest direction and d2 is the highest
 
 	// Handle up/down cables
 	if(d1 == 11 || d2 == 11)
-		T = GetBelow(src)
+		var/turf/current_turf = get_turf(src)
+		T = GET_TURF_BELOW(current_turf)
 		if(T)
 			. += power_list(T, src, 12, powernetless_only)
 
 	if(d1 == 12 || d2 == 12)
-		T = GetAbove(src)
+		var/turf/current_turf = get_turf(src)
+		T = GET_TURF_ABOVE(current_turf)
 		if(T)
 			. += power_list(T, src, 11, powernetless_only)
 
@@ -395,7 +398,7 @@ By design, d1 is the smallest direction and d2 is the highest
 	for(var/cable_dir in list(d1, d2))
 		if(cable_dir == 11 || cable_dir == 12 || cable_dir == 0)
 			continue
-		var/reverse = GLOB.reverse_dir[cable_dir]
+		var/reverse = REVERSE_DIR(cable_dir)
 		T = get_step(src, cable_dir)
 		if(T)
 			for(var/obj/structure/cable/C in T)
@@ -498,10 +501,10 @@ By design, d1 is the smallest direction and d2 is the highest
 	max_amount = MAXCOIL
 	color = COLOR_RED
 	throwforce = 10
-	w_class = ITEMSIZE_SMALL
+	w_class = WEIGHT_CLASS_SMALL
 	throw_speed = 2
 	throw_range = 5
-	matter = list(DEFAULT_WALL_MATERIAL = 50, MATERIAL_GLASS = 20)
+	matter = list(DEFAULT_WALL_MATERIAL = 50, MATERIAL_GLASS = 20, MATERIAL_PHORON = 3)
 	recyclable = TRUE
 	obj_flags = OBJ_FLAG_CONDUCTABLE
 	item_flags = ITEM_FLAG_HELD_MAP_TEXT
@@ -511,11 +514,10 @@ By design, d1 is the smallest direction and d2 is the highest
 	drop_sound = 'sound/items/drop/accessory.ogg'
 	pickup_sound = 'sound/items/pickup/accessory.ogg'
 	surgerysound = 'sound/items/surgery/fixovein.ogg'
+	contained_sprite = TRUE
 	build_from_parts = TRUE
 	worn_overlay = "end"
-
-/obj/item/stack/cable_coil/iscoil()
-	return TRUE
+	tool_behaviour = TOOL_CABLECOIL
 
 /obj/item/stack/cable_coil/Initialize(mapload, amt, param_color = null)
 	. = ..(mapload, amt)
@@ -528,9 +530,8 @@ By design, d1 is the smallest direction and d2 is the highest
 	update_icon()
 	update_wclass()
 
-/obj/item/stack/cable_coil/get_examine_text(mob/user, distance, is_adjacent, infix, suffix)
-	. = ..()
-
+/obj/item/stack/cable_coil/feedback_hints(mob/user, distance, is_adjacent)
+	. += ..()
 	var/found_color_name = "Unknown"
 	for(var/color_name in GLOB.cable_coil_colours)
 		var/color_value = GLOB.cable_coil_colours[color_name]
@@ -540,13 +541,13 @@ By design, d1 is the smallest direction and d2 is the highest
 	. += "This cable is: <span style='color:[color]'>[found_color_name]</span>"
 
 	if(!uses_charge)
-		. += "There [src.amount == 1 ? "is" : "are"] <b>[src.amount]</b> [src.singular_name]\s of cable in the coil."
+		. += "There [src.amount == 1 ? "is" : "are"] <b>[src.amount] [src.singular_name]\s</b> of cable in the coil."
 	else
 		. += "You have enough charge to produce <b>[get_amount()]</b>."
 
-/obj/item/stack/cable_coil/attack(mob/living/carbon/M, mob/user)
-	if(ishuman(M) && user.a_intent == I_HELP)
-		var/mob/living/carbon/human/H = M
+/obj/item/stack/cable_coil/attack(mob/living/target_mob, mob/living/user, target_zone)
+	if(ishuman(target_mob) && user.a_intent == I_HELP)
+		var/mob/living/carbon/human/H = target_mob
 		var/obj/item/organ/external/affecting = H.get_organ(user.zone_sel.selecting)
 
 		if(affecting.open != 0)
@@ -556,27 +557,27 @@ By design, d1 is the smallest direction and d2 is the highest
 		else
 			if(!BP_IS_ROBOTIC(affecting))
 				if(affecting.is_bandaged())
-					to_chat(user, SPAN_WARNING("The wounds on [M]'s [affecting.name] have already been closed."))
+					to_chat(user, SPAN_WARNING("The wounds on [H]'s [affecting.name] have already been closed."))
 					return
 				else
 					if(!can_use(10, user))
 						to_chat(user, SPAN_NOTICE("You don't have enough coils for this!"))
 						return
 					user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
-					for(var/datum/wound/W in affecting.wounds)
+					for(var/datum/wound/W as anything in affecting.wounds)
 						if(W.bandaged)
 							continue
 						if(W.current_stage <= W.max_bleeding_stage)
-							user.visible_message(SPAN_NOTICE("\The [user] starts carefully suturing the open wound on [M]'s [affecting.name]..."), \
-												SPAN_NOTICE("You start carefully suturing the open wound on [M]'s [affecting.name]... This will take a while."))
-							if(!do_mob(user, M, 200))
-								user.visible_message(SPAN_DANGER("[user]'s hand slips and tears open the wound on [M]'s [affecting.name]!"), \
+							user.visible_message(SPAN_NOTICE("\The [user] starts carefully suturing the open wound on [target_mob]'s [affecting.name]..."), \
+												SPAN_NOTICE("You start carefully suturing the open wound on [target_mob]'s [affecting.name]... This will take a while."))
+							if(!do_mob(user, target_mob, 200))
+								user.visible_message(SPAN_DANGER("[user]'s hand slips and tears open the wound on [target_mob]'s [affecting.name]!"), \
 														SPAN_DANGER("<font size=2>The wound on your [affecting.name] is torn open!</font>"))
-								M.apply_damage(rand(1,10), DAMAGE_BRUTE)
+								target_mob.apply_damage(rand(1,10), DAMAGE_BRUTE)
 								break
-							user.visible_message(SPAN_NOTICE("\The [user] barely manages to stitch \a [W.desc] on [M]'s [affecting.name]."), \
-														SPAN_NOTICE("You barely manage to stitch \a [W.desc] on [M]'s [affecting.name].") )
-							W.bandage("cable-stitched")
+							user.visible_message(SPAN_NOTICE("\The [user] barely manages to stitch \a [W.desc] on [target_mob]'s [affecting.name]."), \
+														SPAN_NOTICE("You barely manage to stitch \a [W.desc] on [target_mob]'s [affecting.name].") )
+							W.bandage()
 							use(10)
 							affecting.add_pain(25)
 							if(prob(min(30 + (germ_level/5), 65))) //Less chance of infection if you clean the coil. Coil's germ level is set to GERM_LEVEL_AMBIENT
@@ -657,7 +658,7 @@ By design, d1 is the smallest direction and d2 is the highest
 	check_maptext(SMALL_FONTS(7, get_amount()))
 
 /obj/item/stack/cable_coil/attackby(obj/item/attacking_item, mob/user)
-	if(attacking_item.ismultitool())
+	if(attacking_item.tool_behaviour == TOOL_MULTITOOL)
 		choose_cable_color(user)
 	return ..()
 
@@ -678,10 +679,10 @@ By design, d1 is the smallest direction and d2 is the highest
 
 /obj/item/stack/cable_coil/proc/update_wclass()
 	if(amount == 1)
-		w_class = ITEMSIZE_TINY
+		w_class = WEIGHT_CLASS_TINY
 		slot_flags = SLOT_BELT | SLOT_EARS //one cable piece can fit in your ear.
 	else
-		w_class = ITEMSIZE_SMALL
+		w_class = WEIGHT_CLASS_SMALL
 		slot_flags = SLOT_BELT
 
 /obj/item/stack/cable_coil/verb/make_restraint()
@@ -792,7 +793,7 @@ By design, d1 is the smallest direction and d2 is the highest
 					return
 
 			var/obj/structure/cable/C = new(F)
-			var/obj/structure/cable/D = new(GetBelow(F))
+			var/obj/structure/cable/D = new(GET_TURF_BELOW(F))
 
 			C.cableColor(color)
 
@@ -1063,7 +1064,7 @@ By design, d1 is the smallest direction and d2 is the highest
 	return ..()
 
 /obj/structure/noose/attackby(obj/item/attacking_item, mob/user, params)
-	if(attacking_item.iswirecutter())
+	if(attacking_item.tool_behaviour == TOOL_WIRECUTTER)
 		user.visible_message("<b>[user]</b> cuts \the [src].", SPAN_NOTICE("You cut \the [src]."))
 		playsound(src.loc, 'sound/items/Wirecutter.ogg', 50, 1)
 		if(istype(buckled, /mob/living))

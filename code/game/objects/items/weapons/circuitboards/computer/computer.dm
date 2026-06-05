@@ -1,7 +1,3 @@
-#ifndef T_BOARD
-#error T_BOARD macro is not defined but we need it!
-#endif
-
 /obj/item/circuitboard/message_monitor
 	name = T_BOARD("message monitor console")
 	build_path = /obj/machinery/computer/message_monitor
@@ -71,10 +67,6 @@
 /obj/item/circuitboard/syndicatedoor
 	name = T_BOARD("ProComp Executive")
 	build_path = /obj/machinery/computer/pod/old/syndicate
-
-/obj/item/circuitboard/swfdoor
-	name = T_BOARD("Magix")
-	build_path = /obj/machinery/computer/pod/old/swf
 
 /obj/item/circuitboard/rdservercontrol
 	name = T_BOARD("R&D server control console")

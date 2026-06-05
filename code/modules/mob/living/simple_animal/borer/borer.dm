@@ -16,21 +16,22 @@
 	a_intent = I_HURT
 	stop_automated_movement = 1
 	status_flags = CANPUSH
-	attacktext = "nipped"
+	attacktext = "nips"
 	friendly = "prods"
 	wander = 0
-	maxHealth = 40
+	maxhealth = 40
 	health = 40
 	pass_flags = PASSTABLE
 	universal_understand = TRUE
 	holder_type = /obj/item/holder/borer
 	mob_size = 1
 	hunger_enabled = FALSE
+	mob_size = MOB_TINY
 
 	var/used_dominate
-	var/datum/progressbar/autocomplete/ability_bar
+	var/datum/progressbar/ability_bar
 	var/ability_start_time = 0
-	var/obj/screen/borer/chemicals/chem_hud
+	var/atom/movable/screen/borer/chemicals/chem_hud
 	var/chemicals = 10                      // Chemicals used for reproduction and spitting neurotoxin.
 	var/mob/living/carbon/human/host        // Human host for the brain worm.
 	var/truename                            // Name used for brainworm-speak.
@@ -46,9 +47,11 @@
 /mob/living/simple_animal/borer/LateLogin()
 	..()
 	if(mind)
-		borers.add_antagonist(mind)
-	if(client && host)
-		client.screen += host.healths
+		GLOB.borers.add_antagonist_mind(mind, 1, GLOB.borers.role_text, GLOB.borers.welcome_text)
+	if(client)
+		client.init_verbs()
+		if(host)
+			client.screen += host.healths
 
 /mob/living/simple_animal/borer/Initialize()
 	. = ..()
@@ -76,7 +79,7 @@
 /mob/living/simple_animal/borer/can_name(var/mob/living/M)
 	return FALSE
 
-/mob/living/simple_animal/borer/Life()
+/mob/living/simple_animal/borer/Life(seconds_per_tick, times_fired)
 	if(host)
 		if(!stat && host.stat != DEAD)
 			if(chemicals < 250)
@@ -85,12 +88,17 @@
 			host.emote(pick(controlling_emotes))
 	..()
 	if(!QDELETED(ability_bar))
-		ability_bar.update(world.time - ability_start_time)
+		var/borer_progress = world.time - ability_start_time
+		borer_progress = clamp(borer_progress, 0, ability_bar.goal)
+		ability_bar.update(borer_progress)
+
+		if(borer_progress == ability_bar.goal)
+			ability_bar.end_progress()
 
 /mob/living/simple_animal/borer/proc/start_ability(var/atom/target, var/time)
 	if(!QDELETED(ability_bar))
 		return FALSE
-	ability_bar = new /datum/progressbar/autocomplete(src, time, target)
+	ability_bar = new /datum/progressbar(src, time, target)
 	ability_start_time = world.time
 	ability_bar.update(0)
 	return TRUE
@@ -110,11 +118,6 @@
 
 	if(ability_bar)
 		QDEL_NULL(ability_bar)
-
-	if(istype(host,/mob/living/carbon/human))
-		var/mob/living/carbon/human/H = host
-		var/obj/item/organ/external/head = H.get_organ(BP_HEAD)
-		head.implants -= src
 
 	controlling = FALSE
 
@@ -165,8 +168,8 @@
 		return
 
 	if(host.mind)
-		borers.clear_indicators(host.mind)
-		borers.remove_antagonist(host.mind)
+		GLOB.borers.clear_indicators(host.mind)
+		GLOB.borers.remove_antagonist(host.mind)
 
 	forceMove(get_turf(host))
 	var/obj/item/organ/external/head = host.get_organ(BP_HEAD)

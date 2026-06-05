@@ -21,42 +21,6 @@
 	not set properly, the underlay will default to regular floor plating.
 */
 
-//Redefinitions of the diagonal directions so they can be stored in one var without conflicts
-#define N_NORTH	2
-#define N_SOUTH	4
-#define N_EAST	16
-#define N_WEST	256
-#define N_NORTHEAST	32
-#define N_NORTHWEST	512
-#define N_SOUTHEAST	64
-#define N_SOUTHWEST	1024
-
-/* smoothing_flags */
-
-///Do not smooth
-#define SMOOTH_FALSE			BITFLAG(0)
-
-///Smooths with exact specified types or just itself
-#define SMOOTH_TRUE				BITFLAG(1)
-
-///Smooths with all subtypes of specified types or just itself (this value can replace SMOOTH_TRUE)
-#define SMOOTH_MORE				BITFLAG(2)
-
-///If atom should smooth diagonally, this should be present in 'smooth' var
-#define SMOOTH_DIAGONAL			BITFLAG(3)
-
-///Atom will smooth with the borders of the map
-#define SMOOTH_BORDER			BITFLAG(4)
-
-///Atom is currently queued to smooth.
-#define SMOOTH_QUEUED			BITFLAG(5)
-
-///Don't clear the atom's icon_state on smooth.
-#define SMOOTH_NO_CLEAR_ICON	BITFLAG(6)
-
-///Add underlays, detached from diagonal smoothing.
-#define SMOOTH_UNDERLAYS		BITFLAG(7)
-
 /* smoothing_hints */
 
 ///Don't draw the 'F' state. Useful with SMOOTH_NO_CLEAR_ICON.
@@ -80,10 +44,13 @@
 	var/tmp/top_right_corner
 	var/tmp/bottom_left_corner
 	var/tmp/bottom_right_corner
-	var/list/canSmoothWith = null // TYPE PATHS I CAN SMOOTH WITH~~~~~ If this is null and atom is smooth, it smooths only with itself
+	/// TYPE PATHS I CAN SMOOTH WITH - If this is null and atom is smooth, it smooths only with itself
+	var/list/canSmoothWith = null
 	var/list/can_blend_with = null
-	var/blend_overlay //Icon state of the blending overlay.
-	var/attach_overlay //Icon state of the overlay this object uses to attach to other objects.
+	/// Icon state of the blending overlay.
+	var/blend_overlay
+	/// Icon state of the overlay this object uses to attach to other objects.
+	var/attach_overlay
 
 /atom/movable
 	var/can_be_unanchored = 0
@@ -92,10 +59,14 @@
 
 /turf
 	var/list/fixed_underlay
-	var/smooth_underlays	// Determines if we should attempt to generate turf underlays for this type.
-	var/tile_decal_state // override if you don't want decals to cut from the icon state directly but something else. used for coloring decals, mostly
-	var/tile_outline // decal effect for "sinking in" the edges.
-	var/tile_outline_alpha // how dark you want the sinking in to be. set this if you want above to do stuff.
+	/// Determines if we should attempt to generate turf underlays for this type.
+	var/smooth_underlays
+	/// Override if you don't want decals to cut from the icon state directly but something else. Used for coloring decals, mostly
+	var/tile_decal_state
+	/// Decal effect for "sinking in" the edges.
+	var/tile_outline
+	/// How dark you want the sinking in to be. Set this if you want above to do stuff.
+	var/tile_outline_alpha
 	var/tile_outline_blend_process = ICON_OVERLAY
 
 /turf/simulated/wall/shuttle
@@ -125,7 +96,7 @@
 	else
 		var/atom/movable/AM
 
-		for(var/direction in GLOB.cardinal)
+		for(var/direction in GLOB.cardinals)
 			AM = find_type_in_direction(src, direction)
 			if(AM == NULLTURF_BORDER)
 				if((smoothing_flags & SMOOTH_BORDER))
@@ -173,24 +144,24 @@
 
 	return ..()
 
-///Do not use, use SSicon_smooth.add_to_queue(atom)
-/proc/smooth_icon(atom/A)
+///Do not use, use QUEUE_SMOOTH(atom)
+/atom/proc/smooth_icon()
 	SHOULD_NOT_SLEEP(TRUE)
-	if(!A || !A.smoothing_flags)
+	if(QDELETED(src))
 		return
-	A.smoothing_flags &= ~SMOOTH_QUEUED
-	if (!A.z)
+	if(!smoothing_flags)
 		return
-	if(QDELETED(A))
+	if (!z)
 		return
-	A.atom_flags |= ATOM_FLAG_HTML_USE_INITIAL_ICON
-	if((A.smoothing_flags & SMOOTH_TRUE) || (A.smoothing_flags & SMOOTH_MORE))
-		var/adjacencies = A.calculate_adjacencies()
+	smoothing_flags &= ~SMOOTH_QUEUED
+	atom_flags |= ATOM_FLAG_HTML_USE_INITIAL_ICON
+	if((smoothing_flags & (SMOOTH_TRUE|SMOOTH_MORE)))
+		var/adjacencies = calculate_adjacencies()
 
-		if(A.smoothing_flags & SMOOTH_DIAGONAL)
-			A.diagonal_smooth(adjacencies)
+		if(smoothing_flags & SMOOTH_DIAGONAL)
+			diagonal_smooth(adjacencies)
 		else
-			A.cardinal_smooth(adjacencies)
+			cardinal_smooth(adjacencies)
 
 /atom/proc/diagonal_smooth(adjacencies)
 	SHOULD_NOT_SLEEP(TRUE)
@@ -222,7 +193,7 @@
 	return adjacencies
 
 /turf/diagonal_smooth(adjacencies)
-	adjacencies = reverse_ndir(..())
+	adjacencies = REVERSE_DIR(..())
 	if (smooth_underlays && adjacencies)
 		// This should be a mutable_appearance, but we're still on 510.
 		// Alas.
@@ -261,7 +232,7 @@
 /turf/proc/get_underlays(var/list/adjacencies)
 	SHOULD_NOT_SLEEP(TRUE)
 
-	//First of all, check if there are turfs like us we can ask for underlays.
+	// First of all, check if there are turfs like us we can ask for underlays.
 	adjacencies = calculate_adjacencies()
 	var/success = FALSE
 	if (smooth_underlays)
@@ -277,104 +248,117 @@
 						success = TRUE
 						break
 
-		//if all else fails, ask our own turf
+		// If all else fails, ask our own turf
 		if(!success)
 			underlay_appearance.icon = base_icon
 			underlay_appearance.icon_state = base_icon_state
 
 		underlays = U
 
-//Blend atoms
-/atom/proc/handle_blending(adjacencies, var/list/dir_mods, var/overlay_layer = 3)
+#define ndir_to_initial(RET, ndir)\
+	switch(ndir){\
+		if(N_NORTH){\
+			RET = "n";\
+			}\
+		if(N_SOUTH){\
+			RET = "s";\
+			}\
+		if(N_EAST){\
+			RET = "e";\
+			}\
+		if(N_WEST){\
+			RET = "w";\
+			}\
+	}
+
+/**
+ * Blend atoms
+ */
+/atom/proc/handle_blending(adjacencies, var/list/dir_mods)
 	SHOULD_NOT_SLEEP(TRUE)
 
 	LAZYINITLIST(dir_mods)
-	var/walls_found = 0 //Bitfield of the directions of walls we've found.
+	// Bitfield of the directions of walls we've found.
+	var/walls_found = 0
 	for(var/adjacency in list(N_NORTH, N_EAST, N_SOUTH, N_WEST))
 		if(adjacencies & adjacency)
-			var/turf/T = get_step(src, reverse_ndir(adjacency))
+			var/turf/T = get_step(src, REVERSE_DIR(adjacency))
 			if(is_type_in_list(T, can_blend_with))
 				if(attach_overlay)
-					AddOverlays("[reverse_ndir(adjacency)]_[attach_overlay]", overlay_layer)
+					AddOverlays("[REVERSE_DIR(adjacency)]_[attach_overlay]")
 				walls_found |= adjacency
 				dir_mods["[adjacency]"] = "-[blend_overlay]"
 	for(var/adjacency in list(N_NORTH, N_SOUTH))
 		for(var/diagonal in list(N_WEST, N_EAST))
-			var/prefix = ndir_to_initial(adjacency)
-			var/suffix = ndir_to_initial(adjacency)
+			//This shit is done to avoid checking twice, since the value is the same
+			var/prefix
+			ndir_to_initial(prefix, adjacency)
+			var/suffix = prefix
+
 			var/has_adjacency = walls_found & adjacency
 			var/has_diagonal = walls_found & diagonal
 			if(((adjacencies & adjacency) && (adjacencies && diagonal)) && (has_adjacency || has_diagonal))
-				dir_mods["[adjacency][diagonal]"] = "-[prefix][walls_found & adjacency ? "wall" : "win"]-[suffix][walls_found & diagonal ? "wall" : "win"]"
+				dir_mods["[adjacency][diagonal]"] = "-[prefix][has_adjacency ? "wall" : "win"]-[suffix][has_diagonal ? "wall" : "win"]"
 				if(attach_overlay)
-					AddOverlays("[prefix][suffix]_[attach_overlay]", overlay_layer)
+					AddOverlays("[prefix][suffix]_[attach_overlay]")
 	return dir_mods
 
-/proc/ndir_to_initial(var/ndir)
-	switch(ndir)
-		if(N_NORTH)
-			return "n"
-		if(N_SOUTH)
-			return "s"
-		if(N_EAST)
-			return "e"
-		if(N_WEST)
-			return "w"
+#undef ndir_to_initial
 
-/atom/proc/cardinal_smooth(adjacencies, var/list/dir_mods)
+/atom/proc/cardinal_smooth(adjacencies)
 	SHOULD_NOT_SLEEP(TRUE)
 
 	//NW CORNER
 	var/nw = "1-i"
 	if((adjacencies & N_NORTH) && (adjacencies & N_WEST))
 		if(adjacencies & N_NORTHWEST)
-			nw = "1-f" + LAZYACCESS(dir_mods, "[N_NORTH][N_WEST][N_NORTHWEST]")
+			nw = "1-f"
 		else
-			nw = "1-nw" + LAZYACCESS(dir_mods, "[N_NORTH][N_WEST]")
+			nw = "1-nw"
 	else
 		if(adjacencies & N_NORTH)
-			nw = "1-n" + LAZYACCESS(dir_mods, "[N_NORTH]")
+			nw = "1-n"
 		else if(adjacencies & N_WEST)
-			nw = "1-w" + LAZYACCESS(dir_mods, "[N_WEST]")
+			nw = "1-w"
 
 	//NE CORNER
 	var/ne = "2-i"
 	if((adjacencies & N_NORTH) && (adjacencies & N_EAST))
 		if(adjacencies & N_NORTHEAST)
-			ne = "2-f" + LAZYACCESS(dir_mods, "[N_NORTH][N_EAST][N_NORTHEAST]")
+			ne = "2-f"
 		else
-			ne = "2-ne" + LAZYACCESS(dir_mods, "[N_NORTH][N_EAST]")
+			ne = "2-ne"
 	else
 		if(adjacencies & N_NORTH)
-			ne = "2-n" + LAZYACCESS(dir_mods, "[N_NORTH]")
+			ne = "2-n"
 		else if(adjacencies & N_EAST)
-			ne = "2-e" + LAZYACCESS(dir_mods, "[N_EAST]")
+			ne = "2-e"
 
 	//SW CORNER
 	var/sw = "3-i"
 	if((adjacencies & N_SOUTH) && (adjacencies & N_WEST))
 		if(adjacencies & N_SOUTHWEST)
-			sw = "3-f" + LAZYACCESS(dir_mods, "[N_SOUTH][N_WEST][N_SOUTHWEST]")
+			sw = "3-f"
 		else
-			sw = "3-sw" + LAZYACCESS(dir_mods, "[N_SOUTH][N_WEST]")
+			sw = "3-sw"
 	else
 		if(adjacencies & N_SOUTH)
-			sw = "3-s" + LAZYACCESS(dir_mods, "[N_SOUTH]")
+			sw = "3-s"
 		else if(adjacencies & N_WEST)
-			sw = "3-w" + LAZYACCESS(dir_mods, "[N_WEST]")
+			sw = "3-w"
 
 	//SE CORNER
 	var/se = "4-i"
 	if((adjacencies & N_SOUTH) && (adjacencies & N_EAST))
 		if(adjacencies & N_SOUTHEAST)
-			se = "4-f" + LAZYACCESS(dir_mods, "[N_SOUTH][N_EAST][N_SOUTHEAST]")
+			se = "4-f"
 		else
-			se = "4-se" + LAZYACCESS(dir_mods, "[N_SOUTH][N_EAST]")
+			se = "4-se"
 	else
 		if(adjacencies & N_SOUTH)
-			se = "4-s" + LAZYACCESS(dir_mods, "[N_SOUTH]")
+			se = "4-s"
 		else if(adjacencies & N_EAST)
-			se = "4-e" + LAZYACCESS(dir_mods, "[N_EAST]")
+			se = "4-e"
 
 	var/list/New
 	var/list/Old
@@ -525,35 +509,14 @@
 			return A && A.type == source.type ? A : null
 
 //Icon smoothing helpers
-/proc/smooth_zlevel(var/zlevel, now = FALSE)
+/proc/smooth_zlevel(var/zlevel)
 	SHOULD_NOT_SLEEP(TRUE)
 
-	for(var/V in Z_TURFS(zlevel))
-		var/turf/T = V
+	for(var/turf/T as anything in Z_TURFS(zlevel))
+		QUEUE_SMOOTH(T)
 
-		//There's no use in smoothing turfs that have been deleted
-		if(QDELETED(T))
-			continue
-
-		if(T.smoothing_flags)
-			if(now)
-				smooth_icon(T)
-			else
-				SSicon_smooth.add_to_queue(T)
-
-		for(var/R in T)
-			var/atom/A = R
-
-			//There's no use in smoothing deleted things
-			if(QDELETED(A))
-				continue
-
-			if(A.smoothing_flags)
-
-				if(now)
-					smooth_icon(A)
-				else
-					SSicon_smooth.add_to_queue(A)
+		for(var/atom/movable/movable_to_smooth as anything in T)
+			QUEUE_SMOOTH(movable_to_smooth)
 
 /atom/proc/clear_smooth_overlays()
 	SHOULD_NOT_SLEEP(TRUE)
@@ -578,43 +541,3 @@
 	bottom_right_corner = se
 	O += se
 	AddOverlays(O)
-
-/proc/reverse_ndir(ndir)
-	SHOULD_NOT_SLEEP(TRUE)
-	SHOULD_BE_PURE(TRUE)
-
-	switch(ndir)
-		if(N_NORTH)
-			return NORTH
-		if(N_SOUTH)
-			return SOUTH
-		if(N_WEST)
-			return WEST
-		if(N_EAST)
-			return EAST
-		if(N_NORTHWEST)
-			return NORTHWEST
-		if(N_NORTHEAST)
-			return NORTHEAST
-		if(N_SOUTHEAST)
-			return SOUTHEAST
-		if(N_SOUTHWEST)
-			return SOUTHWEST
-		if(N_NORTH|N_WEST)
-			return NORTHWEST
-		if(N_NORTH|N_EAST)
-			return NORTHEAST
-		if(N_SOUTH|N_WEST)
-			return SOUTHWEST
-		if(N_SOUTH|N_EAST)
-			return SOUTHEAST
-		if(N_NORTH|N_WEST|N_NORTHWEST)
-			return NORTHWEST
-		if(N_NORTH|N_EAST|N_NORTHEAST)
-			return NORTHEAST
-		if(N_SOUTH|N_WEST|N_SOUTHWEST)
-			return SOUTHWEST
-		if(N_SOUTH|N_EAST|N_SOUTHEAST)
-			return SOUTHEAST
-		else
-			return 0

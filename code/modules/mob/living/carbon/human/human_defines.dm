@@ -1,4 +1,5 @@
 /mob/living/carbon/human
+	light_system = MOVABLE_LIGHT
 
 	blocks_emissive = EMISSIVE_BLOCK_NONE
 
@@ -37,7 +38,8 @@
 
 	var/size_multiplier = 1 //multiplier for the mob's icon size
 	var/damage_multiplier = 1 //multiplies melee combat damage
-	var/icon_update = 1 //whether icon updating shall take place
+
+	var/default_lighting_alpha = LIGHTING_PLANE_ALPHA_VISIBLE
 
 	var/lipstick_color = null	//no lipstick by default
 
@@ -76,6 +78,7 @@
 	var/obj/item/l_store = null
 	var/obj/item/s_store = null
 	var/obj/item/wrists = null
+	var/obj/item/pants = null
 
 	var/icon/stand_icon = null
 	var/icon/lying_icon = null
@@ -113,8 +116,8 @@
 	var/list/equipment_overlays = list()	// Extra overlays from equipped items
 
 	var/is_noisy = FALSE		// if TRUE, movement should make sound.
-	var/bodyfall_sound = /singleton/sound_category/bodyfall_sound
-	var/footsound = /singleton/sound_category/blank_footsteps
+	var/bodyfall_sound = SFX_BODYFALL
+	var/footsound = SFX_FOOTSTEP_BLANK
 
 	var/last_x = 0
 	var/last_y = 0

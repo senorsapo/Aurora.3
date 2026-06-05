@@ -5,12 +5,17 @@
 	layer = 9
 	pixel_x = -16
 	protects_against_weather = TRUE
+	sample_data = list("Cellular structure indicitive of large plantlife.")
 	var/max_chop_health = 180
 	var/chop_health = 180 //15 hits with steel hatchet, 5 with wielded fireaxe
 	var/fall_force = 60
 	var/list/contained_objects = list()	//If it has anything except wood. Fruit, pinecones, animals, etc.
 	var/stumptype = /obj/structure/flora/stump //stump to make when chopped
 	var/static/list/fall_forbid = list(/obj/structure/flora, /obj/effect, /obj/structure/bonfire, /obj/structure/pit)
+
+/obj/structure/flora/tree/Initialize()
+	. = ..()
+	AddComponent(/datum/component/large_transparency)
 
 /obj/structure/flora/tree/proc/update_desc()
 	desc = initial(desc)

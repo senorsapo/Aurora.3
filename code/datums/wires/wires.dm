@@ -1,7 +1,7 @@
 #define MAXIMUM_EMP_WIRES 3
 
-var/global/list/wire_color_directory = list()
-var/global/list/wire_name_directory = list()
+GLOBAL_LIST_INIT(wire_color_directory, list())
+GLOBAL_LIST_INIT(wire_name_directory, list())
 
 /datum/wires
 	/// The holder (atom that contains these wires).
@@ -45,18 +45,18 @@ var/global/list/wire_name_directory = list()
 	if(random)
 		randomize()
 	else
-		if(!wire_color_directory[key])
+		if(!GLOB.wire_color_directory[key])
 			randomize()
-			wire_color_directory[key] = colors
-			wire_name_directory[key] = proper_name
+			GLOB.wire_color_directory[key] = colors
+			GLOB.wire_name_directory[key] = proper_name
 		else
-			colors = wire_color_directory[key]
+			colors = GLOB.wire_color_directory[key]
 
 /datum/wires/Destroy()
 	holder = null
 	//properly clear refs to avoid harddels & other problems
 	for(var/color in assemblies)
-		var/obj/item/device/assembly/assembly = assemblies[color]
+		var/obj/item/assembly/assembly = assemblies[color]
 		assembly.holder = null
 	LAZYCLEARLIST(assemblies)
 	return ..()
@@ -171,13 +171,13 @@ var/global/list/wire_name_directory = list()
 /datum/wires/proc/pulse_color(color, mob/living/user, force=FALSE)
 	pulse(get_wire(color), user, force)
 
-/datum/wires/proc/pulse_assembly(obj/item/device/assembly/signaler/S)
+/datum/wires/proc/pulse_assembly(obj/item/assembly/signaler/S)
 	for(var/color in assemblies)
 		if(S == assemblies[color])
 			pulse_color(color, force=TRUE)
 			return TRUE
 
-/datum/wires/proc/attach_assembly(color, obj/item/device/assembly/signaler/S)
+/datum/wires/proc/attach_assembly(color, obj/item/assembly/signaler/S)
 	if(S && istype(S) && !is_attached(color))
 		assemblies[color] = S
 		S.forceMove(holder)
@@ -185,7 +185,7 @@ var/global/list/wire_name_directory = list()
 		return S
 
 /datum/wires/proc/detach_assembly(color)
-	var/obj/item/device/assembly/signaler/S = get_attached(color)
+	var/obj/item/assembly/signaler/S = get_attached(color)
 	if(S && istype(S))
 		assemblies -= color
 		S.connected = null
@@ -248,11 +248,19 @@ var/global/list/wire_name_directory = list()
  */
 /datum/wires/proc/can_reveal_wires(mob/user)
 	// Admin ghost can see a purpose of each wire.
-	if(isobserver(user) && check_rights(R_MOD, FALSE, user))
+	if(isghost(user) && check_rights(R_MOD, FALSE, user))
 		return TRUE
 
-	// Station blueprints do that too, but only if the wires are not randomized.
-	if(istype(user.get_active_hand(), /obj/item/blueprints) && !random)
+	// The following checks only apply for non-randomized wires.
+	if (random)
+		return FALSE
+
+	// Station blueprints do that too
+	if(istype(user.get_active_hand(), /obj/item/blueprints))
+		return TRUE
+
+	// Max electrical engineering skill grants this as a perk
+	if (GET_SKILL_LEVEL(user, ELECTRICAL_ENGINEERING_SKILL_COMPONENT) >= SKILL_LEVEL_PROFESSIONAL)
 		return TRUE
 
 	return FALSE
@@ -292,9 +300,13 @@ var/global/list/wire_name_directory = list()
 	var/reveal_wires = can_reveal_wires(user)
 
 	for(var/color in colors)
+		var/wire_label = null
+		if (reveal_wires || always_reveal_wire(color))
+			wire_label = is_dud_color(color) ? "None" : get_wire(color)
+
 		payload.Add(list(list(
 			"color" = color,
-			"wire" = (((reveal_wires || always_reveal_wire(color)) && !is_dud_color(color)) ? get_wire(color) : null),
+			"wire" = wire_label,
 			"cut" = is_color_cut(color),
 			"attached" = is_attached(color)
 		)))
@@ -318,7 +330,7 @@ var/global/list/wire_name_directory = list()
 		if("attach")
 			// Attach
 			if(!is_attached(target_wire))
-				var/obj/item/device/assembly/signaler/I = L.get_type_in_hands(/obj/item/device/assembly/signaler)
+				var/obj/item/assembly/signaler/I = L.get_type_in_hands(/obj/item/assembly/signaler)
 				if(!istype(I))
 					to_chat(usr, SPAN_WARNING("You do not have a signaler to attach!"))
 					return
@@ -335,13 +347,13 @@ var/global/list/wire_name_directory = list()
 
 		if("cut") // Toggles the cut/mend status
 			var/obj/item/I = L.get_active_hand()
-			if(!I || !I.iswirecutter())
+			if(!I || !I.tool_behaviour == TOOL_WIRECUTTER)
 				if(isrobot(L))
 					var/mob/living/silicon/robot/R = L
 					I = R.return_wirecutter()
 				else
 					I = L.get_inactive_hand()
-			if(I?.iswirecutter())
+			if(I?.tool_behaviour == TOOL_WIRECUTTER)
 				cut_color(target_wire, source = L)
 				holder.add_hiddenprint(L)
 				I.play_tool_sound(holder, 50)
@@ -351,13 +363,13 @@ var/global/list/wire_name_directory = list()
 
 		if("pulse")
 			var/obj/item/I = L.get_active_hand()
-			if(!I || !I.ismultitool())
+			if(!I || !I.tool_behaviour == TOOL_MULTITOOL)
 				if(isrobot(L))
 					var/mob/living/silicon/robot/R = L
 					I = R.return_multitool()
 				else
 					I = L.get_inactive_hand()
-			if(I?.ismultitool())
+			if(I?.tool_behaviour == TOOL_MULTITOOL)
 				pulse_color(target_wire, L)
 				holder.add_hiddenprint(L)
 				. = TRUE

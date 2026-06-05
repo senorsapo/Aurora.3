@@ -10,7 +10,7 @@
 	if(istype(user, /mob/living/simple_animal/construct))
 		var/mob/living/simple_animal/construct/C = user
 		var/construct_class
-		if(narsie_cometh)
+		if(GLOB.narsie_cometh)
 			construct_class = alert(C, "Please choose which type of construct you wish to become.", "Construct Selection", "Juggernaut", "Wraith", "Harvester")
 		else
 			construct_class = alert(C, "Please choose which type of construct you wish to become.", "Construct Selection", "Juggernaut", "Wraith", "Artificer")
@@ -22,10 +22,10 @@
 
 		var/construct_path = construct_types[construct_class]
 		var/mob/living/simple_animal/construct/Z = new construct_path(get_turf(C))
-		Z.health = Z.health * (C.health / C.maxHealth)
+		Z.health = Z.health * (C.health / C.maxhealth)
 		Z.key = C.key
 		if(iscultist(C))
-			cult.add_antagonist(Z.mind)
+			GLOB.cult.add_antagonist(Z.mind)
 		C.death()
 		construct_msg(Z, construct_class)
 		Z.cancel_camera()

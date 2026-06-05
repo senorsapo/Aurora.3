@@ -63,7 +63,7 @@
 	connect_types = CONNECT_TYPE_REGULAR|CONNECT_TYPE_FUEL
 
 	use_power = POWER_USE_OFF
-	power_channel = EQUIP
+	power_channel = AREA_USAGE_EQUIP
 	idle_power_usage = 21600 //6 Wh per tick for default 2 capacitor. Gives them a reason to turn it off, really to nerf backup battery
 
 	component_types = list(
@@ -113,7 +113,9 @@
 	return 0
 
 /obj/machinery/atmospherics/unary/engine/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
-	return 0
+	if(mover?.movement_type & PHASING)
+		return TRUE
+	return FALSE
 
 /obj/machinery/atmospherics/unary/engine/atmos_init()
 	..()
@@ -156,20 +158,33 @@
 
 /obj/machinery/atmospherics/unary/engine/proc/get_status()
 	. = list()
-	.+= "Location: [get_area(src)]."
-	if(stat & NOPOWER)
-		.+= "<span class='average'>Insufficient power to operate.</span>"
-	if(!check_fuel())
-		.+= "<span class='average'>Insufficient fuel for a burn.</span>"
-	if(stat & BROKEN)
-		.+= "<span class='average'>Inoperable engine configuration.</span>"
-	if(blockage)
-		.+= "<span class='average'>Obstruction of airflow detected.</span>"
 
-	.+= "Propellant total mass: [round(air_contents.get_mass(),0.01)] kg."
-	.+= "Propellant used per burn: [round(air_contents.get_mass() * volume_per_burn * thrust_limit / air_contents.volume,0.01)] kg."
-	.+= "Propellant pressure: [round(air_contents.return_pressure()/1000,0.1)] MPa."
-	. = jointext(.,"<br>")
+	. += list(list(
+		"text" = "Location: [get_area(src)].",
+		"severity" = "info"
+	))
+
+	if(stat & NOPOWER)
+		. += list(list("text" = "Insufficient power to operate.", "severity" = "bad"))
+	if(!check_fuel())
+		. += list(list("text" = "Insufficient fuel for a burn.", "severity" = "bad"))
+	if(stat & BROKEN)
+		. += list(list("text" = "Inoperable engine configuration.", "severity" = "bad"))
+	if(blockage)
+		. += list(list("text" = "Obstruction of airflow detected.", "severity" = "bad"))
+
+	. += list(list(
+		"text" = "Propellant total mass: [round(air_contents.get_mass(), 0.01)] kg.",
+		"severity" = null
+	))
+	. += list(list(
+		"text" = "Propellant used per burn: [round(air_contents.get_mass() * volume_per_burn * thrust_limit / air_contents.volume, 0.01)] kg.",
+		"severity" = null
+	))
+	. += list(list(
+		"text" = "Propellant pressure: [round(XGM_PRESSURE(air_contents)/1000, 0.1)] MPa.",
+		"severity" = null
+	))
 
 /obj/machinery/atmospherics/unary/engine/power_change()
 	. = ..()
@@ -195,7 +210,7 @@
 
 /obj/machinery/atmospherics/unary/engine/proc/check_blockage()
 	blockage = FALSE
-	var/exhaust_dir = reverse_direction(dir)
+	var/exhaust_dir = REVERSE_DIR(dir)
 	var/turf/A = get_turf(src)
 	for(var/i in 1 to exhaust_offset)
 		A = get_step(A, exhaust_dir)
@@ -233,16 +248,18 @@
 	if(network)
 		network.update = 1
 
-	var/exhaust_dir = reverse_direction(dir)
+	var/exhaust_dir = REVERSE_DIR(dir)
 	var/turf/T = get_turf(src)
 	for(var/i in 1 to exhaust_offset)
 		T = get_step(T, exhaust_dir)
 	if(T)
 		T.assume_air(removed)
-		new/obj/effect/engine_exhaust(T, dir, air_contents.check_combustability() && air_contents.temperature >= PHORON_MINIMUM_BURN_TEMPERATURE)
+		var/is_cmb = 0
+		CHECK_COMBUSTIBLE(is_cmb, air_contents)
+		new/obj/effect/engine_exhaust(T, dir, is_cmb && air_contents.temperature >= PHORON_MINIMUM_BURN_TEMPERATURE)
 
 /obj/machinery/atmospherics/unary/engine/proc/calculate_thrust(datum/gas_mixture/propellant, used_part = 1)
-	return round(sqrt(propellant.get_mass() * used_part * sqrt(air_contents.return_pressure()/200)),0.1)
+	return round(sqrt(propellant.get_mass() * used_part * sqrt(XGM_PRESSURE(air_contents)/200)),0.01)
 
 //Exhaust effect
 /obj/effect/engine_exhaust

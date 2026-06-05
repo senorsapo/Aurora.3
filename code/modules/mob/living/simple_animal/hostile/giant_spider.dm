@@ -28,7 +28,7 @@
 	blood_type = "#51C404"
 	blood_amount = 150
 	stop_automated_movement_when_pulled = 0
-	maxHealth = 200
+	maxhealth = 200
 	health = 200
 	melee_damage_lower = 15
 	melee_damage_upper = 20
@@ -36,19 +36,20 @@
 	resist_mod = 1.5
 	heat_damage_per_tick = 20
 	cold_damage_per_tick = 20
-	var/poison_per_bite = 5
-	var/poison_type = /singleton/reagent/toxin
+	var/venom_per_bite = 5
+	var/venom_type = /singleton/reagent/toxin
 	faction = "spiders"
 	var/busy = 0
 	pass_flags = PASSTABLE
-	move_to_delay = 6
-	speed = 3
+	speed = 6
 	mob_size = 6
+	smart_melee = FALSE
 
-	attacktext = "bitten"
+	attacktext = "bites"
 	attack_emote = "skitters toward"
 	attack_sound = 'sound/weapons/bite.ogg'
 	emote_sounds = list('sound/effects/creatures/spider_critter.ogg')
+	sample_data = list("Genetic markers identified as being linked with stem cell differentiaton", "Tissue sample contains high muscle content")
 
 //nursemaids - these create webs and eggs
 /mob/living/simple_animal/hostile/giant_spider/nurse
@@ -58,15 +59,16 @@
 	icon_living = "greimorian_worker"
 	icon_dead = "greimorian_worker_dead"
 	blood_amount = 50
-	maxHealth = 40
+	maxhealth = 40
 	health = 40
 	melee_damage_lower = 5
 	melee_damage_upper = 10
 	armor_penetration = 20
-	poison_per_bite = 10
+	venom_per_bite = 4
 	var/atom/cocoon_target
-	poison_type = /singleton/reagent/soporific
+	venom_type = /singleton/reagent/toxin/greimorian_eggs
 	var/fed = 0
+	sample_data = list("Genetic markers identified as being linked with stem cell differentiaton", "Cellular structures indicative of high offspring production")
 
 /mob/living/simple_animal/hostile/giant_spider/nurse/servant
 	name = "greimorian servant"
@@ -75,23 +77,20 @@
 	icon_living = "greimorian_servant"
 	icon_dead = "greimorian_servant_dead"
 	blood_amount = 150
-	maxHealth = 200
+	maxhealth = 200
 	health = 200
 	melee_damage_lower = 15
 	melee_damage_upper = 20
 	armor_penetration = 30
-	poison_per_bite = 10
+	venom_per_bite = 1
 	speed = -2
-	poison_type = /singleton/reagent/soporific
+	venom_type = /singleton/reagent/toxin/greimorian_eggs
 	fed = 1
-	minbodytemp = 0
-	maxbodytemp = 350
-	min_oxy = 0
-	max_co2 = 0
-	max_tox = 0
+	lighting_alpha = LIGHTING_PLANE_ALPHA_SOMEWHAT_INVISIBLE
 	var/playable = TRUE
+	sample_data = list("Genetic markers identified as being linked with stem cell differentiaton", "Cellular structures indicative of high offspring production", "Tissue sample contains high neural cell content")
 
-/mob/living/simple_animal/hostile/giant_spider/nurse/servant/Life()
+/mob/living/simple_animal/hostile/giant_spider/nurse/servant/Life(seconds_per_tick, times_fired)
 	..()
 	adjustBruteLoss(-2)
 
@@ -103,13 +102,15 @@
 	icon_living = "greimorian_hunter"
 	icon_dead = "greimorian_hunter_dead"
 	blood_amount = 90
-	maxHealth = 120
+	maxhealth = 120
 	health = 120
 	melee_damage_lower = 10
 	melee_damage_upper = 20
 	armor_penetration = 15
-	poison_per_bite = 5
-	move_to_delay = 4
+	venom_per_bite = 5
+	speed = 4
+	sample_data = list("Genetic markers identified as being linked with stem cell differentiaton", "Cellular biochemistry shows high metabolic capacity")
+	smart_melee = TRUE
 
 /mob/living/simple_animal/hostile/giant_spider/emp
 	name = "greimorian jackal"
@@ -117,31 +118,35 @@
 	icon_state = "greimorian_jackal"
 	icon_living = "greimorian_jackal"
 	icon_dead = "greimorian_jackal_dead"
-	maxHealth = 100
+	maxhealth = 100
 	health = 100
 	melee_damage_lower = 5
 	melee_damage_upper = 10
 	armor_penetration = 15
-	poison_type = /singleton/reagent/perconol // mildly beneficial for organics
-	poison_per_bite = 2
-	move_to_delay = 5
+	venom_type = /singleton/reagent/perconol // mildly beneficial for organics
+	venom_per_bite = 2
+	speed = 5
+	sample_data = list("Genetic markers identified as being linked with stem cell differentiaton", "Cellular biochemistry geared towards creating strong electrical potential differences")
+	smart_melee = TRUE
 
 /mob/living/simple_animal/hostile/giant_spider/bombardier
 	name = "greimorian bombardier"
-	desc = "A disgusting crawling Greimorian. This one has vents that shoot out condensed capsaicin."
+	desc = "A disgusting crawling Greimorian. This one has vents that shoot out acid."
 	icon_state = "greimorian_bombardier"
 	icon_living = "greimorian_bombardier"
 	icon_dead = "greimorian_bombardier_dead"
-	maxHealth = 60
+	maxhealth = 60
 	health = 60
 	melee_damage_lower = 5
 	melee_damage_upper = 10
 	armor_penetration = 5
 	ranged = TRUE
 	ranged_attack_range = 4
-	poison_type = /singleton/reagent/capsaicin/condensed
-	poison_per_bite = 2
-	move_to_delay = 5
+	venom_type = /singleton/reagent/acid/greimorian
+	venom_per_bite = 2
+	speed = 5
+	sample_data = list("Genetic markers identified as being linked with stem cell differentiaton", "Exocrinic acid synthesis detected")
+	smart_melee = TRUE
 
 /mob/living/simple_animal/hostile/giant_spider/bombardier/Shoot(var/target, var/start, var/mob/user, var/bullet = 0)
 	if(target == start)
@@ -151,8 +156,8 @@
 
 	var/turf/target_turf = get_turf(target)
 	var/obj/effect/effect/water/chempuff/pepperspray = new /obj/effect/effect/water/chempuff(get_turf(src))
-	pepperspray.create_reagents(15)
-	pepperspray.reagents.add_reagent(poison_type, 15)
+	pepperspray.create_reagents(10)
+	pepperspray.reagents.add_reagent(venom_type, 10)
 	pepperspray.set_color()
 	pepperspray.set_up(target_turf, 3, 5)
 
@@ -161,6 +166,8 @@
 	get_light_and_color(parent)
 	add_language(LANGUAGE_GREIMORIAN)
 	add_language(LANGUAGE_GREIMORIAN_HIVEMIND)
+	remove_language(LANGUAGE_TCB)
+	default_language = GLOB.all_languages[LANGUAGE_GREIMORIAN]
 
 /mob/living/simple_animal/hostile/giant_spider/nurse/servant/Initialize()
 	. = ..()
@@ -172,8 +179,8 @@
 		SSghostroles.add_spawn_atom("servant", src)
 
 /mob/living/simple_animal/hostile/giant_spider/nurse/servant/Destroy()
-	. = ..()
 	SSghostroles.remove_spawn_atom("servant", src)
+	return ..()
 
 /mob/living/simple_animal/hostile/giant_spider/on_attack_mob(var/mob/hit_mob, var/obj/item/organ/external/limb)
 	. = ..()
@@ -185,24 +192,25 @@
 		var/list/armors = target.get_armors_by_zone(limb.limb_name, DAMAGE_BRUTE, DAMAGE_FLAG_SHARP)
 		for(var/armor in armors)
 			var/datum/component/armor/armor_datum = armor
-			inject_probability -= armor_datum.armor_values["melee"] * 1.8
-		if(prob(inject_probability))
+			inject_probability -= armor_datum.armor_values[MELEE] * 1.8
+		if(prob(inject_probability) && !BP_IS_ROBOTIC(limb))
 			to_chat(target, SPAN_WARNING("You feel a tiny prick."))
-			target.reagents.add_reagent(poison_type, poison_per_bite)
+			target.reagents.add_reagent(venom_type, venom_per_bite)
 
-/mob/living/simple_animal/hostile/giant_spider/nurse/on_attack_mob(var/mob/hit_mob, var/obj/item/organ/external/limb)
+/mob/living/simple_animal/hostile/giant_spider/nurse/on_attack_mob(var/mob/living/carbon/human/hit_mob, var/obj/item/organ/external/limb)
 	. = ..()
-	if(ishuman(hit_mob) && istype(limb) && !BP_IS_ROBOTIC(limb) && prob(poison_per_bite))
-		var/eggs = new /obj/effect/spider/eggcluster(limb, src)
-		limb.implants += eggs
-		to_chat(hit_mob, SPAN_WARNING("\The [src] injects something into your [limb.name]!"))
+	if(istype(limb))
+		if(BP_IS_ROBOTIC(limb))
+			to_chat(hit_mob, SPAN_WARNING("\The [src] tries to inject something into your [limb.name], but fortunately it finds no living flesh!"))
+		else
+			to_chat(hit_mob, SPAN_WARNING("\The [src] injects something into your [limb.name]!"))
 
 /mob/living/simple_animal/hostile/giant_spider/emp/on_attack_mob(var/mob/hit_mob, var/obj/item/organ/external/limb)
 	. = ..()
 	if(ishuman(hit_mob))
 		var/mob/living/carbon/human/H = hit_mob
 		if(prob(20))
-			var/obj/item/organ/internal/cell/cell_holder = locate() in H.internal_organs
+			var/obj/item/organ/internal/machine/power_core/cell_holder = locate() in H.internal_organs
 			if(cell_holder)
 				var/obj/item/cell/C = cell_holder.cell
 				if(C)
@@ -222,12 +230,12 @@
 				for(var/turf/T in orange(20, src))
 					move_targets.Add(T)*/
 				stop_automated_movement = 1
-				SSmove_manager.move_to(src, pick(orange(20, src)), 1, move_to_delay)
+				GLOB.move_manager.move_to(src, pick(orange(20, src)), 1, speed)
 				addtimer(CALLBACK(src, PROC_REF(stop_walking)), 50, TIMER_UNIQUE)
 
 /mob/living/simple_animal/hostile/giant_spider/proc/stop_walking()
 	stop_automated_movement = 0
-	SSmove_manager.stop_looping(src)
+	GLOB.move_manager.stop_looping(src)
 
 /mob/living/simple_animal/hostile/giant_spider/nurse/think()
 	..()
@@ -237,17 +245,16 @@
 			if(!busy && prob(30))
 				//first, check for potential food nearby to cocoon
 				for(var/mob/living/C in view(src, world.view))
-					if(C.stat)
+					if(C.stat && !istype(C, /mob/living/simple_animal/hostile/giant_spider))
 						cocoon_target = C
 						busy = MOVING_TO_TARGET
-						SSmove_manager.move_to(src, C, 1, move_to_delay)
+						GLOB.move_manager.move_to(src, C, 1, speed)
 						//give up if we can't reach them after 10 seconds
 						addtimer(CALLBACK(src, PROC_REF(GiveUp), C), 100, TIMER_UNIQUE)
 						return
 
-				//second, spin a sticky spiderweb on this tile
-				var/obj/effect/spider/stickyweb/W = locate() in get_turf(src)
-				if(!W)
+				//second, spin a sticky spiderweb on this tile if there isn't already a spiderweb there
+				if(!locate(/obj/effect/spider/stickyweb) in src.loc)
 					busy = SPINNING_WEB
 					src.visible_message(SPAN_NOTICE("\The [src] begins to secrete a sticky substance."))
 					stop_automated_movement = 1
@@ -270,7 +277,7 @@
 								cocoon_target = O
 								busy = MOVING_TO_TARGET
 								stop_automated_movement = 1
-								SSmove_manager.move_to(src, O, 1, move_to_delay)
+								GLOB.move_manager.move_to(src, O, 1, speed)
 								//give up if we can't reach them after 10 seconds
 								GiveUp(O)
 
@@ -279,7 +286,7 @@
 					busy = SPINNING_COCOON
 					src.visible_message(SPAN_NOTICE("\The [src] begins to secrete a sticky substance around \the [cocoon_target]."))
 					stop_automated_movement = 1
-					SSmove_manager.stop_looping(src)
+					GLOB.move_manager.stop_looping(src)
 					addtimer(CALLBACK(src, PROC_REF(finalize_cocoon)), 50, TIMER_UNIQUE)
 
 		else
@@ -302,7 +309,7 @@
 		stop_automated_movement = 0
 
 /mob/living/simple_animal/hostile/giant_spider/nurse/proc/finalize_web()
-	if(busy == SPINNING_WEB)
+	if(busy == SPINNING_WEB && !locate(/obj/effect/spider/stickyweb) in src.loc) // Additional check, to be extra-sure they don't stack webs.
 		new /obj/effect/spider/stickyweb(src.loc)
 		busy = 0
 		stop_automated_movement = 0
@@ -351,12 +358,13 @@
 	set desc = "Create a web that slows down movement."
 	set category = "Greimorian"
 
-	var/obj/effect/spider/stickyweb/W = locate() in get_turf(src)
-	if(!W)
-		to_chat(usr, SPAN_NOTICE("\The [src] begins to secrete a sticky substance."))
-		if(!do_after(src, 20))
+	if(!locate(/obj/effect/spider/stickyweb) in src.loc)
+		src.visible_message(SPAN_NOTICE("\The [src] begins to secrete a sticky substance."))
+		if(!do_after(src, 20) || locate(/obj/effect/spider/stickyweb) in src.loc) // Additional check so you can't queue it multiple times at once to stack webs.
 			return
 		new /obj/effect/spider/stickyweb(get_turf(src))
+	else
+		to_chat(usr, SPAN_WARNING("You cannot secrete webs on a turf that is already webbed!"))
 
 
 /mob/living/simple_animal/hostile/giant_spider/nurse/verb/cocoon()
@@ -375,12 +383,13 @@
 		src.visible_message("\The [src] begins to secrete a sticky substance around \the [P].")
 		if(!do_after(src, 80))
 			return
-		if(P && isturf(P) && get_dist(src,P) <= 1)
-			var/obj/effect/spider/cocoon/C = new(P.loc)
+
+		if(P && isturf(P.loc) && get_dist(src, P) <= 1)
+			var/obj/effect/spider/cocoon/C = new(get_turf(P))
 			var/large_cocoon = FALSE
 			C.pixel_x = P.pixel_x
 			C.pixel_y = P.pixel_y
-			for(P in C.loc)
+			for(P in get_turf(C))
 				if(istype(P, /mob/living/simple_animal/hostile/giant_spider))
 					continue
 				large_cocoon = TRUE
@@ -412,6 +421,10 @@
 	set desc = "Lay a clutch of eggs to make new spiderlings. This will cost one food point."
 	set category = "Greimorian"
 
+	if(fed <= 0)
+		to_chat(src, SPAN_WARNING("You do not have the nutrients to do this. Try cocooning a corpse!"))
+		return
+
 	var/obj/effect/spider/eggcluster/E = locate() in get_turf(src)
 	if(!E && fed > 0)
 		src.visible_message("\The [src] begins to lay a cluster of eggs.")
@@ -427,6 +440,9 @@
 	set desc = "Lay a greimorian servant, which can be player-controlled. This will cost one food point."
 	set category = "Greimorian"
 
+	if(fed <= 0)
+		to_chat(src, SPAN_WARNING("You do not have the nutrients to do this. Try cocooning a corpse!"))
+		return
 
 	var/obj/effect/spider/eggcluster/E = locate() in get_turf(src)
 	if(!E && fed > 0)

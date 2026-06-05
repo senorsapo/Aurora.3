@@ -1,7 +1,5 @@
 //For things that swim and don't do much else, but also bite!
-/mob/living/simple_animal/hostile/retaliate/aquatic
-	abstract_type = /mob/living/simple_animal/hostile/retaliate/aquatic
-
+ABSTRACT_TYPE(/mob/living/simple_animal/hostile/retaliate/aquatic)
 	name = "aquatic animal"
 	desc = DESC_PARENT
 	icon = 'icons/mob/npc/fish.dmi'
@@ -28,7 +26,7 @@
 		icon_state = "[icon_state]"
 		return ..()//Proceed as normal.
 
-/mob/living/simple_animal/hostile/retaliate/aquatic/Life()
+/mob/living/simple_animal/hostile/retaliate/aquatic/Life(seconds_per_tick, times_fired)
 	var/turf/T = get_turf(src)
 	if (!(is_type_in_list(T,suitable_turf_types)))
 		alpha = 255//Becomes a solid color because it is revealed
@@ -45,7 +43,7 @@
 	icon_dead = "thresher_dead"
 	icon_rest = "thresher_rest"
 	health = 230
-	maxHealth = 230
+	maxhealth = 230
 	melee_damage_lower = 40
 	melee_damage_upper = 70
 	armor_penetration = 80
@@ -55,7 +53,7 @@
 	name = "large toothed aquatic creature"
 	desc = "A threatening-looking aquatic creature with a mouth full of densely-packed, razor sharp teeth. This one has grown to a substantial size."
 	health = 370
-	maxHealth = 370
+	maxhealth = 370
 	melee_damage_lower = 50
 	melee_damage_upper = 90
 	armor_penetration = 100

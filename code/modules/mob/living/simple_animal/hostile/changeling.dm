@@ -21,23 +21,23 @@
 	response_disarm = "shoves"
 	response_harm   = "harmlessly punches"
 	blood_amount = 1000
-	maxHealth = 1250
+	maxhealth = 1250
 	health = 1250
 	harm_intent_damage = 0
 	melee_damage_lower = 30
 	melee_damage_upper = 45
 	armor_penetration = 30
 	ranged = 1
-	projectiletype = /obj/item/projectile/bonedart/ling
+	projectiletype = /obj/projectile/bonedart/ling
 	projectilesound = 'sound/weapons/bloodyslice.ogg'
 	resist_mod = 15
 	mob_size = 25
 	environment_smash = 2
-	attacktext = "mangled"
+	attacktext = "mangles"
 	attack_sound = 'sound/weapons/bloodyslice.ogg'
 	emote_sounds = list('sound/effects/creatures/bear_loud_1.ogg', 'sound/effects/creatures/bear_loud_2.ogg', 'sound/effects/creatures/bear_loud_3.ogg', 'sound/effects/creatures/bear_loud_4.ogg')
 
-	see_invisible = SEE_INVISIBLE_NOLIGHTING
+	lighting_alpha = LIGHTING_PLANE_ALPHA_SOMEWHAT_INVISIBLE
 
 	minbodytemp = 0
 	maxbodytemp = 350
@@ -64,11 +64,14 @@
 	mind.assigned_role = "Changeling"
 
 
-/mob/living/simple_animal/hostile/true_changeling/Life()
+/mob/living/simple_animal/hostile/true_changeling/Life(seconds_per_tick, times_fired)
+	if(!..())
+		return FALSE
+
 	if(prob(10))
 		custom_emote(VISIBLE_MESSAGE, pick( list("shrieks!","roars!", "screeches!", "snarls!", "bellows!", "screams!") ) )
 		var/sound = pick(loud_sounds)
-		playsound(src, sound, 90, 1, 15, pressure_affected = 0)
+		playsound(src, sound, 90, TRUE, 15, pressure_affected = FALSE)
 
 
 /mob/living/simple_animal/hostile/true_changeling/death(gibbed)
@@ -154,16 +157,16 @@
 	response_help  = "pets"
 	response_disarm = "shoves"
 	response_harm   = "harmlessly punches"
-	maxHealth = 50
+	maxhealth = 50
 	health = 50
 	harm_intent_damage = 5
 	melee_damage_lower = 5
 	melee_damage_upper = 10
 	mob_size = 15
-	attacktext = "mangled"
+	attacktext = "mangles"
 	attack_sound = 'sound/weapons/bloodyslice.ogg'
 
-	see_invisible = SEE_INVISIBLE_NOLIGHTING
+	lighting_alpha = LIGHTING_PLANE_ALPHA_SOMEWHAT_INVISIBLE
 
 	pass_flags = PASSTABLE
 
@@ -200,9 +203,9 @@
 	mind.assigned_role = "Changeling"
 
 /mob/living/simple_animal/hostile/lesser_changeling/Destroy()
-	. = ..()
 	QDEL_NULL(occupant)
 	QDEL_NULL(untransform_occupant)
+	return ..()
 
 /mob/living/simple_animal/hostile/lesser_changeling/proc/add_untransform_verb()
 	if(!occupant)

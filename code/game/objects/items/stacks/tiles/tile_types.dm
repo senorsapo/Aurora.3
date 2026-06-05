@@ -1,9 +1,9 @@
 /* Diffrent misc types of tiles
  * Contains:
- *		Prototype
- *		Grass
- *		Wood
- *		Carpet
+ * * Prototype
+ * * Grass
+ * * Wood
+ * * Carpet
  */
 
 #define TILE_MATERIAL_AMOUNT 468
@@ -12,22 +12,16 @@
 	name = "tile"
 	singular_name = "tile"
 	desc = "A non-descript floor tile."
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	max_amount = 60
 	recyclable = TRUE
 	icon = 'icons/obj/item/stacks/tiles.dmi'
-	item_icons = list(
-		slot_l_hand_str = 'icons/mob/items/stacks/lefthand_tiles.dmi',
-		slot_r_hand_str = 'icons/mob/items/stacks/righthand_tiles.dmi',
-		)
 	randpixel = 7
 	drop_sound = 'sound/items/drop/axe.ogg'
 	pickup_sound = 'sound/items/pickup/axe.ogg'
-	item_flags = 0
-	obj_flags = 0
 
-/obj/item/stack/tile/New()
-	..()
+/obj/item/stack/tile/Initialize(mapload, amount)
+	. = ..()
 	randpixel_xy()
 
 /*
@@ -314,7 +308,7 @@
 /obj/item/stack/tile/phoron
 	name = "phoron floor tile"
 	singular_name = "phoron floor tile"
-	icon_state = "tile_plasma"
+	icon_state = "tile_phoron"
 	matter = list(MATERIAL_PHORON = TILE_MATERIAL_AMOUNT)
 
 /obj/item/stack/tile/diamond

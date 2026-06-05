@@ -10,7 +10,7 @@
 	autoclose = FALSE
 	hashatch = FALSE
 	panel_visible_while_open = TRUE
-	insecure = FALSE
+	features_powerloss_manual_override = FALSE
 
 	var/datum/turbolift/lift
 	var/datum/turbolift_floor/floor
@@ -33,7 +33,7 @@
 		for(var/mob/living/LM in turf)
 			if(LM.mob_size <= MOB_TINY)
 				var/moved = 0
-				for(dir in shuffle(GLOB.cardinal.Copy()))
+				for(dir in shuffle(GLOB.cardinals.Copy()))
 					var/dest = get_step(LM,dir)
 					if(!(locate(/obj/machinery/door/airlock/lift) in dest))
 						if(LM.Move(dest))

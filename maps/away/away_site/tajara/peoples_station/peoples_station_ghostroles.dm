@@ -27,12 +27,14 @@
 	shoes = /obj/item/clothing/shoes/jackboots/tajara
 
 	uniform = /obj/item/clothing/under/tajaran/cosmonaut
-	l_ear = /obj/item/device/radio/headset/ship
+	l_ear = /obj/item/radio/headset/ship
 
 	belt = /obj/item/storage/belt/military
 
 	accessory = /obj/item/clothing/accessory/badge/hadii_card
 	r_pocket = /obj/item/storage/wallet/random
+
+	l_hand = /obj/item/martial_manual/tajara
 
 /obj/outfit/admin/peoples_station_crew/get_id_access()
 	return list(ACCESS_PRA, ACCESS_EXTERNAL_AIRLOCKS)
@@ -69,6 +71,7 @@
 						/obj/item/gun/projectile/pistol/adhomai = 1
 						)
 	l_hand = /obj/item/clothing/accessory/badge/hadii_card/member
+	r_hand = /obj/item/martial_manual/tajara
 
 
 /datum/ghostspawner/human/peoples_station_crew/commissar
@@ -105,4 +108,5 @@
 						/obj/item/storage/box/hadii_manifesto = 1,
 						/obj/item/storage/box/hadii_card = 1
 						)
-	l_hand = /obj/item/device/megaphone
+	l_hand = /obj/item/megaphone
+	r_hand = /obj/item/martial_manual/tajara

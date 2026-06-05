@@ -1,11 +1,11 @@
 /obj/item/modular_computer/process()
+	handle_power() // Handles all computer power interaction
+
 	if(!enabled) // The computer is turned off
 		last_power_usage = 0
 		return FALSE
 
-	handle_power() // Handles all computer power interaction
-
-	if(damage > broken_damage)
+	if(health <= broken_damage)
 		shutdown_computer()
 		return FALSE
 
@@ -41,11 +41,11 @@
 			else
 				enabled_services -= service
 
-	working = hard_drive && processor_unit && damage < broken_damage && computer_use_power()
+	working = hard_drive && processor_unit && health >= broken_damage && computer_use_power()
 	check_update_ui_need()
 
 	if(looping_sound && working && enabled && world.time > ambience_last_played_time + 30 SECONDS && prob(3))
-		playsound(get_turf(src), /singleton/sound_category/computerbeep_sound, 30, 1, 10, required_preferences = ASFX_AMBIENCE)
+		playsound(get_turf(src), SFX_COMPUTER_BEEP, 30, 1, 10, required_preferences = ASFX_AMBIENCE)
 		ambience_last_played_time = world.time
 
 /obj/item/modular_computer/proc/get_preset_programs(preset_type)
@@ -68,6 +68,7 @@
 			hard_drive.store_file(prog)
 
 /obj/item/modular_computer/proc/handle_verbs()
+	verbs += /obj/item/modular_computer/proc/force_shutdown
 	if(card_slot)
 		if(card_slot.stored_card)
 			verbs += /obj/item/modular_computer/proc/eject_id
@@ -115,7 +116,8 @@
 		QDEL_LIST(hard_drive.stored_files)
 
 	for(var/obj/item/computer_hardware/CH in src.get_all_components())
-		uninstall_component(null, CH)
+		// Eject_id is made false here as we want to delete the id too
+		uninstall_component(null, CH, eject_id = FALSE)
 		qdel(CH)
 
 	registered_id = null
@@ -166,7 +168,7 @@
 	icon_state = icon_state_unpowered
 
 	ClearOverlays()
-	if(damage >= broken_damage)
+	if(health <= broken_damage)
 		icon_state = icon_state_broken
 		AddOverlays("broken")
 		return
@@ -262,7 +264,7 @@
 	if(tesla_link)
 		tesla_link.enabled = TRUE
 	var/issynth = issilicon(user) // Robots and AIs get different activation messages.
-	if(damage > broken_damage)
+	if(health <= broken_damage)
 		if(issynth)
 			to_chat(user, SPAN_WARNING("You send an activation signal to \the [src], but it responds with an error code. It must be damaged."))
 		else
@@ -382,7 +384,7 @@
 		to_chat(user, SPAN_WARNING("\The [src]'s screen displays, \"I/O ERROR - Unable to run [prog]\"."))
 		return
 
-	P.computer = src
+	P.set_computer(src)
 
 	if(!P.is_supported_by_hardware(hardware_flag, TRUE, user))
 		return
@@ -500,7 +502,7 @@
 	if(QDELETED(S))
 		return
 
-	S.computer = src
+	S.set_computer(src)
 
 	if(!S.is_supported_by_hardware(hardware_flag, 1, user))
 		return

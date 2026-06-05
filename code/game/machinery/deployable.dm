@@ -17,10 +17,9 @@ Deployable Kits
 	build_amt = 5
 	anchored = TRUE
 	density = TRUE
+	maxhealth = OBJECT_HEALTH_LOW
 
 	var/force_material
-	var/health = 100
-	var/maxhealth = 100
 
 /obj/structure/blocker/Initialize(mapload, var/material_name)
 	. = ..()
@@ -38,22 +37,26 @@ Deployable Kits
 	name = "[material.display_name] [name]"
 	desc = "This space is blocked off by a barricade made of [material.display_name]."
 	color = material.icon_colour
-	maxhealth = material.integrity
-	health = maxhealth
+	set_maxhealth(material.integrity)
+	set_health(maxhealth)
 
-/obj/structure/blocker/bullet_act(obj/item/projectile/P, def_zone)
+/obj/structure/blocker/bullet_act(obj/projectile/hitting_projectile, def_zone, piercing_hit)
+	. = ..()
+	if(. != BULLET_ACT_HIT)
+		return .
+
 	var/damage_modifier = 0.4
-	switch(P.damage_type)
+	switch(hitting_projectile.damage_type)
 		if(DAMAGE_BURN)
 			damage_modifier = 1
 		if(DAMAGE_BRUTE)
 			damage_modifier = 0.75
-	health -= P.damage * damage_modifier
+	health -= hitting_projectile.damage * damage_modifier
 	if(!check_dismantle())
-		visible_message(SPAN_WARNING("\The [src] is hit by \the [P]!"))
+		visible_message(SPAN_WARNING("\The [src] is hit by \the [hitting_projectile]!"))
 
 /obj/structure/blocker/attackby(obj/item/attacking_item, mob/user)
-	if(attacking_item.ishammer() && user.a_intent != I_HURT)
+	if(attacking_item.tool_behaviour == TOOL_HAMMER && user.a_intent != I_HURT)
 		var/obj/item/I = usr.get_inactive_hand()
 		if(I && istype(I, /obj/item/stack))
 			var/obj/item/stack/D = I
@@ -67,7 +70,7 @@ Deployable Kits
 				user.visible_message("<b>[user]</b> begins to repair \the [src].", SPAN_NOTICE("You begin to repair \the [src]."))
 				if(I.use_tool(src, user, 20, volume = 50) && health < maxhealth)
 					if(D.use(1))
-						health = maxhealth
+						set_health(maxhealth)
 						visible_message("<b>[user]</b> repairs \the [src].", SPAN_NOTICE("You repair \the [src]."))
 			return TRUE
 	else
@@ -105,8 +108,10 @@ Deployable Kits
 /obj/structure/blocker/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)//So bullets will fly over and stuff.
 	if(air_group || (height==0))
 		return TRUE
-	if(istype(mover, /obj/item/projectile))
-		var/obj/item/projectile/P = mover
+	if(mover.movement_type & PHASING)
+		return TRUE
+	if(istype(mover, /obj/projectile))
+		var/obj/projectile/P = mover
 		if(P.original == src)
 			return FALSE
 		if(P.firer && Adjacent(P.firer))
@@ -114,7 +119,7 @@ Deployable Kits
 		return prob(35)
 	if(isliving(mover))
 		return FALSE
-	if(istype(mover) && mover.checkpass(PASSTABLE))
+	if(istype(mover) && mover.pass_flags & PASSTABLE)
 		return TRUE
 	return FALSE
 
@@ -140,8 +145,7 @@ Deployable Kits
 	anchored = 0.0
 	density = 1.0
 	icon_state = "barrier"
-	var/health = 100.0
-	var/maxhealth = 100.0
+	maxhealth = OBJECT_HEALTH_LOW
 	var/locked = 0.0
 //	req_access = list(ACCESS_MAINT_TUNNELS)
 
@@ -168,7 +172,7 @@ Deployable Kits
 				visible_message(SPAN_WARNING("BZZzZZzZZzZT"))
 				return
 		return
-	else if (attacking_item.iswrench())
+	else if (attacking_item.tool_behaviour == TOOL_WRENCH)
 		if (src.health < src.maxhealth)
 			user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
 			src.health = src.maxhealth
@@ -217,9 +221,11 @@ Deployable Kits
 		icon_state = "[initial(icon_state)][src.locked]"
 
 /obj/machinery/deployable/barrier/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)//So bullets will fly over and stuff.
+	if(mover?.movement_type & PHASING)
+		return TRUE
 	if(air_group || (height==0))
 		return 1
-	if(istype(mover) && mover.checkpass(PASSTABLE))
+	if(istype(mover) && mover.pass_flags & PASSTABLE)
 		return 1
 	else
 		return 0
@@ -264,6 +270,7 @@ Deployable Kits
 	icon = 'icons/obj/storage/briefcase.dmi'
 	icon_state = "inf_box"
 	item_state = "inf_box"
+	contained_sprite = TRUE
 	drop_sound = 'sound/items/drop/backpack.ogg'
 	pickup_sound = 'sound/items/pickup/backpack.ogg'
 
@@ -288,7 +295,8 @@ Deployable Kits
 	icon = 'icons/obj/storage/briefcase.dmi'
 	icon_state = "barrier_kit"
 	item_state = "barrier_kit"
-	w_class = ITEMSIZE_SMALL
+	contained_sprite = TRUE
+	w_class = WEIGHT_CLASS_SMALL
 	kit_product = /obj/machinery/deployable/barrier/legion
 
 /obj/item/deployable_kit/surgery_table
@@ -297,14 +305,14 @@ Deployable Kits
 	icon = 'icons/obj/surgery.dmi'
 	icon_state = "table_deployable"
 	item_state = "table_parts"
-	w_class = ITEMSIZE_LARGE
+	w_class = WEIGHT_CLASS_BULKY
 	kit_product = /obj/machinery/optable
 	assembly_time = 20 SECONDS
 
 /obj/item/deployable_kit/surgery_table/assemble_kit(mob/user)
 	..()
 	var/free_spot = null
-	for(var/check_dir in GLOB.cardinal)
+	for(var/check_dir in GLOB.cardinals)
 		var/turf/T = get_step(src, check_dir)
 		if(turf_clear(T))
 			free_spot = T
@@ -322,7 +330,7 @@ Deployable Kits
 	item_state = "table_parts"
 	drop_sound = 'sound/items/drop/axe.ogg'
 	pickup_sound = 'sound/items/pickup/axe.ogg'
-	w_class = ITEMSIZE_LARGE
+	w_class = WEIGHT_CLASS_BULKY
 	kit_product = /obj/machinery/porta_turret/legion
 	assembly_time = 15 SECONDS
 
@@ -332,7 +340,8 @@ Deployable Kits
 	icon = 'icons/obj/storage/briefcase.dmi'
 	icon_state = "inf_box"
 	item_state = "inf_box"
-	w_class = ITEMSIZE_NORMAL
+	contained_sprite = TRUE
+	w_class = WEIGHT_CLASS_NORMAL
 	kit_product = /obj/machinery/iv_drip
 	assembly_time = 4 SECONDS
 
@@ -342,13 +351,14 @@ Deployable Kits
 	icon = 'icons/obj/storage/briefcase.dmi'
 	icon_state = "barrier_kit"
 	item_state = "barrier_kit"
-	w_class = ITEMSIZE_LARGE
+	contained_sprite = TRUE
+	w_class = WEIGHT_CLASS_BULKY
 	kit_product = /obj/structure/bed/stool/chair/remote/mech/portable
 	assembly_time = 20 SECONDS
 
 /obj/item/deployable_kit/remote_mech/attack_self(mob/user)
 	var/area/A = get_area(user)
-	if(!A.powered(EQUIP))
+	if(!A.powered(AREA_USAGE_EQUIP))
 		to_chat(user, SPAN_WARNING("\The [src] can not be deployed in an unpowered area."))
 		return FALSE
 	..()

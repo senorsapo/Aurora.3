@@ -145,7 +145,7 @@
 	name = "Belt of Holding"
 	desc = "Can hold more than you'd expect."
 	icon_state = "emsbelt"
-	max_w_class = ITEMSIZE_NORMAL // Can hold normal sized items.
+	max_w_class = WEIGHT_CLASS_NORMAL // Can hold normal sized items.
 	storage_slots = 14	// Twice the capacity of a typical belt.
 	max_storage_space = 16
 
@@ -222,9 +222,9 @@
 	name = "Spyglass"
 	desc = "A mundane spyglass, it may prove useful to those who wish to scout ahead, or fight from an extreme range."
 	cost = 100
-	obj_path = /obj/item/device/binoculars/spyglass
+	obj_path = /obj/item/binoculars/spyglass
 
-/obj/item/device/binoculars/spyglass
+/obj/item/binoculars/spyglass
 	name = "spyglass"
 	desc = "It's a hand-held telescope, useful for star-gazing, peeping, and recon."
 	icon_state = "spyglass"

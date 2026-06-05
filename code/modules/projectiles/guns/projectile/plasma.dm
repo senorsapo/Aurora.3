@@ -1,10 +1,10 @@
 /obj/item/gun/projectile/plasma
-	name = "plasma shotgun"
+	name = "OEI-2 plasma shotgun"
 	desc = "A marvel of Elyran weapons technology which utilizes superheated plasma to pierce thick armor with gruesome results."
-	icon = 'icons/obj/guns/slammer.dmi'
+	icon = 'icons/obj/guns/faction/elyran_republic/slammer.dmi'
 	icon_state = "slammer"
 	item_state = "slammer"
-	w_class = ITEMSIZE_LARGE
+	w_class = WEIGHT_CLASS_BULKY
 	origin_tech = list(TECH_COMBAT = 3, TECH_MATERIAL = 3)
 	ammo_type = /obj/item/ammo_casing/plasma_slug
 	magazine_type = /obj/item/ammo_magazine/plasma
@@ -23,12 +23,12 @@
 		icon_state = "[initial(icon_state)]-empty"
 
 /obj/item/gun/projectile/plasma/bolter
-	name = "plasma bolter"
+	name = "\improper OEI-2M plasma bolter"
 	desc = "A miniaturized, less efficient version of the infamous plasma slammer. Sacrifices much of its power for a more compact frame."
-	icon = 'icons/obj/guns/bolter.dmi'
+	icon = 'icons/obj/guns/faction/elyran_republic/bolter.dmi'
 	icon_state = "bolter"
 	item_state = "bolter"
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	ammo_type = /obj/item/ammo_casing/plasma_bolt
 	magazine_type = /obj/item/ammo_magazine/plasma/light
 	allowed_magazines = list(/obj/item/ammo_magazine/plasma/light)
@@ -37,7 +37,7 @@
 	fire_delay = ROF_RIFLE
 
 /obj/item/gun/energy/mountedplasma
-	name = "plasma cannon"
+	name = "mounted plasma cannon"
 	fire_sound = 'sound/weapons/gunshot/slammer.ogg'
 	burst = 2
 	burst_delay = 3
@@ -45,12 +45,12 @@
 	charge_cost = 100
 	use_external_power = TRUE
 	self_recharge = TRUE
-	projectile_type = /obj/item/projectile/plasma
+	projectile_type = /obj/projectile/plasma
 
 /obj/item/gun/projectile/plasma/bolter/pistol
-	name = "plasma pistol"
+	name = "\improper OEI-7 plasma pistol"
 	desc = "An Elyran designed firearm, used for diplomatic protection and high-value escort, which fires super heated bolts of plasma. Rare outside of Elyra due to the maintenance and production costs."
-	icon = 'icons/obj/guns/plasma_pistol.dmi'
+	icon = 'icons/obj/guns/faction/elyran_republic/plasma_pistol.dmi'
 	icon_state = "plasma"
 	item_state = "plasma"
 	magazine_type = /obj/item/ammo_magazine/plasma/light/pistol

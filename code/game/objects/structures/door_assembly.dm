@@ -5,12 +5,11 @@
 /obj/structure/door_assembly
 	name = "airlock assembly"
 	desc = "An airlock assembly."
-	desc_info = "To create a glass airlock, add two reinforced glass sheets."
 	icon = 'icons/obj/doors/basic/single/generic/door.dmi'
-	icon_state = "construction"
+	icon_state = "construction_new"
 	anchored = FALSE
 	density = TRUE
-	w_class = ITEMSIZE_HUGE
+	w_class = WEIGHT_CLASS_HUGE
 	build_amt = 4
 	obj_flags = OBJ_FLAG_ROTATABLE|OBJ_FLAG_MOVES_UNSUPPORTED
 	pixel_x = -16
@@ -27,13 +26,52 @@
 	var/created_name
 	var/width = 1
 
+/obj/structure/door_assembly/assembly_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	. += "Use a pen on \the [src] to name it."
+	if(anchored && !glass)
+		. += "Windows could be installed with some <b>reinforced glass</b>."
+	switch(state)
+		if(STATE_UNWIRED)
+			if(!anchored)
+				. += "\the [src] should first be anchored to the floor with some <b>bolts</b>."
+			else
+				. += "\the [src] will need to be fitted with some <b>cables</b>."
+		if(STATE_WIRED)
+			. += "Compatible <b>electronics</b> still need to be installed. Remember to configure them first!"
+		if(STATE_ELECTRONICS_INSTALLED)
+			. += "The remaining panels can be <b>screwed</b> closed to complete the assembly."
+
+/obj/structure/door_assembly/disassembly_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	switch(state)
+		if(STATE_UNWIRED)
+			if(anchored && glass)
+				. += "The glass window could be removed with a <b>welder</b>."
+			else if(anchored)
+				. += "\the [src] is anchored to the floor with some <b>bolts</b>."
+			else
+				. += "\the [src] could be reduced to metal sheets with a <b>welder</b>."
+		if(STATE_WIRED)
+			. += "The cables in \the [src] could be <b>cut</b>."
+		if(STATE_ELECTRONICS_INSTALLED)
+			. += "The electronics could be <b>pried</b> out."
+	. += "A <b>chainsaw</b> or equivalent would probably get rid of this thing, but make a real mess."
+
+/obj/structure/door_assembly/feedback_hints(mob/user, distance, is_adjacent)
+	. = list()
+	. = ..()
+	. += "It is currently facing [dir2text(dir)]."
+	. += "It is possible to squeeze through it as long it is anchored to the floor. Drag and drop a mob onto the assembly to do so."
+
 /obj/structure/door_assembly/Initialize(mapload)
 	. = ..()
 	update_state()
 
-/obj/structure/door_assembly/get_examine_text(mob/user, distance, is_adjacent, infix, suffix)
-	. = ..()
-	. += "It is currently facing [dir2text(dir)]."
+/obj/structure/door_assembly/Destroy()
+	electronics = null
+	created_name = null
+	return ..()
 
 /obj/structure/door_assembly/door_assembly_generic
 	base_name = "airlock"
@@ -46,6 +84,7 @@
 
 /obj/structure/door_assembly/door_assembly_ext
 	base_name = "external airlock"
+	icon = 'icons/obj/doors/basic/single/external/door.dmi'
 	airlock_type = /obj/machinery/door/airlock/external
 
 /obj/structure/door_assembly/door_assembly_hatch
@@ -55,7 +94,7 @@
 
 /obj/structure/door_assembly/door_assembly_mhatch
 	base_name = "maintenance hatch"
-	icon = 'icons/obj/doors/basic/single/external/door.dmi'
+	icon = 'icons/obj/doors/basic/single/hatch/door.dmi'
 	airlock_type = /obj/machinery/door/airlock/maintenance_hatch
 
 /obj/structure/door_assembly/door_assembly_highsecurity
@@ -86,7 +125,7 @@
 			bound_height = width * world.icon_size
 
 /obj/structure/door_assembly/attackby(obj/item/attacking_item, mob/user)
-	if(attacking_item.ispen())
+	if(attacking_item.tool_behaviour == TOOL_PEN)
 		var/door_name = sanitizeSafe(input(user, "Enter the name for the door.", src.name, src.created_name), MAX_NAME_LEN)
 		if(!door_name)
 			return
@@ -94,8 +133,8 @@
 			return
 		created_name = door_name
 
-	else if(attacking_item.iswelder())
-		if(!glass || anchored)
+	else if(attacking_item.tool_behaviour == TOOL_WELDER)
+		if(!glass && anchored)
 			to_chat(user, SPAN_WARNING("\The [src] isn't ready to be welded yet. It doesn't have any installed glass to remove, and it has to be unsecured to deconstruct it."))
 			return
 		var/obj/item/weldingtool/WT = attacking_item
@@ -120,7 +159,7 @@
 			to_chat(user, SPAN_WARNING("You need more welding fuel."))
 			return
 
-	else if(attacking_item.iswrench())
+	else if(attacking_item.tool_behaviour == TOOL_WRENCH)
 		if(state != STATE_UNWIRED)
 			to_chat(user, SPAN_WARNING("You have to remove the wiring before you can use the wrench on \the [src]."))
 			return
@@ -138,7 +177,7 @@
 			to_chat(user, SPAN_NOTICE("You [anchored? "un" : ""]secure \the [src]."))
 			anchored = !anchored
 
-	else if(attacking_item.iscoil())
+	else if(attacking_item.tool_behaviour == TOOL_CABLECOIL)
 		if(state > STATE_UNWIRED)
 			to_chat(user, SPAN_WARNING("\The [src] has already been wired."))
 			return
@@ -155,7 +194,7 @@
 				state = STATE_WIRED
 				to_chat(user, SPAN_NOTICE("You wire the airlock."))
 
-	else if(attacking_item.iswirecutter())
+	else if(attacking_item.tool_behaviour == TOOL_WIRECUTTER)
 		if(state == STATE_UNWIRED)
 			to_chat(user, SPAN_WARNING("\The [src] doesn't have any wires to remove."))
 			return
@@ -196,7 +235,7 @@
 			else
 				EL.is_installed = FALSE
 
-	else if(attacking_item.iscrowbar())
+	else if(attacking_item.tool_behaviour == TOOL_CROWBAR)
 		if(state != STATE_ELECTRONICS_INSTALLED)
 			to_chat(user, SPAN_WARNING("\The [src] has no electronics to remove."))
 			return
@@ -225,6 +264,9 @@
 		var/obj/item/stack/S = attacking_item
 		var/material_name = S.get_material_name()
 		if(S.get_amount() >= 2)
+			if(material_name != MATERIAL_GLASS_REINFORCED)
+				to_chat(user, SPAN_WARNING("You can only use reinforced glass to install a window into an airlock assembly."))
+				return
 			if(material_name == MATERIAL_GLASS_REINFORCED)
 				user.visible_message("<b>[user]</b> starts installing \the [S] into the airlock assembly.", SPAN_WARNING("You start installing \the [S] into the airlock assembly."))
 				if(attacking_item.use_tool(src, user, 40, volume = 50) && !glass)
@@ -232,7 +274,7 @@
 						to_chat(user, SPAN_NOTICE("You install reinforced glass windows into the airlock assembly."))
 						glass = TRUE
 
-	else if(attacking_item.isscrewdriver())
+	else if(attacking_item.tool_behaviour == TOOL_SCREWDRIVER)
 		if(state != STATE_ELECTRONICS_INSTALLED)
 			to_chat(user, SPAN_WARNING("\The [src] doesn't have any electronics installed."))
 			return
@@ -280,6 +322,75 @@
 		..()
 	update_state()
 
+/obj/structure/door_assembly/mouse_drop_receive(atom/dropped, mob/user, params)
+	// Logic allowing people to squeeze through airlock assemblies.
+
+	if(use_check(user) || !Adjacent(user))
+		return ..()
+
+	to_chat(user, SPAN_NOTICE("You try to squeeze through \the [src]..."))
+
+	var/speed_multiplier = 1
+	switch(user.mob_size)
+		if(MOB_LARGE)
+			to_chat(user, SPAN_WARNING("However, you are too large to fit through it!"))
+			return ..()
+		if(MOB_MEDIUM)
+			speed_multiplier = 1.0
+		if(MOB_SMALL)
+			speed_multiplier = 0.66
+		if(MOB_TINY)
+			speed_multiplier = 0.33
+		if(MOB_MINISCULE)
+			speed_multiplier = 0.25
+		else
+			speed_multiplier = 1.0
+
+	if(!src.anchored)
+		to_chat(user, SPAN_WARNING("\The [src] isn't secured to the floor yet, you can't squeeze through it."))
+		return ..()
+
+	// Check if user is standing directly infront of the airlock facing the open assembly, not diagonal or besides the assembly.
+	if((src.dir == NORTH || src.dir == SOUTH) && !((src.loc.y == user.loc.y + 1 || src.loc.y == user.loc.y -1) && user.loc.x == src.loc.x))
+		return ..()
+	else if((src.dir == EAST || src.dir == WEST) && !((src.loc.x == user.loc.x + 1 || src.loc.x == user.loc.x - 1) && user.loc.y == src.loc.y))
+		return ..()
+
+	// Get position on the opposite side of the airlock from the user.
+	var/dx = src.loc.x - user.loc.x
+	var/dy = src.loc.y - user.loc.y
+	// normalize to a single-tile step
+	dx = dx > 0 ? 1 : (dx < 0 ? -1 : 0)
+	dy = dy > 0 ? 1 : (dy < 0 ? -1 : 0)
+	var/turf/T = locate(src.loc.x + dx, src.loc.y + dy, src.z)
+
+	// Check if the location is empty to step upon.
+	if(!T || !turf_clear(T))
+		to_chat(user, SPAN_WARNING("However, there is no room to step out on the other side!"))
+		return ..()
+
+	var/turf/old_loc = locate(user.loc.x, user.loc.y, user.loc.z)
+	src.add_fingerprint(user)
+
+	user.resting = TRUE
+	if(do_after(user, (3 * speed_multiplier) SECONDS, src, DO_UNIQUE, (INCAPACITATION_RESTRAINED|INCAPACITATION_BUCKLED_FULLY))) // Squeeze in
+		user.forceMove(src.loc) // Ignore density check
+		sleep((2 * speed_multiplier) SECOND) // Crawl delay
+		if(src.loc != user.loc) // Check if user was moved out of the assembly during the process, if so, abort
+			user.resting = FALSE
+			return ..()
+		if(prob(10 * speed_multiplier)) // Climb out
+			visible_message(SPAN_WARNING("[user] gets tangled in the \the [src] for a moment while squeezing through it..."))
+			if(!do_after(user, (5 * speed_multiplier) SECONDS, src, DO_UNIQUE, (INCAPACITATION_RESTRAINED|INCAPACITATION_BUCKLED_FULLY)))
+				user.forceMove(old_loc)
+				user.resting = FALSE
+				return ..()
+		user.Move(T) // Get out behind assembly
+		visible_message(SPAN_NOTICE("[user] squeezes through the \the [src]!"))
+	user.resting = FALSE
+
+	..()
+
 /obj/structure/door_assembly/proc/CanChainsaw(var/obj/item/material/twohanded/chainsaw/ChainSawVar)
 	return (ChainSawVar.powered)
 
@@ -288,10 +399,13 @@
 	switch (state)
 		if(STATE_UNWIRED)
 			name = anchored ? "secured " : "unsecured "
+			icon_state = anchored ? "construction_anchored" : "construction_new"
 		if(STATE_WIRED)
 			name = "wired "
+			icon_state = "construction_wired"
 		if(STATE_ELECTRONICS_INSTALLED)
 			name = "near-finished "
+			icon_state = "construction_electronics"
 	name += "[glass == TRUE ? "window " : ""][glass ? "glass airlock" : base_name] assembly"
 	if(created_name)
 		name += " ([created_name])"

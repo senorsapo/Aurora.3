@@ -3,11 +3,11 @@
 	var/wet_type = 0
 	var/wet_amount = 0
 	var/image/wet_overlay = null
+	/// The armor of this object, turned into an armor component.
+	var/list/armor
 
 	var/thermite = 0
 	initial_gas = list("oxygen" = MOLES_O2STANDARD, "nitrogen" = MOLES_N2STANDARD)
-	var/to_be_destroyed = 0 //Used for fire, if a melting temperature was reached, it will be destroyed
-	var/max_fire_temperature_sustained = 0 //The max temperature of the fire which it was subjected to
 	var/dirt = 0
 
 	var/unwet_timer	// Used to keep track of the unwet timer & delete it on turf change so we don't runtime if the new turf is not simulated.
@@ -18,13 +18,30 @@
 
 /turf/simulated/Initialize(mapload)
 	if (mapload)
-		if(istype(loc, /area/chapel))
+		if(istype(loc, /area/horizon/service/chapel))
 			holy = 1
 
 	. = ..()
 	levelupdate(mapload)
 	if (!mapload)
 		updateVisibility(src)
+
+	if(maxhealth)
+		if(!health)
+			// Allows you to set dynamic health states on initialize.
+			health = maxhealth
+	if(islist(armor))
+		for(var/type in armor)
+			if(armor[type])
+				AddComponent(/datum/component/armor, armor)
+				break
+	else if(should_use_health)
+		AddComponent(/datum/component/armor, GLOB.default_object_armor, TRUE)
+
+/turf/simulated/condition_hints(mob/user, distance, is_adjacent)
+	. += ..()
+	if(health < maxhealth)
+		. += get_damage_condition_hints(user, distance, is_adjacent)
 
 /turf/simulated/proc/update_dirt()
 	dirt = min(dirt+1, 101)
@@ -34,18 +51,17 @@
 			dirtoverlay = new/obj/effect/decal/cleanable/dirt(src)
 		dirtoverlay.alpha = min((dirt - 50) * 5, 255)
 
-/turf/simulated/Entered(atom/A, atom/OL)
+/turf/simulated/Entered(atom/movable/arrived, atom/old_loc)
 	if(movement_disabled && usr.ckey != movement_disabled_exception)
 		to_chat(usr, SPAN_WARNING("Movement is admin-disabled.")) //This is to identify lag problems)
 		return
 
-	if(istype(A,/mob/living))
-		var/mob/living/M = A
-		if(src.wet_type && src.wet_amount)
-			if(M.buckled_to || (src.wet_type == 1 && M.m_intent == M_WALK))
-				return
+	if(istype(arrived, /mob/living))
+		var/mob/living/M = arrived
+		//if the turf is wet, the mob is not buckled, and either it's not wet with water or the mob is running, slip it
+		if(src.wet_type && src.wet_amount && !M.buckled_to && (src.wet_type != WET_TYPE_WATER || M.m_intent != M_WALK))
 
-			//Water
+			//Defaults to a water slip
 			var/slip_dist = 1
 			var/slip_stun = 6
 			var/floor_type = "wet"
@@ -67,14 +83,15 @@
 
 		// Ugly hack :c Should never have multiple plants in the same tile.
 		var/obj/effect/plant/plant = locate() in contents
-		if(plant) plant.trodden_on(M)
+		if(plant)
+			plant.trodden_on(M)
 
 		// Dirt overlays.
 		update_dirt()
 
 		M.inertia_dir = 0
 
-	..(A, OL)
+	..()
 
 /**
  * Slips a mob, moving it for N tiles

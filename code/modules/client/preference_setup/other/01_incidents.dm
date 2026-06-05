@@ -78,13 +78,13 @@
 		if (I.fine == 0)
 			dat += "<br>Brig Sentence: [I.getBrigSentence()] <br>"
 		else
-			dat += "Fine: [I.fine] Credits<br>"
+			dat += "Fine: [I.fine]电<br>"
 		dat += "Notes: <br>"
 		if (I.notes != "")
 			dat += nl2br(I.notes)
 		else
 			dat += "- No Summary Entered -"
-		dat += "<br><a href='?src=\ref[src];details_sec_incident=[I.db_id]'>Show Details</a><br><a href='?src=\ref[src];del_sec_incident=[I.db_id]'>Delete Incident</a>"
+		dat += "<br><a href='byond://?src=[REF(src)];details_sec_incident=[I.db_id]'>Show Details</a><br><a href='byond://?src=[REF(src)];del_sec_incident=[I.db_id]'>Delete Incident</a>"
 
 	. = dat.Join()
 

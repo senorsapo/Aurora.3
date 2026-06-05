@@ -1,4 +1,5 @@
 /datum/antagonist/proc/create_antagonist(var/datum/mind/target, var/move, var/gag_announcement, var/preserve_appearance)
+	SHOULD_CALL_PARENT(TRUE)
 
 	if(!target)
 		return
@@ -8,8 +9,7 @@
 		remove_antagonist(target)
 		return 0
 	if(!preserve_appearance && (flags & ANTAG_CHOOSE_NAME))
-		spawn(1)
-			set_antag_name(target.current)
+		addtimer(CALLBACK(src, PROC_REF(set_antag_name), target.current),  1)
 	if(move)
 		place_mob(target.current)
 	update_leader()
@@ -19,6 +19,10 @@
 	if(!gag_announcement)
 		announce_antagonist_spawn()
 	LAZYDISTINCTADD(SSticker.mode.antag_templates, src)
+
+	// Antags wipe skill components so that they can bypass skill restrictions entirely.
+	for(var/skill in target.current.GetComponents(/datum/component/skill))
+		qdel(skill)
 
 /datum/antagonist/proc/create_default(var/mob/source)
 	var/mob/living/M
@@ -43,21 +47,21 @@
 	return W
 
 /datum/antagonist/proc/create_radio(var/freq, var/mob/living/carbon/human/player)
-	var/obj/item/device/radio/R
+	var/obj/item/radio/R
 
 	switch(freq)
 		if(NINJ_FREQ)
-			R = new /obj/item/device/radio/headset/ninja(player)
+			R = new /obj/item/radio/headset/ninja(player)
 		if(BLSP_FREQ)
-			R = new /obj/item/device/radio/headset/bluespace(player)
+			R = new /obj/item/radio/headset/bluespace(player)
 		if(BURG_FREQ)
-			R = new /obj/item/device/radio/headset/burglar(player)
+			R = new /obj/item/radio/headset/burglar(player)
 		if(SYND_FREQ)
-			R = new /obj/item/device/radio/headset/syndicate(player)
+			R = new /obj/item/radio/headset/syndicate(player)
 		if(RAID_FREQ)
-			R = new /obj/item/device/radio/headset/raider(player)
+			R = new /obj/item/radio/headset/raider(player)
 		else
-			R = new /obj/item/device/radio/headset(player)
+			R = new /obj/item/radio/headset(player)
 			R.set_frequency(freq)
 
 	R.set_frequency(freq)

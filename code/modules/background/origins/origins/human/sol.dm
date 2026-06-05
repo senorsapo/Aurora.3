@@ -9,6 +9,9 @@
 		/singleton/origin_item/origin/venus_j,
 		/singleton/origin_item/origin/mars,
 		/singleton/origin_item/origin/jupiter,
+		/singleton/origin_item/origin/jupiter_cal,
+		/singleton/origin_item/origin/jupiter_eur,
+		/singleton/origin_item/origin/saturn,
 		/singleton/origin_item/origin/pluto,
 		/singleton/origin_item/origin/eridani,
 		/singleton/origin_item/origin/eridani_dreg,
@@ -21,14 +24,14 @@
 		/singleton/origin_item/origin/mictlan,
 		/singleton/origin_item/origin/antillia,
 		/singleton/origin_item/origin/sancolette,
-		/singleton/origin_item/origin/ouerea_human
+		/singleton/origin_item/origin/ouerea_human,
 	)
 
 /singleton/origin_item/origin/sol_system
 	name = "Sol System"
 	desc = "The cradle of humanity itself, the Sol System stands above most other systems in terms of its quality of life, wealth, influence, and population. \
 			Undisputedly controlled by the Solarian Alliance, the Sol System will likely remain the unofficial capital for centuries to come."
-	possible_accents = list(ACCENT_SOL)
+	possible_accents = list(ACCENT_SOL, ACCENT_MERCURY, ACCENT_ERIS, ACCENT_TITANIA)
 	possible_citizenships = CITIZENSHIPS_SOLARIAN
 	possible_religions = RELIGIONS_SOLARIAN
 
@@ -71,8 +74,31 @@
 
 /singleton/origin_item/origin/jupiter
 	name = "Jupiter"
-	desc = "The three major inhabited moons of Jupiter - Callisto, Ganymede, and Europa - are key Solarian worlds. Callisto serves as a major port for the Alliance, Ganymede produces much of the food the Alliance consumes, and Europa is a major research hub. The Jovian Moons are home to a remarkable diversity of humanity, and humans from almost anywhere in the Orion Spur can be found in their ports."
-	possible_accents = list(ACCENT_JUPITER, ACCENT_EUROPA, ACCENT_CALLISTO)
+	desc = "The Jovian System is a major hub of the larger Sol System and the Alliance as a whole. Major worlds in it include Ganymede, Europe, and Callisto. If you want something in the Alliance, it can almost certainly be found in Jupiter’s orbit. Though known formally as Jovians, residents of Jupiter’s moons typically refer to themselves by their moon of origin. Unlike the rest of the Sol System, they tend to refer to Jupiter as 'Jove' or 'the Old Man'."
+	possible_accents = list(ACCENT_JUPITER)
+	possible_citizenships = CITIZENSHIPS_SOLARIAN
+	possible_religions = RELIGIONS_SOLARIAN
+
+/singleton/origin_item/origin/jupiter_cal
+	name = "Jupiter, Callisto"
+	desc = "One of the most populous Solarian member-states, the Commonwealth of Callisto is the port of the Sol System. Its heavily terraformed surface is densely urbanized and the moon itself is protected by a massive planetary shield ring: one of the last great projects undertaken by the Alliance. Its residents enjoy a remarkably high average quality of life. Residents of Callisto are known as Callisteans or 'Calies'."
+	possible_accents = list(ACCENT_CALLISTO)
+	possible_citizenships = CITIZENSHIPS_SOLARIAN
+	possible_religions = RELIGIONS_SOLARIAN
+
+/singleton/origin_item/origin/jupiter_eur
+	name = "Jupiter, Europa"
+	desc = "Jupiter’s frozen moon, Europa’s surface is dominated by a thick layer of ice and its residents instead live underground, in the inky darkness of its interior sea, in submarines and habitation stations. Known both for its biodiversity and its horrifying seafarers’ tales, Europa has long fascinated the minds of Solarians across the Alliance. Its residents are known as Europans."
+	possible_accents = list(ACCENT_EUROPA)
+	possible_citizenships = CITIZENSHIPS_SOLARIAN
+	possible_religions = RELIGIONS_SOLARIAN
+	origin_traits = list(TRAIT_ORIGIN_COLD_RESISTANCE, TRAIT_ORIGIN_LIGHT_SENSITIVE)
+	origin_traits_descriptions = list("are more acclimatised to the cold.", "are more sensitive to bright lights")
+
+/singleton/origin_item/origin/saturn
+	name = "Saturn"
+	desc = "The moons of Saturn, while not as populated as the Jovian moons of Jupiter, are an important part of the Alliance and major population centers in the Sol System. Many tourists visit Saturn to see its massive rings, the largest and most complex in the Solar System."
+	possible_accents = list(ACCENT_ENCELADUS, ACCENT_IAPETUS)
 	possible_citizenships = CITIZENSHIPS_SOLARIAN
 	possible_religions = RELIGIONS_SOLARIAN
 
@@ -200,3 +226,4 @@
 	possible_religions = RELIGIONS_SOLARIAN
 	origin_traits = list(TRAIT_ORIGIN_HOT_RESISTANCE)
 	origin_traits_descriptions = list("are more acclimatised to the heat")
+

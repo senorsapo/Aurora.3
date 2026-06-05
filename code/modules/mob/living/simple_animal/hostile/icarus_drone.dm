@@ -19,10 +19,10 @@
 	a_intent = I_HURT
 	stop_automated_movement_when_pulled = FALSE
 	health = 300
-	maxHealth = 300
+	maxhealth = 300
 	blood_type = COLOR_OIL
 	speed = 8
-	projectiletype = /obj/item/projectile/beam/drone
+	projectiletype = /obj/projectile/beam/drone
 	projectilesound = 'sound/weapons/laser3.ogg'
 	destroy_surroundings = 0
 	var/datum/effect_system/ion_trail/ion_trail
@@ -56,9 +56,10 @@
 	tameable = FALSE
 
 	flying = TRUE
-	see_invisible = SEE_INVISIBLE_NOLIGHTING
+	lighting_alpha = LIGHTING_PLANE_ALPHA_SOMEWHAT_INVISIBLE
 
 	psi_pingable = FALSE
+	sample_data = null
 
 /mob/living/simple_animal/hostile/icarus_drone/Initialize()
 	. = ..()
@@ -66,7 +67,7 @@
 	set_light(1.2, 3, LIGHT_COLOR_BLUE)
 
 	if(prob(5))
-		projectiletype = /obj/item/projectile/beam/pulse/drone
+		projectiletype = /obj/projectile/beam/pulse/drone
 		projectilesound = 'sound/weapons/pulse2.ogg'
 	ion_trail = new(src)
 	ion_trail.start()
@@ -152,7 +153,7 @@
 	return TRUE
 
 //self repair systems have a chance to bring the drone back to life
-/mob/living/simple_animal/hostile/icarus_drone/Life()
+/mob/living/simple_animal/hostile/icarus_drone/Life(seconds_per_tick, times_fired)
 	//emps and lots of damage can temporarily shut us down
 	if(disabled > 0)
 		set_stat(UNCONSCIOUS)
@@ -167,7 +168,7 @@
 		speak_chance = 5
 
 	//repair a bit of damage
-	if(prob(1) && health < maxHealth)
+	if(prob(1) && health < maxhealth)
 		visible_message(SPAN_NOTICE("\The [src] shudders and shakes as some of its damaged systems come back online."))
 		spark(src, 3, GLOB.alldirs)
 		health += rand(25, 100)
@@ -185,16 +186,16 @@
 			src.visible_message(SPAN_ALERT("\The [src] suddenly lights up, and additional targetting vanes slide into place."))
 			hostile_drone = TRUE
 
-	if(health / maxHealth > 0.9)
+	if(health / maxhealth > 0.9)
 		icon_state = "drone3"
 		explode_chance = 0
-	else if(health / maxHealth > 0.7)
+	else if(health / maxhealth > 0.7)
 		icon_state = "drone2"
 		explode_chance = 0
-	else if(health / maxHealth > 0.5)
+	else if(health / maxhealth > 0.5)
 		icon_state = "drone1"
 		explode_chance = 0.5
-	else if(health / maxHealth > 0.3)
+	else if(health / maxhealth > 0.3)
 		icon_state = "drone0"
 		explode_chance = 5
 	else if(health > 0)
@@ -207,7 +208,7 @@
 			else
 				visible_message(SPAN_NOTICE("\The [src] suddenly lies still and quiet."))
 			disabled = rand(150, 600)
-			SSmove_manager.stop_looping(src)
+			GLOB.move_manager.stop_looping(src)
 
 	if(exploding && prob(20))
 		if(prob(50))
@@ -220,7 +221,7 @@
 		exploding = TRUE
 		set_stat(UNCONSCIOUS)
 		wander = 1
-		SSmove_manager.stop_looping(src)
+		GLOB.move_manager.stop_looping(src)
 		spawn(rand(50, 150))
 			if(!disabled && exploding)
 				explosion(get_turf(src), 0, 1, 4, 7)
@@ -233,14 +234,15 @@
 	health -= rand(3, 15) * (severity + 1)
 	disabled = rand(150, 600)
 	hostile_drone = FALSE
-	SSmove_manager.stop_looping(src)
+	GLOB.move_manager.stop_looping(src)
 
 /mob/living/simple_animal/hostile/icarus_drone/death()
 	..(null, "suddenly breaks apart.")
-	qdel(src)
+	QDEL_IN(src, 0)
 
 /mob/living/simple_animal/hostile/icarus_drone/Destroy()
 	QDEL_NULL(ion_trail)
+	patrol_target = null
 	//some random debris left behind
 	if(has_loot)
 		spark(src, 3, GLOB.alldirs)
@@ -351,10 +353,10 @@
 
 	return ..()
 
-/obj/item/projectile/beam/drone
+/obj/projectile/beam/drone
 	damage = 15
 
-/obj/item/projectile/beam/pulse/drone
+/obj/projectile/beam/pulse/drone
 	damage = 10
 
 /mob/living/simple_animal/hostile/icarus_drone/malf

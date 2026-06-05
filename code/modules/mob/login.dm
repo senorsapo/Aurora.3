@@ -3,7 +3,7 @@
 	//Multikey checks and logging
 	lastKnownIP	= client.address
 	computer_id	= client.computer_id
-	log_access("Login: [key_name(src)] from [lastKnownIP ? lastKnownIP : "localhost"]-[computer_id] || BYOND v[client.byond_version]",ckey=key_name(src))
+	log_access("Login: [key_name(src)] from [lastKnownIP ? lastKnownIP : "localhost"]-[computer_id] || BYOND v[client.byond_version]")
 	if(GLOB.config.guests_allowed) // shut up if guests allowed for testing
 		return
 	if(GLOB.config.logsettings["log_access"])
@@ -19,11 +19,11 @@
 					spawn() alert("You have logged in already with another key this round, please log out of this one NOW or risk being banned!")
 				if(matches)
 					if(M.client)
-						message_admins(SPAN_WARNING("<B>Notice: </B></span><span class='notice'><A href='?src=\ref[usr];priv_msg=\ref[src]'>[key_name_admin(src)]</A> has the same [matches] as <A href='?src=\ref[usr];priv_msg=\ref[M]'>[key_name_admin(M)]</A>."), 1)
-						log_access("Notice: [key_name(src)] has the same [matches] as [key_name(M)].",ckey=key_name(src))
+						message_admins(SPAN_WARNING("<B>Notice: </B></span><span class='notice'><A href='byond://?src=[REF(usr)];priv_msg=[REF(src)]'>[key_name_admin(src)]</A> has the same [matches] as <A href='byond://?src=[REF(usr)];priv_msg=[REF(M)]'>[key_name_admin(M)]</A>."), 1)
+						log_access("Notice: [key_name(src)] has the same [matches] as [key_name(M)].")
 					else
-						message_admins(SPAN_WARNING("<B>Notice: </B></span><span class='notice'><A href='?src=\ref[usr];priv_msg=\ref[src]'>[key_name_admin(src)]</A> has the same [matches] as [key_name_admin(M)] (no longer logged in). "), 1)
-						log_access("Notice: [key_name(src)] has the same [matches] as [key_name(M)] (no longer logged in).",ckey=key_name(src))
+						message_admins(SPAN_WARNING("<B>Notice: </B></span><span class='notice'><A href='byond://?src=[REF(usr)];priv_msg=[REF(src)]'>[key_name_admin(src)]</A> has the same [matches] as [key_name_admin(M)] (no longer logged in). "), 1)
+						log_access("Notice: [key_name(src)] has the same [matches] as [key_name(M)] (no longer logged in).")
 
 /mob
 	var/client/my_client // Need to keep track of this ourselves, since by the time Logout() is called the client has already been nulled
@@ -97,12 +97,14 @@
 		winset(src, null, "mainwindow.macro=macro hotkey_toggle.is-checked=false input.focus=true")
 	MOB_STOP_THINKING(src)
 
-	clear_important_client_contents(client)
-	enable_client_mobs_in_contents(client)
+	clear_important_client_contents()
+	enable_client_mobs_in_contents()
 
-	CreateRenderers()
-	update_client_color()
+	update_client_color(no_animate = TRUE)
 	add_click_catcher()
+
+	if(client) //Should work based on "change_view" but we lack the infrastructure behind to make it useful, for now
+		client.attempt_auto_fit_viewport()
 
 	if(machine)
 		machine.on_user_login(src)
@@ -114,6 +116,6 @@
 		client.update_skybox(TRUE)
 
 	if(spell_masters)
-		for(var/obj/screen/movable/spell_master/spell_master in spell_masters)
+		for(var/atom/movable/screen/movable/spell_master/spell_master in spell_masters)
 			spell_master.toggle_open(1)
 			client.screen -= spell_master

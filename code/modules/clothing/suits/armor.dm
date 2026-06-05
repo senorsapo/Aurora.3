@@ -1,5 +1,5 @@
 /obj/item/clothing/suit/armor
-	allowed = list(/obj/item/gun/energy,/obj/item/reagent_containers/spray/pepper,/obj/item/gun/projectile,/obj/item/ammo_magazine,/obj/item/ammo_casing,/obj/item/melee/baton,/obj/item/handcuffs,/obj/item/device/flashlight,/obj/item/clothing/head/helmet)
+	allowed = list(/obj/item/gun/energy,/obj/item/reagent_containers/spray/pepper,/obj/item/gun/projectile,/obj/item/ammo_magazine,/obj/item/ammo_casing,/obj/item/melee/baton,/obj/item/handcuffs,/obj/item/flashlight,/obj/item/clothing/head/helmet)
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO
 	item_flags = ITEM_FLAG_THICK_MATERIAL
 
@@ -38,12 +38,12 @@
 	else
 		..(user)
 
-/obj/item/clothing/suit/armor/MouseDrop(obj/over_object as obj)
+/obj/item/clothing/suit/armor/mouse_drop_dragged(atom/over, mob/user, src_location, over_location, params)
 	if (pockets)
-		if (pockets.handle_mousedrop(usr, over_object))
-			..(over_object)
+		if (pockets.handle_mousedrop(user, over))
+			..()
 	else
-		..(over_object)
+		..()
 
 /obj/item/clothing/suit/armor/attackby(obj/item/attacking_item, mob/user)
 	..()
@@ -71,11 +71,11 @@
 	item_state = "armor"
 	blood_overlay_type = "armor"
 	armor = list(
-		melee = ARMOR_MELEE_KNIVES,
-		bullet = ARMOR_BALLISTIC_PISTOL,
-		laser = ARMOR_LASER_SMALL,
-		energy = ARMOR_ENERGY_MINOR,
-		bomb = ARMOR_BOMB_PADDED
+		MELEE = ARMOR_MELEE_KNIVES,
+		BULLET = ARMOR_BALLISTIC_PISTOL,
+		LASER = ARMOR_LASER_SMALL,
+		ENERGY = ARMOR_ENERGY_MINOR,
+		BOMB = ARMOR_BOMB_PADDED
 	)
 
 /obj/item/clothing/suit/storage/toggle/armor/hos
@@ -85,19 +85,19 @@
 	item_state = "jensencoat"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|ARMS|LEGS
 	armor = list(
-		melee = ARMOR_MELEE_KNIVES,
-		bullet = ARMOR_BALLISTIC_SMALL,
-		laser = ARMOR_LASER_SMALL,
-		energy = ARMOR_ENERGY_MINOR,
-		bomb = ARMOR_BOMB_PADDED
+		MELEE = ARMOR_MELEE_KNIVES,
+		BULLET = ARMOR_BALLISTIC_SMALL,
+		LASER = ARMOR_LASER_SMALL,
+		ENERGY = ARMOR_ENERGY_MINOR,
+		BOMB = ARMOR_BOMB_PADDED
 	)
-	allowed = list(/obj/item/gun/energy, /obj/item/reagent_containers/spray/pepper, /obj/item/gun/projectile, /obj/item/ammo_magazine, /obj/item/ammo_casing, /obj/item/melee/baton, /obj/item/handcuffs, /obj/item/device/flashlight)
+	allowed = list(/obj/item/gun/energy, /obj/item/reagent_containers/spray/pepper, /obj/item/gun/projectile, /obj/item/ammo_magazine, /obj/item/ammo_casing, /obj/item/melee/baton, /obj/item/handcuffs, /obj/item/flashlight)
 
 /obj/item/clothing/suit/storage/toggle/armor/hos/Initialize()
 	. = ..()
 	pockets = new /obj/item/storage/internal(src)
 	pockets.storage_slots = 4
-	pockets.max_w_class = ITEMSIZE_SMALL
+	pockets.max_w_class = WEIGHT_CLASS_SMALL
 	pockets.max_storage_space = 8
 
 /obj/item/clothing/suit/armor/swat
@@ -110,15 +110,15 @@
 	item_flags = ITEM_FLAG_THICK_MATERIAL
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|FEET|ARMS
 	allowed = list(/obj/item/gun,/obj/item/ammo_magazine,/obj/item/ammo_casing,/obj/item/melee/baton,/obj/item/handcuffs,/obj/item/tank/emergency_oxygen)
-	slowdown = 1
+	slowdown = 0.5
 	armor = list(
-		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_MEDIUM,
-		laser = ARMOR_LASER_RIFLE,
-		energy = ARMOR_ENERGY_MINOR,
-		bomb = ARMOR_BOMB_PADDED,
-		bio = ARMOR_BIO_SHIELDED,
-		rad = ARMOR_RAD_SMALL
+		MELEE = ARMOR_MELEE_RESISTANT,
+		BULLET = ARMOR_BALLISTIC_MEDIUM,
+		LASER = ARMOR_LASER_RIFLE,
+		ENERGY = ARMOR_ENERGY_MINOR,
+		BOMB = ARMOR_BOMB_PADDED,
+		BIO = ARMOR_BIO_SHIELDED,
+		RAD = ARMOR_RAD_SMALL
 	)
 	max_pressure_protection = FIRESUIT_MAX_PRESSURE
 	min_pressure_protection = 0
@@ -147,7 +147,7 @@
 	icon_state = "reactiveoff"
 	item_state = "reactiveoff"
 	blood_overlay_type = "armor"
-	slowdown = 1
+	slowdown = 0.5
 	armor = null
 
 /obj/item/clothing/suit/armor/reactive/handle_shield(mob/user, var/on_back, var/damage, atom/damage_source = null, mob/attacker = null, var/def_zone = null, var/attack_text = "the attack")
@@ -165,11 +165,11 @@
 		if(!isturf(picked)) return
 
 		spark(user, 5)
-		playsound(user.loc, /singleton/sound_category/spark_sound, 50, 1)
+		playsound(user.loc, SFX_SPARKS, 50, 1)
 
 		user.forceMove(picked)
-		return PROJECTILE_FORCE_MISS
-	return FALSE
+		return BULLET_ACT_BLOCK
+	return BULLET_ACT_HIT
 
 /obj/item/clothing/suit/armor/reactive/attack_self(mob/user as mob)
 	src.active = !( src.active )
@@ -198,13 +198,13 @@
 	item_state = "armor"
 	var/obj/item/gun/holstered = null
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|ARMS
-	slowdown = 1
+	slowdown = 0.5
 	armor = list(
-		melee = ARMOR_MELEE_KNIVES,
-		bullet = ARMOR_BALLISTIC_MEDIUM,
-		laser = ARMOR_LASER_RIFLE,
-		energy = ARMOR_ENERGY_SMALL,
-		bomb = ARMOR_BOMB_PADDED
+		MELEE = ARMOR_MELEE_KNIVES,
+		BULLET = ARMOR_BALLISTIC_MEDIUM,
+		LASER = ARMOR_LASER_RIFLE,
+		ENERGY = ARMOR_ENERGY_SMALL,
+		BOMB = ARMOR_BOMB_PADDED
 	)
 	siemens_coefficient = 0.35
 	var/obj/item/clothing/accessory/holster/holster
@@ -216,6 +216,10 @@
 	holster.on_attached(src)	//its inside a suit, we set  this so it can be drawn from
 	QDEL_NULL(pockets)	//Tactical armor has internal holster instead of pockets, so we null this out
 	ClearOverlays()	// Remove the holster's overlay.
+
+/obj/item/clothing/suit/armor/tactical/Destroy()
+	QDEL_NULL(holster)
+	return ..()
 
 /obj/item/clothing/suit/armor/tactical/attackby(obj/item/attacking_item, mob/user)
 	..()
@@ -229,7 +233,7 @@
 
 /obj/item/clothing/suit/armor/tactical/verb/holster()
 	set name = "Holster"
-	set category = "Object"
+	set category = "Object.Held"
 	set src in usr
 	if(!istype(usr, /mob/living)) return
 	if(usr.stat) return
@@ -259,11 +263,11 @@
 	item_state = "armor"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|ARMS
 	armor = list(
-		melee = ARMOR_MELEE_KNIVES,
-		bullet = ARMOR_BALLISTIC_PISTOL,
-		laser = ARMOR_LASER_RIFLE,
-		energy = ARMOR_ENERGY_SMALL,
-		bomb = ARMOR_BOMB_PADDED
+		MELEE = ARMOR_MELEE_KNIVES,
+		BULLET = ARMOR_BALLISTIC_PISTOL,
+		LASER = ARMOR_LASER_RIFLE,
+		ENERGY = ARMOR_ENERGY_SMALL,
+		BOMB = ARMOR_BOMB_PADDED
 	)
 	siemens_coefficient = 0.35
 
@@ -295,14 +299,14 @@
 	desc = "A simple kevlar plate carrier."
 	icon_state = "kvest"
 	item_state = "kvest"
-	allowed = list(/obj/item/gun,/obj/item/reagent_containers/spray/pepper,/obj/item/ammo_magazine,/obj/item/ammo_casing,/obj/item/melee/baton,/obj/item/handcuffs,/obj/item/device/flashlight)
+	allowed = list(/obj/item/gun,/obj/item/reagent_containers/spray/pepper,/obj/item/ammo_magazine,/obj/item/ammo_casing,/obj/item/melee/baton,/obj/item/handcuffs,/obj/item/flashlight)
 	siemens_coefficient = 0.5
 	armor = list(
-		melee = ARMOR_MELEE_KNIVES,
-		bullet = ARMOR_BALLISTIC_PISTOL,
-		laser = ARMOR_LASER_SMALL,
-		energy = ARMOR_ENERGY_SMALL,
-		bomb = ARMOR_BOMB_PADDED
+		MELEE = ARMOR_MELEE_KNIVES,
+		BULLET = ARMOR_BALLISTIC_PISTOL,
+		LASER = ARMOR_LASER_SMALL,
+		ENERGY = ARMOR_ENERGY_SMALL,
+		BOMB = ARMOR_BOMB_PADDED
 	)
 
 /obj/item/clothing/suit/storage/vest/Initialize()
@@ -355,12 +359,12 @@
 	icon = 'icons/obj/item/clothing/department_uniforms/security.dmi'
 	icon_state = "hazard_cadet"
 	item_state = "hazard_cadet"
-	allowed = list(/obj/item/gun,/obj/item/reagent_containers/spray/pepper,/obj/item/ammo_magazine,/obj/item/ammo_casing,/obj/item/melee/baton,/obj/item/handcuffs,/obj/item/device/flashlight)
+	allowed = list(/obj/item/gun,/obj/item/reagent_containers/spray/pepper,/obj/item/ammo_magazine,/obj/item/ammo_casing,/obj/item/melee/baton,/obj/item/handcuffs,/obj/item/flashlight)
 	siemens_coefficient = 0.5
 	armor = list(
-		melee = ARMOR_MELEE_SMALL,
-		energy = ARMOR_ENERGY_MINOR,
-		bomb = ARMOR_BOMB_MINOR
+		MELEE = ARMOR_MELEE_SMALL,
+		ENERGY = ARMOR_ENERGY_MINOR,
+		BOMB = ARMOR_BOMB_MINOR
 		)
 	contained_sprite = TRUE
 
@@ -395,11 +399,11 @@
 	icon_badge = "hoswebvest_badge"
 	icon_nobadge = "hoswebvest_nobadge"
 	armor = list(
-		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_SMALL,
+		MELEE = ARMOR_MELEE_RESISTANT,
+		BULLET = ARMOR_BALLISTIC_SMALL,
 		laser = ARMOR_BALLISTIC_PISTOL,
-		energy = ARMOR_ENERGY_MINOR,
-		bomb = ARMOR_BOMB_PADDED
+		ENERGY = ARMOR_ENERGY_MINOR,
+		BOMB = ARMOR_BOMB_PADDED
 	)
 
 //ert related armor
@@ -411,11 +415,11 @@
 	item_state = "ert_soldier"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|ARMS
 	armor = list(
-		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_RIFLE,
-		laser = ARMOR_LASER_RIFLE,
-		energy = ARMOR_ENERGY_RESISTANT,
-		bomb = ARMOR_BOMB_PADDED
+		MELEE = ARMOR_MELEE_RESISTANT,
+		BULLET = ARMOR_BALLISTIC_RIFLE,
+		LASER = ARMOR_LASER_RIFLE,
+		ENERGY = ARMOR_ENERGY_RESISTANT,
+		BOMB = ARMOR_BOMB_PADDED
 	)
 	siemens_coefficient = 0.35
 	slowdown = 0
@@ -463,11 +467,11 @@
 	contained_sprite = TRUE
 	species_restricted = list(BODYTYPE_UNATHI)
 	armor = list(
-		melee = ARMOR_MELEE_MAJOR,
-		bullet = ARMOR_BALLISTIC_PISTOL,
-		laser = ARMOR_LASER_KEVLAR,
-		energy = ARMOR_ENERGY_SMALL,
-		bomb = ARMOR_BOMB_PADDED
+		MELEE = ARMOR_MELEE_MAJOR,
+		BULLET = ARMOR_BALLISTIC_PISTOL,
+		LASER = ARMOR_LASER_KEVLAR,
+		ENERGY = ARMOR_ENERGY_SMALL,
+		BOMB = ARMOR_BOMB_PADDED
 	)
 	siemens_coefficient = 0.35
 
@@ -477,12 +481,12 @@
 	icon_state = "hegemony_armor"
 	item_state = "hegemony_armor"
 	armor = list(
-		melee = ARMOR_MELEE_VERY_HIGH,
-		bullet = ARMOR_BALLISTIC_MEDIUM,
-		laser = ARMOR_LASER_RIFLE,
-		energy = ARMOR_ENERGY_MINOR,
-		bomb = ARMOR_BOMB_PADDED,
-		rad = ARMOR_RAD_MINOR
+		MELEE = ARMOR_MELEE_VERY_HIGH,
+		BULLET = ARMOR_BALLISTIC_MEDIUM,
+		LASER = ARMOR_LASER_RIFLE,
+		ENERGY = ARMOR_ENERGY_MINOR,
+		BOMB = ARMOR_BOMB_PADDED,
+		RAD = ARMOR_RAD_MINOR
 	)
 
 // Vaurca version of Unathi armor
@@ -495,14 +499,14 @@
 	contained_sprite = TRUE
 	species_restricted = list(BODYTYPE_VAURCA)
 	armor = list(
-		melee = ARMOR_MELEE_VERY_HIGH,
-		bullet = ARMOR_BALLISTIC_MEDIUM,
-		laser = ARMOR_LASER_RIFLE,
-		energy = ARMOR_ENERGY_MINOR,
-		bomb = ARMOR_BOMB_PADDED,
-		rad = ARMOR_RAD_MINOR
+		MELEE = ARMOR_MELEE_VERY_HIGH,
+		BULLET = ARMOR_BALLISTIC_MEDIUM,
+		LASER = ARMOR_LASER_RIFLE,
+		ENERGY = ARMOR_ENERGY_MINOR,
+		BOMB = ARMOR_BOMB_PADDED,
+		RAD = ARMOR_RAD_MINOR
 	)
-	allowed = list(/obj/item/gun/projectile, /obj/item/gun/energy, /obj/item/gun/launcher, /obj/item/melee, /obj/item/reagent_containers/spray/pepper, /obj/item/ammo_magazine, /obj/item/ammo_casing, /obj/item/melee/baton, /obj/item/handcuffs, /obj/item/device/flashlight)
+	allowed = list(/obj/item/gun/projectile, /obj/item/gun/energy, /obj/item/gun/launcher, /obj/item/melee, /obj/item/reagent_containers/spray/pepper, /obj/item/ammo_magazine, /obj/item/ammo_casing, /obj/item/melee/baton, /obj/item/handcuffs, /obj/item/flashlight)
 	siemens_coefficient = 0.35
 
 /obj/item/clothing/suit/storage/vest/legion
@@ -519,15 +523,15 @@
 		/obj/item/ammo_casing,
 		/obj/item/melee/baton,
 		/obj/item/handcuffs,
-		/obj/item/device/flashlight,
+		/obj/item/flashlight,
 		/obj/item/material/twohanded/pike/flag
 	)
 	armor = list(
-		melee = ARMOR_MELEE_MAJOR,
-		bullet = ARMOR_BALLISTIC_SMALL,
-		laser = ARMOR_LASER_SMALL,
-		energy = ARMOR_ENERGY_MINOR,
-		bomb = ARMOR_BOMB_RESISTANT
+		MELEE = ARMOR_MELEE_MAJOR,
+		BULLET = ARMOR_BALLISTIC_SMALL,
+		LASER = ARMOR_LASER_SMALL,
+		ENERGY = ARMOR_ENERGY_MINOR,
+		BOMB = ARMOR_BOMB_RESISTANT
 	)
 
 /obj/item/clothing/suit/storage/vest/legion/legate
@@ -540,28 +544,28 @@
 	. = ..()
 	pockets = new/obj/item/storage/internal(src)
 	pockets.storage_slots = 4
-	pockets.max_w_class = ITEMSIZE_SMALL
+	pockets.max_w_class = WEIGHT_CLASS_SMALL
 	pockets.max_storage_space = 8
 
 /obj/item/clothing/suit/storage/vest/sol
 	name = "sol heavy armor vest"
 	desc = "A high-quality armor vest in a deep green. It is surprisingly flexible and light, even with the added webbing and armor plating."
-	icon = 'icons/clothing/under/uniforms/sol_uniform.dmi'
+	icon = 'icons/obj/item/clothing/suit/storage/sol_army_vest.dmi'
 	icon_state = "solwebvest"
 	item_state = "solwebvest"
 	armor = list(
-		melee = ARMOR_MELEE_VERY_HIGH,
-		bullet = ARMOR_BALLISTIC_MEDIUM,
-		laser = ARMOR_LASER_RIFLE,
-		energy = ARMOR_ENERGY_RESISTANT,
-		bomb = ARMOR_BOMB_PADDED
+		MELEE = ARMOR_MELEE_VERY_HIGH,
+		BULLET = ARMOR_BALLISTIC_MEDIUM,
+		LASER = ARMOR_LASER_RIFLE,
+		ENERGY = ARMOR_ENERGY_RESISTANT,
+		BOMB = ARMOR_BOMB_PADDED
 	)
 	contained_sprite = TRUE
 
 /obj/item/clothing/suit/storage/vest/konyang
 	name = "konyang police vest"
 	desc = "A fairly dated armor vest in bright blue issued to the various police forces of Konyang. It comes with a prominent silver emblem on the front."
-	icon = 'icons/clothing/under/uniforms/konyang_uniforms.dmi'
+	icon = 'icons/obj/item/clothing/suit/storage/konyang_police_vest.dmi'
 	icon_state = "police_vest"
 	item_state = "police_vest"
 	contained_sprite = TRUE
@@ -569,15 +573,15 @@
 /obj/item/clothing/suit/storage/vest/kala
 	name = "kala armor vest"
 	desc = "A simple armor vest issued to all of the Kala. It's made of an advanced lightweight alloy."
-	icon = 'icons/clothing/kit/skrell_armor.dmi'
+	icon = 'icons/obj/item/clothing/suit/storage/kala_armor.dmi'
 	icon_state = "kala_armor"
 	item_state = "kala_armor"
 	armor = list(
-		melee = ARMOR_MELEE_KNIVES,
-		bullet = ARMOR_BALLISTIC_PISTOL,
-		laser = ARMOR_LASER_RIFLE,
-		energy = ARMOR_ENERGY_SMALL,
-		bomb = ARMOR_BOMB_PADDED
+		MELEE = ARMOR_MELEE_KNIVES,
+		BULLET = ARMOR_BALLISTIC_PISTOL,
+		LASER = ARMOR_LASER_RIFLE,
+		ENERGY = ARMOR_ENERGY_SMALL,
+		BOMB = ARMOR_BOMB_PADDED
 	)
 	contained_sprite = TRUE
 
@@ -588,7 +592,7 @@
 	desc = "A suit that protects against some damage."
 	icon_state = "centcom"
 	item_state = "centcom"
-	w_class = ITEMSIZE_LARGE//bulky item
+	w_class = WEIGHT_CLASS_BULKY//bulky item
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|FEET|ARMS|HANDS
 	allowed = list(/obj/item/gun/energy,/obj/item/melee/baton,/obj/item/handcuffs,/obj/item/tank/emergency_oxygen)
 	flags_inv = HIDEWRISTS|HIDEGLOVES|HIDESHOES|HIDEJUMPSUIT
@@ -601,10 +605,10 @@
 	desc = "A heavily armored suit that protects against moderate damage."
 	icon_state = "heavy"
 	item_state = "swat_suit"
-	w_class = ITEMSIZE_LARGE//bulky item
+	w_class = WEIGHT_CLASS_BULKY//bulky item
 	gas_transfer_coefficient = 0.90
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|FEET|ARMS|HANDS
-	slowdown = 3
+	slowdown = 1.5
 	flags_inv = HIDEWRISTS|HIDEGLOVES|HIDESHOES|HIDEJUMPSUIT
 	siemens_coefficient = 0.1
 	pocket_slots = 3

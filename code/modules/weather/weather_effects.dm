@@ -1,7 +1,7 @@
 /obj/abstract/weather_system/proc/get_movement_delay(var/datum/gas_mixture/env, var/travel_dir)
 
 	// It's quiet. Too quiet.
-	if(!wind_direction || !base_wind_delay || !travel_dir || !env || env.return_pressure() < MIN_WIND_PRESSURE)
+	if(!wind_direction || !base_wind_delay || !travel_dir || !env || XGM_PRESSURE(env) < MIN_WIND_PRESSURE)
 		return 0
 
 	// May the wind be always at your back!
@@ -12,7 +12,7 @@
 		return -(round(current_wind_strength * 0.5))
 
 	// Never spit into the wind.
-	var/reversed_wind = GLOB.reverse_dir[wind_direction]
+	var/reversed_wind = REVERSE_DIR(wind_direction)
 	if(reversed_wind == travel_dir)
 		return current_wind_strength
 	if(travel_dir & reversed_wind)

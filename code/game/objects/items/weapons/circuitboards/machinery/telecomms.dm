@@ -1,9 +1,5 @@
-#ifndef T_BOARD
-#error T_BOARD macro is not defined but we need it!
-#endif
-
 /obj/item/circuitboard/telecomms
-	board_type = "machine"
+	board_type = BOARD_MACHINE
 
 /obj/item/circuitboard/telecomms/receiver
 	name = T_BOARD("subspace receiver")

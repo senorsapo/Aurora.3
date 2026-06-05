@@ -9,7 +9,7 @@
 	max_count = 4
 
 	outfit = /obj/outfit/admin/fishing_trawler_crewman
-	possible_species = list(SPECIES_UNATHI, SPECIES_VAURCA_WARRIOR, SPECIES_VAURCA_WORKER)
+	possible_species = list(SPECIES_UNATHI, SPECIES_VAURCA_WARRIOR, SPECIES_VAURCA_WORKER, SPECIES_VAURCA_ATTENDANT)
 	uses_species_whitelist = FALSE
 	allow_appearance_change = APPEARANCE_PLASTICSURGERY
 
@@ -31,14 +31,15 @@
 	uniform = /obj/item/clothing/under/unathi
 	shoes = /obj/item/clothing/shoes/workboots
 	back = /obj/item/storage/backpack/satchel/hegemony
-	l_ear = /obj/item/device/radio/headset/ship
+	l_ear = /obj/item/radio/headset/ship
 	id = /obj/item/card/id/hephaestus
 	backpack_contents = list(/obj/item/storage/box/survival = 1)
 
 	species_shoes = list(
 		SPECIES_UNATHI = /obj/item/clothing/shoes/workboots/toeless,
 		SPECIES_VAURCA_WARRIOR = /obj/item/clothing/shoes/workboots/toeless,
-		SPECIES_VAURCA_WORKER = /obj/item/clothing/shoes/workboots/toeless
+		SPECIES_VAURCA_WORKER = /obj/item/clothing/shoes/workboots/toeless,
+		SPECIES_VAURCA_ATTENDANT = /obj/item/clothing/shoes/workboots/toeless
 	)
 	species_suit = list(
 		SPECIES_UNATHI = /obj/item/clothing/accessory/poncho/unathimantle/fisher

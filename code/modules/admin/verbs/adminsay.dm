@@ -1,5 +1,5 @@
 /client/proc/cmd_admin_say(msg as text)
-	set category = "Special Verbs"
+	set category = "Admin.Chat"
 	set name = "Asay" //Gave this shit a shorter name so you only have to time out "asay" rather than "admin say" to use it --NeoFite
 	set hidden = 1
 	if(!check_rights(R_ADMIN))	return
@@ -7,7 +7,7 @@
 	msg = sanitize(msg)
 	if(!msg)	return
 
-	log_admin("ADMIN: [key_name(src)] : [msg]",admin_key=key_name(src))
+	log_admin("ADMIN: [key_name(src)] : [msg]")
 
 	if(check_rights(R_ADMIN,0))
 		for(var/s in GLOB.staff)
@@ -18,14 +18,14 @@
 	feedback_add_details("admin_verb","M") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
 /client/proc/cmd_mod_say(msg as text)
-	set category = "Special Verbs"
+	set category = "Admin.Chat"
 	set name = "Msay"
 	set hidden = 1
 
 	if(!check_rights(R_ADMIN|R_MOD))	return
 
 	msg = sanitize(msg)
-	log_admin("MOD: [key_name(src)] : [msg]",admin_key=key_name(src))
+	log_admin("MOD: [key_name(src)] : [msg]")
 
 	if (!msg)
 		return
@@ -36,12 +36,12 @@
 	for(var/s in GLOB.staff)
 		var/client/C = s
 		if ((R_ADMIN|R_MOD) & C.holder.rights)
-			to_chat(C, "<span class='mod_channel'>" + create_text_tag("MOD", C) + " <span class='name'>[sender_name]</span>(<A HREF='?src=\ref[C.holder];adminplayerobservejump=\ref[mob]'>JMP</A>): <span class='message linkify'>[msg]</span></span>")
+			to_chat(C, "<span class='mod_channel'>" + create_text_tag("MOD", C) + " <span class='name'>[sender_name]</span>(<A href='byond://?src=[REF(C.holder)];adminplayerobservejump=[REF(mob)]'>JMP</A>): <span class='message linkify'>[msg]</span></span>")
 
 	feedback_add_details("admin_verb","MS") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
 /client/proc/cmd_dev_say(msg as text)
-	set category = "Special Verbs"
+	set category = "Admin.Chat"
 	set name = "Devsay"
 	set hidden = 1
 
@@ -50,7 +50,7 @@
 	msg = copytext(sanitize(msg), 1, MAX_MESSAGE_LEN)
 	if(!msg)	return
 
-	log_admin("DEV: [key_name(src)] : [msg]",admin_key=key_name(src))
+	log_admin("DEV: [key_name(src)] : [msg]")
 
 	if(check_rights(R_DEV,0))
 		msg = "<span class='devsay'>[create_text_tag("DEV")] <EM>[key_name(usr, 0, 1, 0)]</EM>: <span class='message linkify'>[msg]</span></span>"
@@ -60,8 +60,8 @@
 				to_chat(C, msg)
 
 /client/proc/cmd_cciaa_say(msg as text)
-	set category = "Special Verbs"
-	set name = "Dosay"
+	set category = "Admin.Chat"
+	set name = "CCIAsay"
 	set hidden = 1
 
 	if(!check_rights(R_ADMIN|R_CCIAA)) return
@@ -69,7 +69,7 @@
 	msg = copytext(sanitize(msg), 1, MAX_MESSAGE_LEN)
 	if(!msg)	return
 
-	log_admin("CCIASAY: [key_name(src)] : [msg]",admin_key=key_name(src))
+	log_admin("CCIASAY: [key_name(src)] : [msg]")
 
 	if(check_rights((R_CCIAA|R_ADMIN),0))
 		msg = "<span class='cciaasay'>[create_text_tag("CCIA")] <EM>[key_name(usr, 0, 1, 0)]</EM>: <span class='message linkify'>[msg]</span></span>"

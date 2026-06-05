@@ -58,7 +58,7 @@
 		return
 
 	if(prob(33) && H.canmove && isturf(H.loc) && !H.pulledby) //won't move if being pulled
-		step(H, pick(GLOB.cardinal))
+		step(H, pick(GLOB.cardinals))
 
 	if(prob(1))
 		H.emote(pick("scratch","jump","roll","tail"))
@@ -200,5 +200,5 @@
 	brute_mod = 0.8
 	burn_mod = 2
 	fall_mod = 0
-	slowdown = -1
+	slowdown = -0.3
 

@@ -4,7 +4,7 @@
 	icon = 'icons/obj/guns/rocket.dmi'
 	icon_state = "rocket"
 	item_state = "rocket"
-	w_class = ITEMSIZE_LARGE
+	w_class = WEIGHT_CLASS_BULKY
 	throw_speed = 2
 	throw_range = 10
 	force = 11
@@ -19,8 +19,12 @@
 	var/max_rockets = 1
 	var/list/rockets = new/list()
 
-/obj/item/gun/launcher/rocket/get_examine_text(mob/user, distance, is_adjacent, infix, suffix)
-	. = ..()
+/obj/item/gun/launcher/rocket/Destroy()
+	QDEL_LIST(rockets)
+	return ..()
+
+/obj/item/gun/launcher/rocket/feedback_hints(mob/user, distance, is_adjacent)
+	. += ..()
 	if(is_adjacent)
 		. += SPAN_NOTICE("[rockets.len] / [max_rockets] rockets.")
 
@@ -45,13 +49,13 @@
 
 /obj/item/gun/launcher/rocket/handle_post_fire(mob/user, atom/target)
 	message_admins("[key_name_admin(user)] fired a rocket from a rocket launcher ([src.name]) at [target].")
-	log_game("[key_name(user)] used a rocket launcher ([src.name]) at [target].",ckey=key_name(src))
+	log_game("[key_name(user)] used a rocket launcher ([src.name]) at [target].")
 	..()
 
 /obj/item/gun/launcher/rocket/konyang
-	name = "konyang rocket launcher"
+	name = "\improper KGM-701D rocket launcher"
 	desc = "An unguided rocket launcher often used by the armed forces of Konyang."
 	desc_extended = "The KGM-701 is a heavy anti-tank guided missile in use by the Konyang Army, another carryover from their old Solarian stockpiles. Capable of handling any tank that wouldn't get bogged down on Konyang's soft terrain, the KGM-701 is expected to soldier on for many years to come. This however, is not a KGM-701, but the KGM-701D, the unguided discount variation of the old Solarian ATGM, typically issued to colonial garrisons and not rated against any modern vehicles."
-	icon = 'icons/obj/guns/konyang_weapons.dmi'
+	icon = 'icons/obj/guns/faction/konyang/konyang_weapons.dmi'
 	icon_state = "kgm"
 	item_state = "kgm"

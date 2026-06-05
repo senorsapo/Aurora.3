@@ -6,18 +6,19 @@
 	center_of_mass = list("x"=24, "y"=20)
 
 	armor = list(
-		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_PISTOL,
-		laser = ARMOR_LASER_PISTOL,
-		energy = ARMOR_ENERGY_MINOR,
-		bomb = ARMOR_BOMB_PADDED,
-		bio = ARMOR_BIO_RESISTANT,
-		rad = ARMOR_RAD_MINOR
+		MELEE = ARMOR_MELEE_RESISTANT,
+		BULLET = ARMOR_BALLISTIC_PISTOL,
+		LASER = ARMOR_LASER_PISTOL,
+		ENERGY = ARMOR_ENERGY_MINOR,
+		BOMB = ARMOR_BOMB_PADDED,
+		BIO = ARMOR_BIO_RESISTANT,
+		RAD = ARMOR_RAD_MINOR
 	)
 
 	var/mech_health = 600
 	var/obj/item/robot_parts/robot_component/diagnosis_unit/diagnostics
-	var/obj/item/cell/cell
+	var/obj/item/cell/mecha/cell
+	var/cell_type = /obj/item/cell/mecha
 	var/obj/item/robot_parts/robot_component/armor/mech_armor
 	var/obj/machinery/portable_atmospherics/canister/air_supply
 	var/datum/gas_mixture/cockpit
@@ -30,6 +31,13 @@
 	var/transparent_cabin = FALSE
 	var/hide_pilot = TRUE
 	has_hardpoints = list(HARDPOINT_BACK, HARDPOINT_LEFT_SHOULDER, HARDPOINT_RIGHT_SHOULDER)
+
+	/**
+	 * Maximum % chance for an ejection to fail based on how much damage the mech's torso has taken.
+	 * If you're stuck, better hope there's a friend available to bail you out..
+	 * Or you can keep the hatch open if you would rather risk getting zipped by incoming fire.
+	 */
+	var/ejection_fail_chance = 75
 
 /obj/item/mech_component/chassis/Initialize()
 	. = ..()
@@ -66,11 +74,11 @@
 	. = ..()
 
 	if(!cell)
-		. += SPAN_WARNING("It is missing a <a href='?src=\ref[src];info=cell'>power cell</a>.")
+		. += SPAN_WARNING("It is missing a <a href='byond://?src=[REF(src)];info=cell'>power core</a>.")
 	if(!diagnostics)
-		. += SPAN_WARNING("It is missing a <a href='?src=\ref[src];info=diagnostics'>diagnostics unit</a>.")
+		. += SPAN_WARNING("It is missing a <a href='byond://?src=[REF(src)];info=diagnostics'>diagnostics unit</a>.")
 	if(!mech_armor)
-		. += SPAN_WARNING("It is missing <a href='?src=\ref[src];info=diagnostics'>armor plating</a>.")
+		. += SPAN_WARNING("It is missing <a href='byond://?src=[REF(src)];info=diagnostics'>armor plating</a>.")
 
 /obj/item/mech_component/chassis/Topic(href, href_list)
 	. = ..()
@@ -78,11 +86,11 @@
 		return
 	switch(href_list["info"])
 		if("cell")
-			to_chat(usr, SPAN_NOTICE("A power cell can be created at a mechatronic fabricator."))
+			to_chat(usr, SPAN_NOTICE("A power core can be created at a synthetic fabricator."))
 		if("diagnostics")
-			to_chat(usr, SPAN_NOTICE("A diagnostics unit can be created at a mechatronic fabricator."))
+			to_chat(usr, SPAN_NOTICE("A diagnostics unit can be created at a synthetic fabricator."))
 		if("armor")
-			to_chat(usr, SPAN_NOTICE("Armor plating can be created at a mechatronic fabricator."))
+			to_chat(usr, SPAN_NOTICE("Armor plating can be created at a synthetic fabricator."))
 
 /obj/item/mech_component/chassis/return_diagnostics(mob/user)
 	..()
@@ -105,7 +113,7 @@
 		cockpit.equalize(T.return_air())
 		changed = TRUE
 	else if(air_supply)
-		var/env_pressure = cockpit.return_pressure()
+		var/env_pressure = XGM_PRESSURE(cockpit)
 		var/pressure_delta = air_supply.release_pressure - env_pressure
 		if((air_supply.air_contents.temperature > 0) && (pressure_delta > 0))
 			var/transfer_moles = calculate_transfer_moles(air_supply.air_contents, cockpit, pressure_delta)
@@ -120,8 +128,9 @@
 
 /obj/item/mech_component/chassis/prebuild()
 	diagnostics = new(src)
-	cell = new /obj/item/cell/mecha(src)
-	cell.charge = cell.maxcharge
+	if(cell_type)
+		cell = new cell_type(src)
+		cell.charge = cell.maxcharge
 
 /obj/item/mech_component/chassis/attackby(obj/item/attacking_item, mob/user)
 	if(istype(attacking_item, /obj/item/robot_parts/robot_component/diagnosis_unit))
@@ -130,9 +139,9 @@
 			return
 		if(install_component(attacking_item, user))
 			diagnostics = attacking_item
-	else if(istype(attacking_item, /obj/item/cell))
+	else if(istype(attacking_item, /obj/item/cell/mecha))
 		if(cell)
-			to_chat(user, SPAN_WARNING("\The [src] already has a cell installed."))
+			to_chat(user, SPAN_WARNING("\The [src] already has a core installed."))
 			return
 		if(install_component(attacking_item,user))
 			cell = attacking_item
@@ -145,8 +154,8 @@
 	else
 		return ..()
 
-/obj/item/mech_component/chassis/MouseDrop_T(atom/dropping, mob/user)
-	var/obj/machinery/portable_atmospherics/canister/C = dropping
+/obj/item/mech_component/chassis/mouse_drop_receive(atom/dropped, mob/user, params)
+	var/obj/machinery/portable_atmospherics/canister/C = dropped
 	if(istype(C) && do_after(user, 5, src))
 		to_chat(user, SPAN_NOTICE("You install the canister into \the [src]."))
 		if(air_supply)

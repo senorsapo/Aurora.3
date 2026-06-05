@@ -58,7 +58,7 @@ export const MESSAGE_TYPES = [
     name: 'Radio',
     description: 'All departments of radio messages',
     selector:
-      '.alert, .minorannounce, .syndradio, .centradio, .aiprivradio, .comradio, .entradio, .hailradio, .shipradio, .secradio, .engradio, .medradio, .sciradio, .supradio, .srvradio, .radio, .deptradio, .binarysay, .newscaster, .alien, .changeling, .coalitionradio',
+      '.alert, .minorannounce, .syndradio, .centradio, .aiprivradio, .comradio, .entradio, .hailradio, .shipradio, .secradio, .engradio, .medradio, .sciradio, .supradio, .srvradio, .radio, .deptradio, .binarysay, .newscaster, .alien, .changeling, .coalitionradio, .expradio',
   },
   {
     type: MESSAGE_TYPE_INFO,
@@ -72,7 +72,7 @@ export const MESSAGE_TYPES = [
     name: 'Warnings',
     description: 'Urgent messages from the game and items',
     selector:
-      '.warning:not(.pm), .critical, .userdanger, .italics, .alertsyndie, .warningplain',
+      '.warning:not(.pm), .critical, .userdanger, .italics, .alertsyndie, .warningplain, .boldwarning',
   },
   {
     type: MESSAGE_TYPE_DEADCHAT,

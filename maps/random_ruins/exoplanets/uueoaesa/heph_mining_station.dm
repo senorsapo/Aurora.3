@@ -4,7 +4,7 @@
 	description = "A Hephaestus Industries mining station on one of Uueoa-Esa's minor celestial bodies."
 	sectors = list(SECTOR_UUEOAESA)
 	prefix = "uueoaesa/"
-	suffixes = list("heph_mining_station.dmm")
+	suffix = "heph_mining_station.dmm"
 	template_flags = TEMPLATE_FLAG_NO_RUINS|TEMPLATE_FLAG_RUIN_STARTS_DISALLOWED
 	spawn_cost = 2
 	ban_ruins = list(/datum/map_template/ruin/exoplanet/miners_guild_outpost)
@@ -15,7 +15,6 @@
 	name = "Hephaestus Mining Station"
 	icon_state = "bluenew"
 	requires_power = TRUE
-	dynamic_lighting = TRUE
 	no_light_control = FALSE
 	base_turf = /turf/simulated/floor/exoplanet/barren
 	area_flags = AREA_FLAG_RAD_SHIELDED|AREA_FLAG_INDESTRUCTIBLE_TURFS

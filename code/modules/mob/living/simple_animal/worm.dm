@@ -17,7 +17,7 @@
 
 	harm_intent_damage = 2
 
-	maxHealth = 30
+	maxhealth = 30
 	health = 30
 
 	universal_speak =1
@@ -47,7 +47,7 @@
 	var/atom/currentlyEating //what the worm is currently eating
 	var/eatingDuration = 0 //how long he's been eating it for
 
-/mob/living/simple_animal/space_worm/Life()
+/mob/living/simple_animal/space_worm/Life(seconds_per_tick, times_fired)
 	..()
 
 	if(next && !(next in view(src,1)))
@@ -64,16 +64,21 @@
 
 	update_icon()
 
-	return
+	return TRUE
 
 /mob/living/simple_animal/space_worm/Destroy() //if a chunk a destroyed, make a new worm out of the split halves
 	if(previous)
 		previous.Detach()
+	if(next && next.previous == src)
+		next.previous = null
+	previous = null
+	next = null
 	return ..()
 
 /mob/living/simple_animal/space_worm/Move()
 	var/attachementNextPosition = loc
-	if(..())
+	. = ..()
+	if(.)
 		if(previous)
 			previous.Move(attachementNextPosition)
 		update_icon()
@@ -126,6 +131,11 @@
 	return
 
 /mob/living/simple_animal/space_worm/proc/Detach(die = 0)
+	if(QDELETED(src))
+		previous = null
+		next = null
+		return
+
 	var/mob/living/simple_animal/space_worm/newHead = new /mob/living/simple_animal/space_worm/head(loc,0)
 	var/mob/living/simple_animal/space_worm/newHeadPrevious = previous
 
@@ -175,12 +185,12 @@
 	icon_living = "spacewormhead0"
 	icon_dead = "spacewormheaddead"
 
-	maxHealth = 20
+	maxhealth = 20
 	health = 20
 
 	melee_damage_lower = 10
 	melee_damage_upper = 15
-	attacktext = "bitten"
+	attacktext = "bites"
 
 	animate_movement = SLIDE_STEPS
 

@@ -4,22 +4,31 @@
 	icon_state = "object"
 	color = "#fffffe"
 	mouse_opacity = MOUSE_OPACITY_ICON
+	layer = OVERMAP_SECTOR_LAYER
+	set_dir_on_move = FALSE
 
 //RP fluff details to appear on scan readouts for any object we want to include these details with
 	var/scanimage = "no_data.png"
-	var/designer = "Unknown" 							//The shipyard or designer of the object if applicable
-	var/volume = "Unestimated" 							//Length height width of the object in tiles ingame
-	var/weapons = "Not apparent"						//The expected armament or scale of armament that the design comes with if applicable. Can vary in visibility for obvious reasons
-	var/sizeclass = "Unknown"							//The class of the design if applicable. Not a prefix. Should be things like battlestations or corvettes
-	var/shiptype = "Unknown"							//The designated purpose of the design. Should briefly describe whether it's a combatant or study vessel for example
+	/// The shipyard or designer of the object if applicable.
+	var/designer = "Unknown"
+	/// Length height width of the object in tiles ingame.
+	var/volume = "Unestimated"
+	/// The expected armament or scale of armament that the design comes with if applicable. Can vary in visibility for obvious reasons.
+	var/weapons = "Not apparent"
+	/// The class of the design if applicable. Not a prefix. Should be things like battlestations or corvettes.
+	var/sizeclass = "Unknown"
+	/// The designated purpose of the design. Should briefly describe whether it's a combatant or study vessel for example.
+	var/shiptype = "Unknown"
 
-	var/alignment = "Unknown"							//For landing sites. Allows the crew to know if they're landing somewhere bad or not
+	/// For landing sites. Allows the crew to know if they're landing somewhere bad or not.
+	var/alignment = "Unknown"
 
-	var/generic_object = TRUE //Used to give basic scan descriptions of every generic overmap object that excludes noteworthy locations, ships and exoplanets
-	var/static_vessel = FALSE //Used to expand scan details for visible space stations
-	var/landing_site = FALSE //Used for unique landing sites that occupy the same overmap tile as another - for example, the implementation of Point Verdant and Konyang
-
-	layer = OVERMAP_SECTOR_LAYER
+	///Used to give basic scan descriptions of every generic overmap object that excludes noteworthy locations, ships and exoplanets.
+	var/generic_object = TRUE
+	/// Used to expand scan details for visible space stations.
+	var/static_vessel = FALSE
+	/// Used for unique landing sites that occupy the same overmap tile as another - for example, the implementation of Point Verdant and Konyang.
+	var/landing_site = FALSE
 
 	var/list/map_z = list()
 
@@ -35,12 +44,18 @@
 
 	var/image/targeted_overlay
 
+/obj/effect/overmap/Destroy()
+	QDEL_NULL(targeted_overlay)
+	return ..()
+
 //Overlay of how this object should look on other skyboxes
 /obj/effect/overmap/proc/get_skybox_representation()
 	return
 
 /obj/effect/overmap/proc/get_scan_data(mob/user)
 	if(static_vessel == TRUE)
+		if(instant_contact)
+			. += "<br>It is broadcasting a distress signal."
 		. += "<hr>"
 		. += "<br><center><large><b>Scan Details</b></large>"
 		. += "<br><large><b>[name]</b></large></center>"
@@ -55,14 +70,15 @@
 		. += "<hr>"
 		. += "<br><center><b>Native Database Notes</b></center>"
 		. += "<br><small>[desc]</small>"
-	if(landing_site == TRUE)
+		return
+	else if(landing_site == TRUE)
 		. += "<hr>"
 		. += "<br><center><large><b>Designated Landing Zone Details</b></large>"
 		. += "<br><large><b>[name]</b></large></center>"
 		. += "<hr>"
 		. += "<br><center><b>Native Database Specifications</b>"
 		. += "<br><img src = [scanimage]></center>"
-		. += "<br><small><b>Governing Body:</b> [alignment]"
+		. += "<br><small><b>Governing Body:</b> [alignment]</small>"
 		. += "<hr>"
 		. += "<br><center><b>Native Database Notes</b></center>"
 		. += "<br><small>[desc]</small>"
@@ -102,7 +118,7 @@
 		return INITIALIZE_HINT_QDEL
 
 	if(known)
-		plane = EFFECTS_ABOVE_LIGHTING_PLANE
+		plane = ABOVE_LIGHTING_PLANE
 		for(var/obj/machinery/computer/ship/helm/H in SSmachinery.machinery)
 			H.get_known_sectors()
 	update_icon()
@@ -110,14 +126,26 @@
 	if(requires_contact)
 		set_invisibility(INVISIBILITY_OVERMAP)// Effects that require identification have their images cast to the client via sensors.
 
-/obj/effect/overmap/Crossed(var/obj/effect/overmap/visitable/other)
-	if(istype(other))
+	var/static/list/loc_connections = list(
+		COMSIG_ATOM_ENTERED = PROC_REF(on_entered),
+		COMSIG_ATOM_EXITED = PROC_REF(on_exit),
+	)
+
+	AddElement(/datum/element/connect_loc, loc_connections)
+
+/obj/effect/overmap/proc/on_entered(datum/source, atom/movable/arrived, atom/old_loc, list/atom/old_locs)
+	SIGNAL_HANDLER
+
+	if(istype(arrived, /obj/effect/overmap/visitable))
 		for(var/obj/effect/overmap/visitable/O in loc)
 			SSskybox.rebuild_skyboxes(O.map_z)
 
-/obj/effect/overmap/Uncrossed(var/obj/effect/overmap/visitable/other)
-	if(istype(other))
-		SSskybox.rebuild_skyboxes(other.map_z)
+/obj/effect/overmap/proc/on_exit(atom/movable/gone, direction)
+	SIGNAL_HANDLER
+
+	if(istype(gone, /obj/effect/overmap/visitable))
+		var/obj/effect/overmap/visitable/V = gone
+		SSskybox.rebuild_skyboxes(V.map_z)
 		for(var/obj/effect/overmap/visitable/O in loc)
 			SSskybox.rebuild_skyboxes(O.map_z)
 

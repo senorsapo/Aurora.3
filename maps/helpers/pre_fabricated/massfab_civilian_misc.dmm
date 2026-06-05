@@ -447,7 +447,6 @@
 	},
 /obj/structure/curtain/open/shower,
 /obj/structure/window/reinforced{
-	layer = 5;
 	name = "adjusted reinforced window"
 	},
 /obj/machinery/door/window/southleft{
@@ -710,8 +709,7 @@
 	pixel_y = 14
 	},
 /obj/item/material/ashtray/bronze{
-	pixel_x = 3;
-	pixel_y = 0
+	pixel_x = 3
 	},
 /turf/simulated/floor/marble/dark,
 /area/space)
@@ -837,10 +835,10 @@
 /obj/item/storage/box/fancy/candle_box,
 /obj/item/reagent_containers/toothpaste,
 /obj/item/reagent_containers/toothpaste,
-/obj/item/device/quikpay,
+/obj/item/quikpay,
 /obj/item/storage/box/fancy/matches,
-/obj/item/storage/box/beanbags,
-/obj/item/storage/box/beanbags,
+/obj/item/storage/box/shells/beanbags,
+/obj/item/storage/box/shells/beanbags,
 /obj/item/wrench,
 /obj/machinery/light/small{
 	pixel_y = -22
@@ -1195,7 +1193,7 @@
 /area/space)
 "AH" = (
 /obj/structure/table/wood,
-/obj/item/device/flashlight/lamp/green{
+/obj/item/flashlight/lamp/green{
 	pixel_y = 9
 	},
 /obj/machinery/light_switch{
@@ -1383,12 +1381,10 @@
 	pixel_x = -7
 	},
 /obj/item/reagent_containers/glass/bottle/syrup/pumpkin{
-	pixel_x = 1;
-	pixel_y = 0
+	pixel_x = 1
 	},
 /obj/item/reagent_containers/glass/bottle/syrup/vanilla{
-	pixel_x = 9;
-	pixel_y = 0
+	pixel_x = 9
 	},
 /obj/item/reagent_containers/food/drinks/shaker{
 	pixel_x = -3;
@@ -1612,8 +1608,8 @@
 /area/space)
 "HP" = (
 /obj/structure/table/rack/retail_shelf,
-/obj/item/storage/box/produce,
-/obj/item/storage/box/produce,
+/obj/item/storage/box/large/produce,
+/obj/item/storage/box/large/produce,
 /turf/simulated/floor/exoplanet/tiled/white,
 /area/space)
 "HS" = (
@@ -2017,7 +2013,7 @@
 /area/space)
 "PK" = (
 /obj/structure/table/wood,
-/obj/item/device/flashlight/lamp/green{
+/obj/item/flashlight/lamp/green{
 	pixel_y = 9
 	},
 /obj/machinery/light_switch{
@@ -2237,10 +2233,10 @@
 /obj/item/storage/box/fancy/candle_box,
 /obj/item/reagent_containers/toothpaste,
 /obj/item/reagent_containers/toothpaste,
-/obj/item/device/quikpay,
+/obj/item/quikpay,
 /obj/item/storage/box/fancy/matches,
-/obj/item/storage/box/beanbags,
-/obj/item/storage/box/beanbags,
+/obj/item/storage/box/shells/beanbags,
+/obj/item/storage/box/shells/beanbags,
 /obj/item/wrench,
 /obj/machinery/light/small{
 	dir = 1;
@@ -2412,7 +2408,7 @@
 /area/space)
 "XA" = (
 /obj/structure/table/wood,
-/obj/item/device/flashlight/lamp/green{
+/obj/item/flashlight/lamp/green{
 	pixel_y = 9
 	},
 /turf/simulated/floor/wood,
@@ -2548,7 +2544,7 @@
 /area/space)
 "ZA" = (
 /obj/structure/table/wood,
-/obj/item/device/flashlight/lamp/green,
+/obj/item/flashlight/lamp/green,
 /turf/simulated/floor/wood,
 /area/space)
 "ZB" = (

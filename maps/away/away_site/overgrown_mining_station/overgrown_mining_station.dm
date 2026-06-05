@@ -3,9 +3,9 @@
 	description = "An abandoned mining station with a dionae growing into it"
 
 	prefix = "away_site/overgrown_mining_station/"
-	suffixes = list("overgrown_mining_station.dmm")
+	suffix = "overgrown_mining_station.dmm"
 
-	sectors = list(SECTOR_TAU_CETI, SECTOR_ROMANOVICH, SECTOR_CORP_ZONE)
+	sectors = list(ALL_TAU_CETI_SECTORS)
 	spawn_weight = 1
 	spawn_cost = 2
 	id = "overgrown_mining_station"

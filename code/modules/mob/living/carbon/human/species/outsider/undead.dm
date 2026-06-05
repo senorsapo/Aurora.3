@@ -198,6 +198,7 @@
 	slowdown = 1
 
 	vision_flags = DEFAULT_SIGHT
+	default_lighting_alpha = LIGHTING_PLANE_ALPHA_MOSTLY_VISIBLE
 
 	reagent_tag = IS_UNDEAD
 
@@ -256,7 +257,7 @@
 	tail = "tajtail"
 	tail_animation = 'icons/mob/species/tajaran/tail.dmi'
 
-	slowdown = -1
+	slowdown = -0.4
 	brute_mod = 1.2
 	fall_mod = 0.5
 
@@ -348,9 +349,9 @@
 
 	natural_armor = list(
 		ballistic = ARMOR_BALLISTIC_MEDIUM,
-		melee = ARMOR_MELEE_MAJOR,
+		MELEE = ARMOR_MELEE_MAJOR,
 		bomb = null,
-		energy = ARMOR_ENERGY_RESISTANT
+		ENERGY = ARMOR_ENERGY_RESISTANT
 	)
 
 	mob_size = 20
@@ -382,7 +383,7 @@
 
 	stamina = 80
 	sprint_speed_factor = 1.2
-	slowdown = -2
+	slowdown = -0.6
 	standing_jump_range = 5
 	natural_climbing = TRUE
 
@@ -428,10 +429,10 @@
 
 	natural_armor = list(
 		ballistic = ARMOR_BALLISTIC_MINOR,
-		laser = ARMOR_LASER_MINOR,
-		melee = ARMOR_MELEE_SMALL,
-		bomb = ARMOR_BOMB_PADDED,
-		energy = ARMOR_ENERGY_SMALL
+		LASER = ARMOR_LASER_MINOR,
+		MELEE = ARMOR_MELEE_SMALL,
+		BOMB = ARMOR_BOMB_PADDED,
+		ENERGY = ARMOR_ENERGY_SMALL
 	)
 
 	inherent_verbs = list(
@@ -510,7 +511,7 @@
 			if(target.reagents)
 				target.reagents.add_reagent(/singleton/reagent/toxin/hylemnomil, min(10, ZOMBIE_MAX_HYLEMNOMIL - hylemnomil_amount))
 
-		if (target.getBruteLoss() > target.maxHealth * 3)
+		if (target.getBruteLoss() > target.maxhealth * 3)
 			if (target.stat != DEAD)
 				to_chat(src,SPAN_WARNING("You've scraped \the [target] down to the bones already!."))
 			else
@@ -537,8 +538,8 @@
 		nutrition += 40
 
 		playsound(loc, 'sound/effects/splat.ogg', 20, 1)
-		new /obj/effect/decal/cleanable/blood/splatter(get_turf(src), target.species.blood_color)
-		if (target.getBruteLoss() > target.maxHealth*0.75)
+		new /obj/effect/decal/cleanable/blood/splatter(get_turf(src), target.get_blood_color())
+		if (target.getBruteLoss() > target.maxhealth*0.75)
 			if (prob(50))
 				gibs(get_turf(src), target.dna)
 				src.visible_message(SPAN_DANGER("\The [src] tears out \the [target]'s insides!"))

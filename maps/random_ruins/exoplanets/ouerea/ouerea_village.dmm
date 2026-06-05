@@ -323,7 +323,7 @@
 /area/ouerea_village)
 "wB" = (
 /obj/structure/table/wood,
-/obj/item/device/flashlight/lamp,
+/obj/item/flashlight/lamp,
 /turf/simulated/floor/exoplanet/wood/birch{
 	temperature = 303.15
 	},
@@ -432,8 +432,8 @@
 /area/ouerea_village)
 "Dc" = (
 /obj/structure/table/wood,
-/obj/item/device/flashlight/lantern,
-/obj/item/device/flashlight/lantern,
+/obj/item/flashlight/lantern,
+/obj/item/flashlight/lantern,
 /turf/simulated/floor/exoplanet/barren{
 	temperature = 298.15
 	},
@@ -482,11 +482,11 @@
 /obj/item/clothing/under/skrell/wetsuit{
 	color = "#100942"
 	},
-/obj/item/clothing/under/pants/jeans,
-/obj/item/clothing/under/pants/tan,
-/obj/item/clothing/accessory/silversun/random,
+/obj/item/clothing/pants/jeans,
+/obj/item/clothing/pants/black,
+/obj/item/clothing/under/dressshirt/silversun/random,
 /obj/item/clothing/accessory/tshirt,
-/obj/item/clothing/accessory/tshirt/skrell/ocean,
+/obj/item/clothing/under/dressshirt/tshirt/skrell/ocean,
 /obj/item/clothing/head/cowboy,
 /obj/item/clothing/shoes/workboots,
 /turf/simulated/floor/exoplanet/wood/birch{
@@ -502,8 +502,8 @@
 "Gv" = (
 /obj/structure/closet/cabinet,
 /obj/item/gun/projectile/shotgun/doublebarrel,
-/obj/item/storage/box/shotgunshells,
-/obj/item/storage/box/shotgunshells,
+/obj/item/storage/box/shells/buckshot,
+/obj/item/storage/box/shells/buckshot,
 /obj/item/clothing/accessory/storage/bandolier,
 /turf/simulated/floor/exoplanet/wood/birch{
 	temperature = 303.15
@@ -558,11 +558,11 @@
 /obj/item/clothing/under/skrell/wetsuit{
 	color = "#100942"
 	},
-/obj/item/clothing/under/pants/jeans,
-/obj/item/clothing/under/pants/tan,
-/obj/item/clothing/accessory/silversun/random,
+/obj/item/clothing/pants/jeans,
+/obj/item/clothing/pants/black,
+/obj/item/clothing/under/dressshirt/silversun/random,
 /obj/item/clothing/accessory/tshirt,
-/obj/item/clothing/accessory/tshirt/skrell/nebula/teal,
+/obj/item/clothing/under/dressshirt/tshirt/skrell/nebula/teal,
 /obj/item/clothing/head/cowboy,
 /obj/item/clothing/shoes/workboots,
 /turf/simulated/floor/exoplanet/wood/birch{
@@ -691,7 +691,7 @@
 	},
 /area/ouerea_village)
 "SZ" = (
-/obj/item/device/radio/phone,
+/obj/item/radio/phone,
 /obj/structure/table/wood,
 /turf/simulated/floor/exoplanet/wood/birch{
 	temperature = 303.15
@@ -758,6 +758,16 @@
 /obj/structure/light_pole,
 /turf/simulated/floor/exoplanet/concrete{
 	temperature = 303.15
+	},
+/area/ouerea_village)
+"UV" = (
+/obj/structure/cargo_receptacle{
+	max_spawn = 2;
+	min_spawn = 0;
+	override_name = "Ouerea - Rural Settlement"
+	},
+/turf/simulated/floor/exoplanet/grass{
+	temperature = 298.15
 	},
 /area/ouerea_village)
 "VC" = (
@@ -1916,7 +1926,7 @@ yv
 yv
 yv
 yv
-yv
+UV
 Uk
 Uk
 Uk

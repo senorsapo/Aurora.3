@@ -7,8 +7,8 @@ GLOBAL_LIST_EMPTY(sparring_attack_cache)
 	var/desc = "A simple unarmed attack."
 	var/damage = 0						// Extra empty hand attack damage.
 	var/armor_penetration = 0
-	var/attack_sound = /singleton/sound_category/punch_sound
-	var/miss_sound = /singleton/sound_category/punchmiss_sound
+	var/attack_sound = SFX_PUNCH
+	var/miss_sound = SFX_PUNCH_MISS
 	var/shredding = 0 // Calls the old attack_alien() behavior on objects/mobs when on harm intent.
 	var/attack_door = 0 // Whether the attack can damage airlocks and how much damage it does
 	var/crowbar_door = FALSE
@@ -97,14 +97,14 @@ GLOBAL_LIST_EMPTY(sparring_attack_cache)
 					else
 						target.visible_message(SPAN_DANGER("[target] slams into [T]!"))
 					if(prob(50))
-						target.set_dir(GLOB.reverse_dir[target.dir])
+						target.set_dir(REVERSE_DIR(target.dir))
 					target.apply_effect(attack_damage * 0.4, WEAKEN, armor)
 			if(BP_GROIN)
 				if(pain_message)
 					target.visible_message(SPAN_WARNING("[target] looks like [target.get_pronoun("he")] [target.get_pronoun("is")] in pain!"),
 											SPAN_WARNING("[(target.gender=="female") ? "Oh god that hurt!" : "Oh no, that REALLY hurt!"]"))
 
-				target.apply_effects(stutter = attack_damage * 2, agony = attack_damage* 3, blocked = armor)
+				target.apply_effects(stutter = attack_damage * 2, agony = attack_damage* 3, blocked = (armor * 100))
 			if(BP_L_LEG, BP_L_FOOT, BP_R_LEG, BP_R_FOOT)
 				if(!target.lying)
 					if(pain_message)
@@ -193,7 +193,7 @@ GLOBAL_LIST_EMPTY(sparring_attack_cache)
 
 	var/organ = affecting.name
 
-	attack_damage = Clamp(attack_damage, 1, 5) // We expect damage input of 1 to 5 for this proc. But we leave this check juuust in case.
+	attack_damage = clamp(attack_damage, 1, 5) // We expect damage input of 1 to 5 for this proc. But we leave this check juuust in case.
 
 	if(target == user)
 		user.visible_message(SPAN_DANGER("[user] [pick(attack_verb)] [user.get_pronoun("himself")] in the [organ]!"))
@@ -239,7 +239,7 @@ GLOBAL_LIST_EMPTY(sparring_attack_cache)
 	attack_name = "palm"
 
 /datum/unarmed_attack/palm/unathi // only one more damage, pretty much just for show
-	attack_sound = /singleton/sound_category/punch_bassy_sound
+	attack_sound = SFX_PUNCH_BASSY
 	desc = "Striking your opponent with your palm. A method of dishing out damage without risking your claws or shredding your opponent to ribbons. This method of attack showcases some more restraint, the damage output is more stable, too."
 	damage = 3
 
@@ -250,7 +250,7 @@ GLOBAL_LIST_EMPTY(sparring_attack_cache)
 /datum/unarmed_attack/kick
 	attack_verb = list("kicked", "kicked", "kicked", "kneed")
 	attack_noun = list("kick", "kick", "kick", "knee strike")
-	attack_sound = /singleton/sound_category/swing_hit_sound
+	attack_sound = SFX_SWING_HIT
 	desc = "A high risk, pretty low reward move. It could be useful if your shoes has a knife sticking out the front, or if you're a trained martial arts master. Make sure to target the lower parts of the body, or else you won't be able to reach!"
 	damage = 0
 	attack_name = "kick"
@@ -286,7 +286,7 @@ GLOBAL_LIST_EMPTY(sparring_attack_cache)
 
 	var/organ = affecting.name
 
-	attack_damage = Clamp(attack_damage, 1, 5)
+	attack_damage = clamp(attack_damage, 1, 5)
 
 	switch(attack_damage)
 		if(1 to 2)	user.visible_message(SPAN_DANGER("[user] threw [target] a glancing [pick(attack_noun)] to the [organ]!")) //it's not that they're kicking lightly, it's that the kick didn't quite connect
@@ -296,7 +296,7 @@ GLOBAL_LIST_EMPTY(sparring_attack_cache)
 /datum/unarmed_attack/stomp
 	attack_verb = null
 	attack_noun = list("stomp")
-	attack_sound = /singleton/sound_category/swing_hit_sound
+	attack_sound = SFX_SWING_HIT
 	desc = "An incredible tactic for turning a downed opponent into tenderized meat! Stomping is a safe and sound method of dispatching downed enemies, but it only works if they're already lying down."
 	damage = 0
 	attack_name = "stomp"
@@ -334,7 +334,7 @@ GLOBAL_LIST_EMPTY(sparring_attack_cache)
 
 	var/obj/item/clothing/shoes = user.shoes
 
-	attack_damage = Clamp(attack_damage, 1, 5)
+	attack_damage = clamp(attack_damage, 1, 5)
 
 	switch(attack_damage)
 		if(1 to 4)	user.visible_message(SPAN_DANGER("[pick("[user] stomped on", "[user] slammed [user.get_pronoun("his")] [shoes ? copytext(shoes.name, 1, -1) : "foot"] down onto")] [target]'s [organ]!"))
@@ -357,4 +357,4 @@ GLOBAL_LIST_EMPTY(sparring_attack_cache)
 	desc = "Sparring: A heavy strike to your opponent. With poise and precision, no evidence will be left behind! They WILL ABSOLUTELY feel this, but will suffer no dangerous side effect, unless you punch them into cardiac arrest! Show off your might!"
 	damage = 4
 	attack_name = "heavy hit"
-	attack_sound = /singleton/sound_category/punch_bassy_sound
+	attack_sound = SFX_PUNCH_BASSY

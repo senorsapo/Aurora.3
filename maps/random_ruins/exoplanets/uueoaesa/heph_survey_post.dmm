@@ -1,8 +1,7 @@
 //MAP CONVERTED BY dmm2tgm.py THIS HEADER COMMENT PREVENTS RECONVERSION, DO NOT REMOVE
 "ab" = (
 /obj/machinery/atmospherics/pipe/simple/hidden/supply{
-	dir = 9;
-	pixel_y = 0
+	dir = 9
 	},
 /obj/random/dirt_75,
 /turf/simulated/floor/tiled/dark,
@@ -214,7 +213,7 @@
 /turf/simulated/floor/plating,
 /area/heph_survey_post)
 "jx" = (
-/obj/machinery/autolathe,
+/obj/machinery/fabricator/autolathe,
 /turf/simulated/floor/tiled/dark,
 /area/heph_survey_post)
 "jF" = (
@@ -297,10 +296,10 @@
 	icon_state = "heph_crate";
 	name = "equipment crate"
 	},
-/obj/item/device/spaceflare,
-/obj/item/device/spaceflare,
-/obj/item/device/spaceflare,
-/obj/item/device/spaceflare,
+/obj/item/spaceflare,
+/obj/item/spaceflare,
+/obj/item/spaceflare,
+/obj/item/spaceflare,
 /turf/simulated/floor/plating,
 /area/heph_survey_post)
 "nN" = (
@@ -475,7 +474,7 @@
 	icon_state = "heph_crate";
 	name = "equipment crate"
 	},
-/obj/item/device/analyzer,
+/obj/item/analyzer,
 /turf/simulated/floor/plating,
 /area/heph_survey_post)
 "uv" = (
@@ -924,8 +923,8 @@
 	icon_state = "heph_crate";
 	name = "equipment crate"
 	},
-/obj/item/device/suit_cooling_unit,
-/obj/item/device/suit_cooling_unit,
+/obj/item/suit_cooling_unit,
+/obj/item/suit_cooling_unit,
 /turf/simulated/floor/plating,
 /area/heph_survey_post)
 "Te" = (
@@ -1151,8 +1150,7 @@
 /obj/machinery/door/airlock/external,
 /obj/machinery/access_button{
 	pixel_x = 28;
-	pixel_y = -8;
-	dir = 2
+	pixel_y = -8
 	},
 /obj/effect/map_effect/marker/airlock{
 	frequency = 1003;

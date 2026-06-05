@@ -8,15 +8,17 @@
 	icon_state = "paint_empty"
 	item_state = "paintcan"
 	matter = list(DEFAULT_WALL_MATERIAL = 200)
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	amount_per_transfer_from_this = 10
 	possible_transfer_amounts = list(10,20,30,60)
 	volume = 60
 	unacidable = 0
 	atom_flags = ATOM_FLAG_OPEN_CONTAINER
 	fragile = 0
-	var/paint_reagent = null //name of the reagent responsible for colouring the paint
-	var/paint_type = null //used for colouring detective technicolor coat and hat
+	/// Name of the reagent responsible for colouring the paint.
+	var/paint_reagent = null
+	/// Used for colouring detective technicolor coat and hat.
+	var/paint_type = null
 	reagents_to_add = list(/singleton/reagent/paint = 4/5)
 
 /obj/item/reagent_containers/glass/paint/Initialize()

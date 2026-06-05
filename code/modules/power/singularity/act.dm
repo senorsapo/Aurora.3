@@ -17,7 +17,7 @@
 /mob/living/carbon/human/singularity_act()
 	var/gain = 20
 	if(mind)
-		if((mind.assigned_role == "Engineer") || (mind.assigned_role == "Chief Engineer"))
+		if((mind.assigned_role == "Ship Engineer") || (mind.assigned_role == "Chief Engineer"))
 			gain = 100
 		if(mind.assigned_role == "Assistant")
 			gain = rand(0, 300)
@@ -92,7 +92,7 @@
 	qdel(src)
 	return 50000
 
-/obj/item/projectile/beam/emitter/singularity_pull()
+/obj/projectile/beam/emitter/singularity_pull()
 	return
 
 /obj/item/storage/backpack/holding/singularity_act(S, current_size)
@@ -108,12 +108,12 @@
 			if(O.invisibility == 101)
 				O.singularity_act(src, current_size)
 	if(go_up && current_size >= STAGE_FIVE)
-		if(HasAbove(src.z))
-			var/turf/A = GetAbove(src)
+		if(GET_TURF_ABOVE(src))
+			var/turf/A = GET_TURF_ABOVE(src)
 			A.singularity_act(S, current_size, 0, 1)
 	if(go_down && current_size >= STAGE_FIVE)
-		if(HasBelow(src.z))
-			var/turf/B = GetBelow(src)
+		if(GET_TURF_BELOW(src))
+			var/turf/B = GET_TURF_BELOW(src)
 			B.singularity_act(S, current_size, 1, 0)
 	if(istype(src,/turf/simulated/mineral))
 		var/turf/simulated/mineral/M = src

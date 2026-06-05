@@ -4,7 +4,7 @@
 	desc = "Special air bubble designed to protect people inside of it from decompressed environments. Has an integrated cooling unit to preserve a stable temperature inside. Requires a power cell to operate."
 	icon = 'icons/obj/airbubble.dmi'
 	icon_state = "airbubble_fact_folded"
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	var/used = FALSE
 	var/ripped = FALSE
 	var/zipped = FALSE
@@ -63,7 +63,6 @@
 	var/zipped = FALSE
 	density = 0
 	storage_capacity = 20
-	var/contains_body = FALSE
 	var/used = TRUE // If we have deployed it once
 	var/ripped = FALSE // If it has a hole it in, vent all the air outside
 	var/breakout_time = 1 // How many minutes it takes to break out of it.
@@ -82,14 +81,14 @@
 	slowdown = 0
 
 // Examine to see tank pressure
-/obj/structure/closet/airbubble/get_examine_text(mob/user, distance, is_adjacent, infix, suffix)
-	. = ..()
+/obj/structure/closet/airbubble/feedback_hints(mob/user, distance, is_adjacent)
+	. += ..()
 	if(!isnull(internal_tank))
-		. += SPAN_NOTICE("\The [src] has [internal_tank] attached, that displays [round(internal_tank.air_contents.return_pressure() ? internal_tank.air_contents.return_pressure() : 0)] KPa.")
+		. += SPAN_NOTICE("\The [src] has [internal_tank] attached, that displays <b>[round(SAFE_XGM_PRESSURE(internal_tank.air_contents))] kPa</b>.")
 	else
 		. += SPAN_NOTICE("\The [src] has no tank attached.")
 	if (cell)
-		. += "\The [src] has [cell] attached, the charge meter reads [round(cell.percent())]%."
+		. += "\The [src] has [cell] attached, the charge meter reads <b>[round(cell.percent())]%</b>."
 	else
 		. += SPAN_WARNING("[src] has no power cell installed.")
 
@@ -136,7 +135,7 @@
 	if(parts)
 		new parts(loc)
 	if (smoothing_flags)
-		SSicon_smooth.add_to_queue_neighbors(src)
+		QUEUE_SMOOTH_NEIGHBORS(src)
 	return ..()
 
 /obj/structure/closet/airbubble/toggle(mob/user as mob)
@@ -185,22 +184,22 @@
 	return 1
 
 // Fold the bubble, transfering properties.
-/obj/structure/closet/airbubble/MouseDrop(over_object, src_location, over_location)
-	if((!zipped || ripped )&& (over_object == usr && (in_range(src, usr) || usr.contents.Find(src))))
-		if(!ishuman(usr))	return
+/obj/structure/closet/airbubble/mouse_drop_dragged(atom/over, mob/user, src_location, over_location, params)
+	if((!zipped || ripped )&& (over == user && (in_range(src, user) || user.contents.Find(src))))
+		if(!ishuman(user))	return
 		if(opened)	return 0
 		if(contents.len > 1)	return 0
 		if(cell)
-			to_chat(usr, SPAN_WARNING("[src] can not be folded with [cell] attached to it."))
+			to_chat(user, SPAN_WARNING("[src] can not be folded with [cell] attached to it."))
 			return
-		usr.visible_message(
-		SPAN_WARNING("[usr] begins folding up the [src.name]."),
+		user.visible_message(
+		SPAN_WARNING("[user] begins folding up the [src.name]."),
 		SPAN_NOTICE("You begin folding up the [src.name].")
 		)
-		if (!do_after(usr, 0.45 SECONDS))
+		if (!do_after(user, 0.45 SECONDS))
 			return
-		usr.visible_message(
-		SPAN_WARNING("[usr] folds up the [src.name].") ,
+		user.visible_message(
+		SPAN_WARNING("[user] folds up the [src.name].") ,
 		SPAN_NOTICE("You fold up the [src.name].")
 		)
 		var/obj/item/airbubble/bag
@@ -215,7 +214,7 @@
 		if(!isnull(internal_tank))
 			internal_tank.forceMove(bag)
 			internal_tank = null
-		bag.w_class = ITEMSIZE_LARGE
+		bag.w_class = WEIGHT_CLASS_BULKY
 
 		bag.desc = "Special air bubble designed to protect people inside of it from decompressed environments. Has an integrated cooling unit to preserve a stable temperature inside. Requires a power cell to operate."
 		if(syndie)
@@ -291,8 +290,11 @@
 	t_air.merge(inside_air)
 
 // When we shoot bubble, make it rip.
-/obj/structure/closet/airbubble/bullet_act(var/obj/item/projectile/Proj)
-	..()
+/obj/structure/closet/airbubble/bullet_act(obj/projectile/hitting_projectile, def_zone, piercing_hit)
+	. = ..()
+	if(. != BULLET_ACT_HIT)
+		return .
+
 	ripped = TRUE
 	update_icon()
 
@@ -417,7 +419,7 @@
 	if(opened)
 		if(istype(attacking_item, /obj/item/grab))
 			var/obj/item/grab/G = attacking_item
-			MouseDrop_T(G.affecting, user)
+			mouse_drop_receive(G.affecting, user)
 			return FALSE
 		if(!attacking_item.dropsafety())
 			return FALSE
@@ -444,7 +446,7 @@
 		qdel(attacking_item)
 		update_icon()
 		return TRUE
-	else if(attacking_item.iswirecutter())
+	else if(attacking_item.tool_behaviour == TOOL_WIRECUTTER)
 		if(!zipped)
 			to_chat(user, SPAN_WARNING("[src] has no cables to cut."))
 			attack_hand(user)
@@ -506,12 +508,13 @@
 /obj/structure/closet/airbubble/proc/process_tank_give_air()
 	if(internal_tank)
 		var/datum/gas_mixture/tank_air = internal_tank.return_air()
+		var/tank_pressure = XGM_PRESSURE(tank_air)
 
 		var/release_pressure = internal_tank_valve
 		// If ripped, we are leaking
 		if(ripped)
 			// If we has no pressure in the tank, why bother?
-			if(tank_air.return_pressure() <= 1)
+			if(tank_pressure <= 1)
 				STOP_PROCESSING(SSfast_process, src)
 				use_internal_tank = !use_internal_tank
 				visible_message(SPAN_WARNING("You hear last bits of air coming out from [src]'s hole.Maybe the tank run out of air?"))
@@ -528,8 +531,8 @@
 			else
 				qdel(removed)
 			return
-		var/inside_pressure = inside_air.return_pressure()
-		var/pressure_delta = min(release_pressure - inside_pressure, (tank_air.return_pressure() - inside_pressure)/2)
+		var/inside_pressure = XGM_PRESSURE(inside_air)
+		var/pressure_delta = min(release_pressure - inside_pressure, (tank_pressure - inside_pressure)/2)
 		var/transfer_moles = 0
 
 		if(pressure_delta > 0) //inside pressure lower than release pressure
@@ -543,7 +546,7 @@
 			pressure_delta = inside_pressure - release_pressure
 
 			if(t_air)
-				pressure_delta = min(inside_pressure - t_air.return_pressure(), pressure_delta)
+				pressure_delta = min(inside_pressure - XGM_PRESSURE(t_air), pressure_delta)
 			if(pressure_delta > 0) //if location pressure is lower than inside pressure
 				transfer_moles = pressure_delta*inside_air.volume/(inside_air.temperature * R_IDEAL_GAS_EQUATION)
 
@@ -583,27 +586,6 @@
 	var/turf/T = get_turf(src)
 	if(T)
 		return T.return_air()
-
-/obj/structure/closet/airbubble/proc/return_pressure()
-	. = 0
-	if(use_internal_tank)
-		. =  inside_air.return_pressure()
-	else
-		var/datum/gas_mixture/t_air = get_turf_air()
-		if(t_air)
-			. = t_air.return_pressure()
-	return
-
-
-/obj/structure/closet/airbubble/proc/return_temperature()
-	. = 0
-	if(use_internal_tank)
-		. = inside_air.temperature
-	else
-		var/datum/gas_mixture/t_air = get_turf_air()
-		if(t_air)
-			. = t_air.temperature
-	return
 
 /obj/structure/closet/airbubble/process()
 	process_preserve_temp()

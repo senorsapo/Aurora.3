@@ -10,7 +10,7 @@
 	obj_flags =  OBJ_FLAG_CONDUCTABLE
 	slot_flags = SLOT_BELT
 	matter = list(DEFAULT_WALL_MATERIAL = 2000)
-	w_class = ITEMSIZE_NORMAL
+	w_class = WEIGHT_CLASS_NORMAL
 	origin_tech = list(TECH_MATERIAL = 2,TECH_ENGINEERING = 2)
 
 	burst = 1
@@ -28,7 +28,7 @@
 	dispersion = list(0)
 	reliability = 100
 
-	var/obj/item/projectile/projectile_type = /obj/item/projectile/kinetic
+	var/obj/projectile/projectile_type = /obj/projectile/kinetic
 
 	needspin = FALSE
 
@@ -241,9 +241,9 @@
 
 	if(T)
 		var/datum/gas_mixture/environment = T.return_air()
-		var/pressure = (environment)? environment.return_pressure() : 0
-		if(ispath(installed_barrel.projectile_type, /obj/item/projectile/kinetic))
-			var/obj/item/projectile/kinetic/shot_projectile = new installed_barrel.projectile_type(get_turf(src))
+		var/pressure = SAFE_XGM_PRESSURE(environment)
+		if(ispath(installed_barrel.projectile_type, /obj/projectile/kinetic))
+			var/obj/projectile/kinetic/shot_projectile = new installed_barrel.projectile_type(get_turf(src))
 			shot_projectile.damage = damage_increase
 			shot_projectile.range = range_increase
 			shot_projectile.aoe = max(1, aoe_increase)
@@ -255,8 +255,8 @@
 				shot_projectile.base_damage = damage_increase
 				return shot_projectile
 
-		if(ispath(installed_barrel.projectile_type, /obj/item/projectile/beam))
-			var/obj/item/projectile/beam/shot_projectile = new installed_barrel.projectile_type(get_turf(src))
+		if(ispath(installed_barrel.projectile_type, /obj/projectile/beam))
+			var/obj/projectile/beam/shot_projectile = new installed_barrel.projectile_type(get_turf(src))
 			shot_projectile.damage = damage_increase
 			shot_projectile.range = range_increase
 			return shot_projectile
@@ -277,8 +277,8 @@
 	queue_icon_update()
 
 /obj/item/gun/custom_ka/Destroy()
-	. = ..()
 	STOP_PROCESSING(SSprocessing, src)
+	return ..()
 
 /obj/item/gun/custom_ka/process()
 	if(installed_cell)
@@ -408,7 +408,7 @@
 		to_chat(user,"You label \the [name] as \"[custom_name]\"")
 		update_icon()
 		return TRUE
-	else if(attacking_item.iswrench())
+	else if(attacking_item.tool_behaviour == TOOL_WRENCH)
 		if(installed_upgrade_chip)
 			attacking_item.play_tool_sound(get_turf(src), 50)
 			to_chat(user,"You remove \the [installed_upgrade_chip].")
@@ -549,7 +549,7 @@
 	capacity_increase = 0
 	mod_limit_increase = 0
 	var/fire_sound = 'sound/weapons/kinetic_accel.ogg'
-	var/projectile_type = /obj/item/projectile/kinetic
+	var/projectile_type = /obj/projectile/kinetic
 	origin_tech = list(TECH_MATERIAL = 2,TECH_ENGINEERING = 2,TECH_MAGNET = 2)
 
 /obj/item/custom_ka_upgrade/upgrade_chips
@@ -567,19 +567,20 @@
 	origin_tech = list(TECH_POWER = 4,TECH_MAGNET = 4, TECH_DATA = 4)
 
 
-/obj/item/device/kinetic_analyzer
+/obj/item/kinetic_analyzer
 	name = "kinetic analyzer"
 	desc = "Analyzes the kinetic accelerator and prints useful information on it's statistics."
-	icon = 'icons/obj/device.dmi'
-	icon_state = "kinetic_anal"
+	icon = 'icons/obj/item/kinetic_analyzer.dmi'
+	icon_state = "kinetic_analyzer"
 
 
-/obj/item/device/kinetic_analyzer/afterattack(var/atom/target, var/mob/living/user, proximity, params)
+/obj/item/kinetic_analyzer/afterattack(var/atom/target, var/mob/living/user, proximity, params)
 
 	user.visible_message(
 		SPAN_WARNING("\The [user] scans \the [target] with \the [src]."),
 		SPAN_ALERT("You scan \the [target] with \the [src]."))
 
+	flick("kinetic_analyzer_scan", src)
 	if(istype(target,/obj/item/gun/custom_ka))
 		playsound(src, 'sound/machines/ping.ogg', 10, 1)
 

@@ -35,7 +35,7 @@
 	gender = NEUTER
 
 	// Health
-	maxHealth = 35
+	maxhealth = 35
 	health = 35
 
 	// Components
@@ -132,7 +132,7 @@
 
 	return ..()
 
-/mob/living/silicon/robot/drone/can_be_possessed_by(var/mob/abstract/observer/possessor)
+/mob/living/silicon/robot/drone/can_be_possessed_by(var/mob/abstract/ghost/observer/possessor)
 	if(!istype(possessor) || !possessor.client || !possessor.ckey)
 		return FALSE
 	if(!GLOB.config.allow_drone_spawn)
@@ -148,14 +148,14 @@
 		return FALSE
 	return TRUE
 
-/mob/living/silicon/robot/drone/do_possession(var/mob/abstract/observer/possessor)
+/mob/living/silicon/robot/drone/do_possession(var/mob/abstract/ghost/observer/possessor)
 	if(!(istype(possessor) && possessor.ckey))
 		return 0
 	if(src.ckey || src.client)
 		to_chat(possessor, SPAN_WARNING("\The [src] already has a player."))
 		return FALSE
 	message_admins("<span class='adminnotice'>[key_name_admin(possessor)] has taken control of \the [src].</span>")
-	log_admin("[key_name(possessor)] took control of \the [src].",ckey=key_name(possessor))
+	log_admin("[key_name(possessor)] took control of \the [src].")
 	transfer_personality(possessor.client)
 	qdel(possessor)
 	return TRUE
@@ -169,7 +169,7 @@
 	return GLOB.all_languages[LANGUAGE_LOCAL_DRONE]
 
 /mob/living/silicon/robot/drone/fall_impact()
-	..(damage_mod = 0.25) //reduces fall damage by 75%
+	..(damage_mod = 0.05) //reduces fall damage by 95%
 
 /mob/living/silicon/robot/drone/construction
 	// Look and feel
@@ -184,7 +184,7 @@
 	law_type = /datum/ai_laws/construction_drone
 
 	// Interaction
-	can_pull_size = ITEMSIZE_IMMENSE
+	can_pull_size = WEIGHT_CLASS_GIGANTIC
 	can_pull_mobs = MOB_PULL_SAME
 	holder_type = /obj/item/holder/drone/heavy
 
@@ -227,7 +227,7 @@
 	module_type = /obj/item/robot_module/drone/construction/matriarch
 	law_type = /datum/ai_laws/matriarch_drone
 	can_swipe = FALSE
-	maxHealth = 50
+	maxhealth = 50
 	health = 50
 
 	var/matrix_tag
@@ -246,7 +246,7 @@
 	assign_drone_to_matrix(src, matrix_tag)
 	master_matrix.message_drones(MATRIX_NOTICE("Energy surges through your circuits. The matriarch has come online."))
 
-/mob/living/silicon/robot/drone/construction/matriarch/do_possession(mob/abstract/observer/possessor)
+/mob/living/silicon/robot/drone/construction/matriarch/do_possession(mob/abstract/ghost/observer/possessor)
 	. = ..()
 	SSghostroles.remove_spawn_atom("matriarchmaintdrone", src)
 
@@ -264,14 +264,14 @@
 		request_player()
 
 /mob/living/silicon/robot/drone/construction/matriarch/Destroy()
-	. = ..()
 	SSghostroles.remove_spawn_atom("matriarchmaintdrone", src)
+	return ..()
 
 /mob/living/silicon/robot/drone/construction/matriarch/request_player()
 	SSghostroles.add_spawn_atom("matriarchmaintdrone", src)
 
 /mob/living/silicon/robot/drone/init()
-	ai_camera = new /obj/item/device/camera/siliconcam/drone_camera(src)
+	ai_camera = new /obj/item/camera/siliconcam/drone_camera(src)
 	additional_law_channels["Drone"] = ":d"
 	if(!laws)
 		laws = new law_type
@@ -348,7 +348,7 @@
 	else if(istype(attacking_item, /obj/item/borg/upgrade/))
 		to_chat(user, SPAN_WARNING("\The [src] is not compatible with \the [attacking_item]."))
 		return
-	else if(attacking_item.iscrowbar())
+	else if(attacking_item.tool_behaviour == TOOL_CROWBAR)
 		to_chat(user, SPAN_WARNING("\The [src] is hermetically sealed. You can't open the case."))
 		return
 	else if(attacking_item.GetID() || istype(attacking_item, /obj/item/card/robot))
@@ -356,7 +356,7 @@
 			to_chat(user, SPAN_WARNING("\The [src] doesn't have an ID swipe interface."))
 			return
 		if(stat == DEAD)
-			if(!GLOB.config.allow_drone_spawn || emagged || health < -maxHealth) //It's dead, Dave.
+			if(!GLOB.config.allow_drone_spawn || emagged || health < -maxhealth) //It's dead, Dave.
 				to_chat(user, SPAN_WARNING("The interface is fried, and a distressing burned smell wafts from the robot's interior. You're not rebooting this one."))
 				return
 			if(!allowed(usr))
@@ -394,7 +394,7 @@
 	to_chat(src, SPAN_WARNING("You feel a sudden burst of malware loaded into your execute-as-root buffer. Your tiny brain methodically parses, loads and executes the script."))
 
 	message_admins("[key_name_admin(user)] emagged drone [key_name_admin(src)].  Laws overridden.")
-	log_game("[key_name(user)] emagged drone [key_name(src)].  Laws overridden.",ckey=key_name(user),ckey_target=key_name(src))
+	log_game("[key_name(user)] emagged drone [key_name(src)].  Laws overridden.")
 	var/time = time2text(world.realtime, "hh:mm:ss")
 	GLOB.lawchanges.Add("[time] <B>:</B> [user.name]([user.key]) emagged [name]([key])")
 
@@ -454,17 +454,17 @@
 //For some goddamn reason robots have this hardcoded. Redefining it for our fragile friends here.
 /mob/living/silicon/robot/drone/updatehealth()
 	if(status_flags & GODMODE)
-		health = maxHealth
+		health = maxhealth
 		set_stat(CONSCIOUS)
 		return
-	health = maxHealth - (getBruteLoss() + getFireLoss())
+	health = maxhealth - (getBruteLoss() + getFireLoss())
 	return
 
 //Easiest to check this here, then check again in the robot proc.
 //Standard robots use config for crit, which is somewhat excessive for these guys.
 //Drones killed by damage will gib.
 /mob/living/silicon/robot/drone/handle_regular_status_updates()
-	if(health <= -maxHealth && src.stat != DEAD)
+	if(health <= -maxhealth && src.stat != DEAD)
 		gib()
 		return
 	..()

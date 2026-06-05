@@ -10,9 +10,7 @@
 /area/ouerea_guild_mining)
 "cG" = (
 /obj/machinery/conveyor{
-	id = "miners_guild_outpost";
-	layer = 2.9;
-	dir = 2
+	id = "miners_guild_outpost"
 	},
 /obj/structure/railing/mapped{
 	dir = 8
@@ -58,7 +56,6 @@
 "hv" = (
 /obj/machinery/conveyor{
 	id = "miners_guild_outpost";
-	layer = 2.9;
 	dir = 8
 	},
 /obj/structure/railing/mapped{
@@ -171,10 +168,10 @@
 /area/ouerea_guild_mining)
 "ps" = (
 /obj/structure/table/rack,
-/obj/item/device/radio/off,
-/obj/item/device/radio/off,
-/obj/item/device/radio/off,
-/obj/item/device/radio/off,
+/obj/item/radio/off,
+/obj/item/radio/off,
+/obj/item/radio/off,
+/obj/item/radio/off,
 /obj/machinery/light,
 /turf/simulated/floor/exoplanet/concrete{
 	temperature = 298.15
@@ -282,10 +279,10 @@
 /obj/item/ore_detector,
 /obj/item/ore_detector,
 /obj/item/ore_detector,
-/obj/item/device/flashlight/lantern,
-/obj/item/device/flashlight/lantern,
-/obj/item/device/flashlight/lantern,
-/obj/item/device/flashlight/lantern,
+/obj/item/flashlight/lantern,
+/obj/item/flashlight/lantern,
+/obj/item/flashlight/lantern,
+/obj/item/flashlight/lantern,
 /turf/simulated/floor/exoplanet/concrete{
 	temperature = 298.15
 	},
@@ -293,6 +290,16 @@
 "zA" = (
 /obj/machinery/light{
 	dir = 1
+	},
+/turf/simulated/floor/exoplanet/grass{
+	temperature = 298.15
+	},
+/area/ouerea_guild_mining)
+"Ar" = (
+/obj/structure/cargo_receptacle{
+	max_spawn = 2;
+	override_name = "Ouerea - Miners' Guild Camp";
+	min_spawn = 1
 	},
 /turf/simulated/floor/exoplanet/grass{
 	temperature = 298.15
@@ -328,7 +335,6 @@
 "Df" = (
 /obj/machinery/conveyor{
 	id = "miners_guild_outpost";
-	layer = 2.9;
 	dir = 10
 	},
 /obj/structure/railing/mapped{
@@ -374,7 +380,6 @@
 "Gk" = (
 /obj/machinery/conveyor{
 	id = "miners_guild_outpost";
-	layer = 2.9;
 	dir = 8
 	},
 /obj/structure/railing/mapped,
@@ -474,7 +479,6 @@
 /area/ouerea_guild_mining)
 "OT" = (
 /obj/machinery/recharger/wallcharger{
-	layer = 3.3;
 	pixel_x = 4;
 	pixel_y = 24
 	},
@@ -485,7 +489,6 @@
 "Pj" = (
 /obj/machinery/conveyor{
 	id = "miners_guild_outpost";
-	layer = 2.9;
 	dir = 8
 	},
 /obj/structure/railing/mapped{
@@ -517,10 +520,10 @@
 /area/ouerea_guild_mining)
 "SG" = (
 /obj/structure/table/rack,
-/obj/item/device/analyzer,
-/obj/item/device/analyzer,
-/obj/item/device/analyzer,
-/obj/item/device/analyzer,
+/obj/item/analyzer,
+/obj/item/analyzer,
+/obj/item/analyzer,
+/obj/item/analyzer,
 /obj/machinery/light,
 /turf/simulated/floor/exoplanet/concrete{
 	temperature = 298.15
@@ -534,9 +537,7 @@
 /area/ouerea_guild_mining)
 "TB" = (
 /obj/machinery/conveyor{
-	id = "miners_guild_outpost";
-	layer = 2.9;
-	dir = 2
+	id = "miners_guild_outpost"
 	},
 /obj/structure/railing/mapped{
 	dir = 8
@@ -578,7 +579,6 @@
 "Yf" = (
 /obj/machinery/conveyor{
 	id = "miners_guild_outpost";
-	layer = 2.9;
 	dir = 8
 	},
 /obj/structure/railing/mapped,
@@ -1522,7 +1522,7 @@ Go
 Go
 Go
 Go
-Go
+Ar
 Go
 Go
 Go
